@@ -1,0 +1,266 @@
+<template>
+  <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+      <div class="bg-white shadow-sm rounded-lg p-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Self Referral</h1>
+        <p class="text-gray-600 mb-8">Dr. S. Gerald Hann Psychology</p>
+
+        <form @submit="onSubmit" class="space-y-6">
+          <!-- First Name -->
+          <div>
+            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">
+              First Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="firstName"
+              type="text"
+              id="firstName"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.firstName }"
+            />
+            <p v-if="errors.firstName" class="mt-1 text-sm text-red-500">
+              {{ errors.firstName }}
+            </p>
+          </div>
+
+          <!-- Last Name -->
+          <div>
+            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">
+              Last Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="lastName"
+              type="text"
+              id="lastName"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.lastName }"
+            />
+            <p v-if="errors.lastName" class="mt-1 text-sm text-red-500">
+              {{ errors.lastName }}
+            </p>
+          </div>
+
+          <!-- Date of Birth -->
+          <div>
+            <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-1">
+              Date of Birth <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="dateOfBirth"
+              type="date"
+              id="dateOfBirth"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.dateOfBirth }"
+            />
+            <p v-if="errors.dateOfBirth" class="mt-1 text-sm text-red-500">
+              {{ errors.dateOfBirth }}
+            </p>
+          </div>
+
+          <!-- Parents / Guardians -->
+          <div>
+            <label for="parentsGuardians" class="block text-sm font-medium text-gray-700 mb-1">
+              Parents / Guardians
+            </label>
+            <input
+              v-model="parentsGuardians"
+              type="text"
+              id="parentsGuardians"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- Primary Telephone -->
+          <div>
+            <label for="primaryTelephone" class="block text-sm font-medium text-gray-700 mb-1">
+              Primary Telephone <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="primaryTelephone"
+              type="tel"
+              id="primaryTelephone"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.primaryTelephone }"
+            />
+            <p v-if="errors.primaryTelephone" class="mt-1 text-sm text-red-500">
+              {{ errors.primaryTelephone }}
+            </p>
+          </div>
+
+          <!-- Secondary Telephone -->
+          <div>
+            <label for="secondaryTelephone" class="block text-sm font-medium text-gray-700 mb-1">
+              Secondary Telephone
+            </label>
+            <input
+              v-model="secondaryTelephone"
+              type="tel"
+              id="secondaryTelephone"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+              Email <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="email"
+              type="email"
+              id="email"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.email }"
+            />
+            <p v-if="errors.email" class="mt-1 text-sm text-red-500">
+              {{ errors.email }}
+            </p>
+          </div>
+
+          <!-- Mailing Address -->
+          <div>
+            <label for="mailingAddress" class="block text-sm font-medium text-gray-700 mb-1">
+              Mailing Address
+            </label>
+            <textarea
+              v-model="mailingAddress"
+              id="mailingAddress"
+              rows="3"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            ></textarea>
+          </div>
+
+          <!-- Requested Service -->
+          <div>
+            <label for="requestedService" class="block text-sm font-medium text-gray-700 mb-1">
+              Requested Service <span class="text-red-500">*</span>
+            </label>
+            <select
+              v-model="requestedService"
+              id="requestedService"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.requestedService }"
+            >
+              <option value="">Select a service</option>
+              <option value="Child Therapy">Child Therapy</option>
+              <option value="Adolescent Therapy">Adolescent Therapy</option>
+              <option value="Adult Individual Therapy">Adult Individual Therapy</option>
+              <option value="Couple Therapy">Couple Therapy</option>
+              <option value="Family Therapy">Family Therapy</option>
+              <option value="Assessment">Assessment</option>
+              <option value="Consultation">Consultation</option>
+            </select>
+            <p v-if="errors.requestedService" class="mt-1 text-sm text-red-500">
+              {{ errors.requestedService }}
+            </p>
+          </div>
+
+          <!-- Presenting Issues -->
+          <div>
+            <label for="presentingIssues" class="block text-sm font-medium text-gray-700 mb-1">
+              Presenting Issues or Concerns
+            </label>
+            <textarea
+              v-model="presentingIssues"
+              id="presentingIssues"
+              rows="4"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            ></textarea>
+          </div>
+
+          <!-- Turnstile -->
+          <div>
+            <NuxtTurnstile v-model="turnstileToken" />
+          </div>
+
+          <!-- Error Message -->
+          <div v-if="errorMessage" class="p-3 bg-red-50 border border-red-200 rounded-md">
+            <p class="text-sm text-red-600">{{ errorMessage }}</p>
+          </div>
+
+          <!-- Success Message -->
+          <div v-if="successMessage" class="p-3 bg-green-50 border border-green-200 rounded-md">
+            <p class="text-sm text-green-600">{{ successMessage }}</p>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            :disabled="isSubmitting"
+            class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+          >
+            {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useForm, useField } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/zod';
+import { z } from 'zod';
+
+definePageMeta({
+  layout: 'login',
+});
+
+// Define validation schema
+const schema = toTypedSchema(
+  z.object({
+    firstName: z.string().min(1, 'First name is required'),
+    lastName: z.string().min(1, 'Last name is required'),
+    dateOfBirth: z.string().min(1, 'Date of birth is required'),
+    parentsGuardians: z.string().optional(),
+    primaryTelephone: z.string().min(1, 'Primary telephone is required'),
+    secondaryTelephone: z.string().optional(),
+    email: z.string().email('Invalid email address').min(1, 'Email is required'),
+    mailingAddress: z.string().optional(),
+    requestedService: z.string().min(1, 'Requested service is required'),
+    presentingIssues: z.string().optional(),
+  })
+);
+
+// Initialize form
+const { handleSubmit, errors, isSubmitting } = useForm({
+  validationSchema: schema,
+});
+
+// Define fields
+const { value: firstName } = useField<string>('firstName');
+const { value: lastName } = useField<string>('lastName');
+const { value: dateOfBirth } = useField<string>('dateOfBirth');
+const { value: parentsGuardians } = useField<string>('parentsGuardians');
+const { value: primaryTelephone } = useField<string>('primaryTelephone');
+const { value: secondaryTelephone } = useField<string>('secondaryTelephone');
+const { value: email } = useField<string>('email');
+const { value: mailingAddress } = useField<string>('mailingAddress');
+const { value: requestedService } = useField<string>('requestedService');
+const { value: presentingIssues } = useField<string>('presentingIssues');
+
+// Messages
+const errorMessage = ref<string>('');
+const successMessage = ref<string>('');
+
+// Turnstile token
+const turnstileToken = ref<string>('');
+
+// Handle form submission
+const onSubmit = handleSubmit(async (values) => {
+  errorMessage.value = '';
+  successMessage.value = '';
+
+  try {
+    await $fetch('/api/referral/self', {
+      method: 'POST',
+      body: values,
+    });
+
+    // Navigate to success page
+    await navigateTo('/referral/success');
+  } catch (error: any) {
+    errorMessage.value = error.data?.message || 'Failed to submit referral. Please try again.';
+  }
+});
+</script>

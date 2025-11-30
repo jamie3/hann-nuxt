@@ -1,0 +1,14 @@
+node_modules
+.nuxt
+.output
+dist
+.env
+.env.*
+!.env.example
+*.log
+.vscode
+.idea
+.DS_Store
+coverage
+yarn.lock
+package-lock.json
