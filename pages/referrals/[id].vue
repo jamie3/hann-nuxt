@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto px-4 py-8">
     <!-- Loading State -->
-    <div v-if="pending" class="text-center py-8">
+    <div v-if="loading" class="text-center py-8">
       <div
         class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
       ></div>
@@ -10,11 +10,11 @@
 
     <!-- Error State -->
     <div v-else-if="error" class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
-      <p class="text-red-700">Failed to load referral. Please try again.</p>
+      <p class="text-red-700">{{ error }}</p>
     </div>
 
     <!-- Referral Details -->
-    <div v-else-if="data?.referral" class="max-w-4xl">
+    <div v-else-if="referral">
       <!-- Header -->
       <div class="mb-6 flex items-center justify-between">
         <div>
@@ -33,60 +33,60 @@
             Back to Referrals
           </NuxtLink>
           <h1 class="text-3xl font-bold text-gray-900">
-            {{ data.referral.first_name }} {{ data.referral.last_name }}
+            {{ referral.first_name }} {{ referral.last_name }}
           </h1>
         </div>
         <span
           class="px-3 py-1 text-sm font-semibold rounded-full"
           :class="
-            data.referral.referral_type === 'professional'
+            referral.referral_type === 'professional'
               ? 'bg-blue-100 text-blue-800'
               : 'bg-green-100 text-green-800'
           "
         >
-          {{ data.referral.referral_type }} referral
+          {{ referral.referral_type }} referral
         </span>
       </div>
 
       <!-- Main Content -->
-      <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Personal Information -->
-        <div class="border-b border-gray-200 p-6">
+        <div class="bg-white shadow-sm rounded-lg p-6">
           <h2 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h2>
           <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <dt class="text-sm font-medium text-gray-500">Date of Birth</dt>
               <dd class="mt-1 text-sm text-gray-900">
-                {{ new Date(data.referral.date_of_birth).toLocaleDateString() }}
+                {{ new Date(referral.date_of_birth).toLocaleDateString() }}
               </dd>
             </div>
-            <div v-if="data.referral.parents_guardians">
+            <div v-if="referral.parents_guardians">
               <dt class="text-sm font-medium text-gray-500">Parents / Guardians</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ data.referral.parents_guardians }}</dd>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.parents_guardians }}</dd>
             </div>
           </dl>
         </div>
 
         <!-- Contact Information -->
-        <div class="border-b border-gray-200 p-6">
+        <div class="bg-white shadow-sm rounded-lg p-6">
           <h2 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h2>
           <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <dt class="text-sm font-medium text-gray-500">Primary Telephone</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ data.referral.primary_telephone }}</dd>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.primary_telephone }}</dd>
             </div>
-            <div v-if="data.referral.secondary_telephone">
+            <div v-if="referral.secondary_telephone">
               <dt class="text-sm font-medium text-gray-500">Secondary Telephone</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ data.referral.secondary_telephone }}</dd>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.secondary_telephone }}</dd>
             </div>
-            <div v-if="data.referral.email">
+            <div v-if="referral.email">
               <dt class="text-sm font-medium text-gray-500">Email</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ data.referral.email }}</dd>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.email }}</dd>
             </div>
-            <div v-if="data.referral.mailing_address">
+            <div v-if="referral.mailing_address">
               <dt class="text-sm font-medium text-gray-500">Mailing Address</dt>
               <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">
-                {{ data.referral.mailing_address }}
+                {{ referral.mailing_address }}
               </dd>
             </div>
           </dl>
@@ -94,67 +94,70 @@
 
         <!-- Referrer Information (Professional Only) -->
         <div
-          v-if="data.referral.referral_type === 'professional'"
-          class="border-b border-gray-200 p-6"
+          v-if="referral.referral_type === 'professional'"
+          class="bg-white shadow-sm rounded-lg p-6"
         >
           <h2 class="text-lg font-semibold text-gray-900 mb-4">Referrer Information</h2>
           <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div v-if="data.referral.referrer_name">
+            <div v-if="referral.referrer_name">
               <dt class="text-sm font-medium text-gray-500">Referrer Name</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ data.referral.referrer_name }}</dd>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_name }}</dd>
             </div>
-            <div v-if="data.referral.referrer_relationship">
+            <div v-if="referral.referrer_relationship">
               <dt class="text-sm font-medium text-gray-500">Relationship</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ data.referral.referrer_relationship }}</dd>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_relationship }}</dd>
             </div>
-            <div v-if="data.referral.referrer_email">
+            <div v-if="referral.referrer_email">
               <dt class="text-sm font-medium text-gray-500">Referrer Email</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ data.referral.referrer_email }}</dd>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_email }}</dd>
             </div>
-            <div v-if="data.referral.referrer_prefers_contact !== null">
+            <div v-if="referral.referrer_prefers_contact !== null">
               <dt class="text-sm font-medium text-gray-500">Prefers Pre-Contact</dt>
               <dd class="mt-1 text-sm text-gray-900">
-                {{ data.referral.referrer_prefers_contact ? 'Yes' : 'No' }}
+                {{ referral.referrer_prefers_contact ? 'Yes' : 'No' }}
               </dd>
             </div>
           </dl>
         </div>
 
         <!-- Service Information -->
-        <div class="border-b border-gray-200 p-6">
+        <div class="bg-white shadow-sm rounded-lg p-6">
           <h2 class="text-lg font-semibold text-gray-900 mb-4">Service Information</h2>
           <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <dt class="text-sm font-medium text-gray-500">Requested Service</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ data.referral.requested_service }}</dd>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.requested_service }}</dd>
             </div>
-            <div v-if="data.referral.method_of_payment">
+            <div v-if="referral.method_of_payment">
               <dt class="text-sm font-medium text-gray-500">Method of Payment</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ data.referral.method_of_payment }}</dd>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.method_of_payment }}</dd>
             </div>
           </dl>
         </div>
 
         <!-- Presenting Issues -->
-        <div v-if="data.referral.presenting_issues" class="border-b border-gray-200 p-6">
+        <div
+          v-if="referral.presenting_issues"
+          class="bg-white shadow-sm rounded-lg p-6 lg:col-span-3"
+        >
           <h2 class="text-lg font-semibold text-gray-900 mb-4">Presenting Issues or Concerns</h2>
           <p class="text-sm text-gray-900 whitespace-pre-line">
-            {{ data.referral.presenting_issues }}
+            {{ referral.presenting_issues }}
           </p>
         </div>
 
         <!-- Metadata -->
-        <div class="p-6 bg-gray-50">
+        <div class="bg-white shadow-sm rounded-lg p-6 lg:col-span-3">
           <h2 class="text-lg font-semibold text-gray-900 mb-4">Additional Information</h2>
           <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <dt class="text-sm font-medium text-gray-500">Referral ID</dt>
-              <dd class="mt-1 text-sm text-gray-900">#{{ data.referral.id }}</dd>
+              <dd class="mt-1 text-sm text-gray-900">#{{ referral.id }}</dd>
             </div>
             <div>
               <dt class="text-sm font-medium text-gray-500">Submitted On</dt>
               <dd class="mt-1 text-sm text-gray-900">
-                {{ new Date(data.referral.created_at).toLocaleString() }}
+                {{ new Date(referral.created_at).toLocaleString() }}
               </dd>
             </div>
           </dl>
@@ -170,16 +173,21 @@ definePageMeta({
 });
 
 const route = useRoute();
-const id = route.params.id;
+const id = route.params.id as string;
 
-// Fetch referral
-const { data, error, pending } = await useFetch(`/api/referrals/${id}`);
+// Use the referral composable
+const { referral, loading, error, getReferral } = useReferral();
+
+// Fetch referral on mount
+onMounted(async () => {
+  await getReferral(id);
+});
 
 // Set page meta
 useHead({
   title: computed(() =>
-    data.value?.referral
-      ? `${data.value.referral.first_name} ${data.value.referral.last_name} - Referral Details`
+    referral.value
+      ? `${referral.value.first_name} ${referral.value.last_name} - Referral Details`
       : 'Referral Details'
   ),
 });
