@@ -1,11 +1,18 @@
 import { ReferralRepository, ReferralRow, ReferralInsert } from '../repository/referral-repository';
 import type { Referral, NewReferral } from '../types/referral-types';
+import { differenceInYears } from 'date-fns';
 
 export class ReferralService {
   private referralRepository: ReferralRepository;
 
   constructor(referralRepository: ReferralRepository) {
     this.referralRepository = referralRepository;
+  }
+
+  // Calculate age from date of birth to a reference date
+  private calculateAge(dateOfBirth: Date, referenceDate: Date = new Date()): string {
+    const years = differenceInYears(referenceDate, dateOfBirth);
+    return `${years} years`;
   }
 
   // Map database row to domain model
@@ -15,6 +22,10 @@ export class ReferralService {
       first_name: row.first_name,
       last_name: row.last_name,
       date_of_birth: new Date(row.date_of_birth),
+      age: this.calculateAge(new Date(row.date_of_birth)),
+      age_at_referral: row.referred_at
+        ? this.calculateAge(new Date(row.date_of_birth), new Date(row.referred_at))
+        : 'N/A',
       parents_guardians: row.parents_guardians,
       primary_telephone: row.primary_telephone,
       secondary_telephone: row.secondary_telephone,
@@ -28,6 +39,10 @@ export class ReferralService {
       method_of_payment: row.method_of_payment,
       referrer_prefers_contact: row.referrer_prefers_contact,
       referral_type: row.referral_type,
+      status: row.status,
+      opened_at: row.opened_at ? new Date(row.opened_at) : null,
+      closed_at: row.closed_at ? new Date(row.closed_at) : null,
+      referred_at: row.referred_at ? new Date(row.referred_at) : null,
       created_at: new Date(row.created_at),
       updated_at: new Date(row.updated_at),
     };

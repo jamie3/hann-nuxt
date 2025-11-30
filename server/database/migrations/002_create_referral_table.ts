@@ -4,7 +4,7 @@ import { createUpdatedAtTrigger, dropUpdatedAtTrigger } from '../helpers/trigger
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('referral')
-    .addColumn('id', 'serial', (col) => col.primaryKey())
+    .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`uuid_generate_v4()`))
     .addColumn('first_name', 'varchar(255)', (col) => col.notNull())
     .addColumn('last_name', 'varchar(255)', (col) => col.notNull())
     .addColumn('date_of_birth', 'date', (col) => col.notNull())
@@ -21,6 +21,10 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('method_of_payment', 'varchar(100)')
     .addColumn('referrer_prefers_contact', 'boolean')
     .addColumn('referral_type', 'varchar(20)', (col) => col.notNull())
+    .addColumn('status', 'varchar(20)', (col) => col.defaultTo('new').notNull())
+    .addColumn('opened_at', 'timestamptz')
+    .addColumn('closed_at', 'timestamptz')
+    .addColumn('referred_at', 'timestamptz', (col) => col.defaultTo(sql`CURRENT_TIMESTAMP`))
     .addColumn('created_at', 'timestamptz', (col) =>
       col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )

@@ -60,6 +60,14 @@
                 {{ new Date(referral.date_of_birth).toLocaleDateString() }}
               </dd>
             </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Age</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.age }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Age at Referral</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.age_at_referral }}</dd>
+            </div>
             <div v-if="referral.parents_guardians">
               <dt class="text-sm font-medium text-gray-500">Parents / Guardians</dt>
               <dd class="mt-1 text-sm text-gray-900">{{ referral.parents_guardians }}</dd>
@@ -153,6 +161,12 @@
             <div>
               <dt class="text-sm font-medium text-gray-500">Referral ID</dt>
               <dd class="mt-1 text-sm text-gray-900">#{{ referral.id }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Referral Date</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                {{ referral.referred_at ? new Date(referral.referred_at).toLocaleString() : 'N/A' }}
+              </dd>
             </div>
             <div>
               <dt class="text-sm font-medium text-gray-500">Submitted On</dt>

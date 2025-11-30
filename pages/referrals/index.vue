@@ -29,7 +29,17 @@
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
+                Age
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Type
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Status
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -44,7 +54,7 @@
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Date
+                Referral Date
               </th>
             </tr>
           </thead>
@@ -63,6 +73,9 @@
                   Guardian: {{ referral.parents_guardians }}
                 </div>
               </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ referral.age }}
+              </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
                   class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
@@ -75,6 +88,18 @@
                   {{ referral.referral_type }}
                 </span>
               </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span
+                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                  :class="{
+                    'bg-yellow-100 text-yellow-800': referral.status === 'new',
+                    'bg-blue-100 text-blue-800': referral.status === 'opened',
+                    'bg-gray-100 text-gray-800': referral.status === 'closed',
+                  }"
+                >
+                  {{ referral.status }}
+                </span>
+              </td>
               <td class="px-6 py-4">
                 <div class="text-sm text-gray-900">{{ referral.requested_service }}</div>
               </td>
@@ -83,7 +108,9 @@
                 <div v-if="referral.email" class="text-sm text-gray-500">{{ referral.email }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ new Date(referral.created_at).toLocaleDateString() }}
+                {{
+                  referral.referred_at ? new Date(referral.referred_at).toLocaleDateString() : 'N/A'
+                }}
               </td>
             </tr>
           </tbody>

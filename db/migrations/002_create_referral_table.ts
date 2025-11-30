@@ -21,6 +21,10 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('method_of_payment', 'varchar(100)')
     .addColumn('referrer_prefers_contact', 'boolean')
     .addColumn('referral_type', 'varchar(20)', (col) => col.notNull())
+    .addColumn('status', 'varchar(20)', (col) => col.defaultTo('new').notNull())
+    .addColumn('opened_at', 'timestamptz')
+    .addColumn('closed_at', 'timestamptz')
+    .addColumn('referred_at', 'timestamptz', (col) => col.defaultTo(sql`CURRENT_TIMESTAMP`))
     .addColumn('created_at', 'timestamptz', (col) =>
       col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )

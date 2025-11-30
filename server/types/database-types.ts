@@ -27,6 +27,19 @@ export interface Database {
     method_of_payment: string | null;
     referrer_prefers_contact: boolean | null;
     referral_type: 'professional' | 'self';
+    status: Generated<'closed' | 'opened' | 'new'>;
+    opened_at: Date | null;
+    closed_at: Date | null;
+    referred_at: Date | null;
+    created_at: Generated<Date>;
+    updated_at: Generated<Date>;
+  };
+  clinical_note: {
+    id: Generated<string>;
+    referral_id: string;
+    note_date: Date;
+    content: string;
+    author_id: string | null;
     created_at: Generated<Date>;
     updated_at: Generated<Date>;
   };

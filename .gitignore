@@ -1,3 +1,6 @@
+# MySQL tunnel PID file
+.mysql-tunnel-pid
+
 # Nuxt dev/build outputs
 .output
 .data
