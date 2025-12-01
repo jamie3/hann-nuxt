@@ -67,9 +67,13 @@ export interface Referral {
 
 export interface User {
   created_at: Generated<Timestamp>;
+  disabled: Generated<boolean>;
+  failed_login_attempts: Generated<number>;
   id: Generated<string>;
   is_deleted: Generated<boolean>;
   last_login_at: Timestamp | null;
+  locked: Generated<boolean>;
+  name: string | null;
   password: string;
   updated_at: Generated<Timestamp>;
   username: string;

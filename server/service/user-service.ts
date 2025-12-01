@@ -16,6 +16,10 @@ export class UserService {
       id: row.id,
       username: row.username,
       password: row.password,
+      name: row.name ?? null,
+      locked: row.locked ?? false,
+      disabled: row.disabled ?? false,
+      failed_login_attempts: row.failed_login_attempts ?? 0,
       last_login_at: row.last_login_at ? new Date(row.last_login_at) : null,
       is_deleted: row.is_deleted,
       created_at: new Date(row.created_at),
@@ -30,14 +34,47 @@ export class UserService {
       return null;
     }
 
+    // Check if user is locked
+    if (userRow.locked) {
+      throw new Error(
+        'Account is locked due to too many failed login attempts. Please contact an administrator.'
+      );
+    }
+
+    // Check if user is disabled
+    if (userRow.disabled) {
+      throw new Error('Account is disabled. Please contact an administrator.');
+    }
+
     const isValidPassword = await bcrypt.compare(password, userRow.password);
 
     if (!isValidPassword) {
+      // Increment failed login attempts
+      const newFailedAttempts = (userRow.failed_login_attempts ?? 0) + 1;
+
+      // Lock account if 5 or more failed attempts
+      if (newFailedAttempts >= 5) {
+        await this.userRepository.update(userRow.id, {
+          failed_login_attempts: newFailedAttempts,
+          locked: true,
+        });
+        throw new Error(
+          'Account has been locked due to too many failed login attempts. Please contact an administrator.'
+        );
+      } else {
+        await this.userRepository.update(userRow.id, {
+          failed_login_attempts: newFailedAttempts,
+        });
+      }
+
       return null;
     }
 
-    // Update last login timestamp
-    await this.userRepository.updateLastLogin(userRow.id);
+    // Successful login - reset failed attempts and update last login
+    await this.userRepository.update(userRow.id, {
+      failed_login_attempts: 0,
+      last_login_at: new Date(),
+    });
 
     return this.mapToUser(userRow);
   }
