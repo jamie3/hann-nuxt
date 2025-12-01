@@ -81,25 +81,16 @@ const { value: username } = useField<string>('username');
 const { value: password } = useField<string>('password');
 
 // Use auth composable
-const { login } = useAuth();
+const { performLogin, error: authError } = useAuth();
 
 // Error message from API
-const errorMessage = ref<string>('');
+const errorMessage = computed(() => authError.value);
 
 // Handle form submission
 const onSubmit = handleSubmit(async (values) => {
-  errorMessage.value = '';
-
-  const result = await login({
+  await performLogin({
     username: values.username,
     password: values.password,
   });
-
-  if (result.success) {
-    // Redirect to home page after successful login
-    await navigateTo('/');
-  } else {
-    errorMessage.value = result.error || 'Login failed. Please try again.';
-  }
 });
 </script>

@@ -41,9 +41,98 @@
         </button>
       </div>
 
-      <!-- Users List Placeholder -->
-      <div class="text-gray-500 text-center py-8">
-        <p>Users management coming soon...</p>
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="mt-4 text-gray-600">Loading users...</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <p class="text-red-600">{{ error }}</p>
+      </div>
+
+      <!-- Users List -->
+      <div v-else-if="users.length > 0" class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Username
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Created At
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Last Login
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div
+                    class="flex-shrink-0 h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center"
+                  >
+                    <span class="text-white font-semibold">{{
+                      getUserInitials(user.username)
+                    }}</span>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">{{ user.username }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ formatDate(user.created_at) }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">
+                  {{ user.last_login_at ? formatDate(user.last_login_at) : 'Never' }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
+                <button class="text-red-600 hover:text-red-900">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else class="text-center py-8">
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+          ></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No users</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by creating a new user.</p>
       </div>
     </div>
 
@@ -153,6 +242,32 @@ definePageMeta({
 });
 
 const activeTab = ref('users');
+
+// Use the useUsers composable
+const { users, loading, error, getUsers } = useUsers();
+
+// Fetch users when component mounts
+onMounted(() => {
+  getUsers();
+});
+
+// Helper function to get user initials
+const getUserInitials = (username: string): string => {
+  if (!username) return 'U';
+  return username.substring(0, 2).toUpperCase();
+};
+
+// Helper function to format dates
+const formatDate = (date: Date | string): string => {
+  const d = new Date(date);
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
 
 useHead({
   title: 'Settings - Hann Psychological Services',
