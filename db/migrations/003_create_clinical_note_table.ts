@@ -8,7 +8,9 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('referral_id', 'uuid', (col) =>
       col.notNull().references('referral.id').onDelete('cascade')
     )
-    .addColumn('note_date', 'date', (col) => col.notNull())
+    .addColumn('session_date', 'timestamptz', (col) =>
+      col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
+    )
     .addColumn('content', 'text', (col) => col.notNull())
     .addColumn('author_id', 'uuid', (col) => col.references('user.id').onDelete('set null'))
     .addColumn('is_deleted', 'boolean', (col) => col.defaultTo(false).notNull())

@@ -22,7 +22,7 @@ export class ClinicalNoteService {
     return {
       id: row.id,
       referral_id: row.referral_id,
-      note_date: new Date(row.note_date),
+      session_date: new Date(row.session_date),
       content: row.content,
       author_id: row.author_id,
       created_at: new Date(row.created_at),
@@ -34,7 +34,8 @@ export class ClinicalNoteService {
   private mapToInsert(note: NewClinicalNote): ClinicalNoteInsert {
     return {
       referral_id: note.referral_id,
-      note_date: typeof note.note_date === 'string' ? new Date(note.note_date) : note.note_date,
+      session_date:
+        typeof note.session_date === 'string' ? new Date(note.session_date) : note.session_date,
       content: note.content,
       author_id: note.author_id || null,
     };
@@ -44,9 +45,9 @@ export class ClinicalNoteService {
   private mapToUpdate(note: UpdateClinicalNote): ClinicalNoteUpdate {
     const update: ClinicalNoteUpdate = {};
 
-    if (note.note_date !== undefined) {
-      update.note_date =
-        typeof note.note_date === 'string' ? new Date(note.note_date) : note.note_date;
+    if (note.session_date !== undefined) {
+      update.session_date =
+        typeof note.session_date === 'string' ? new Date(note.session_date) : note.session_date;
     }
 
     if (note.content !== undefined) {

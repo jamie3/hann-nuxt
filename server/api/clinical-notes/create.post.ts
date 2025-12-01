@@ -5,10 +5,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   // Validate required fields
-  if (!body.referralId || !body.noteDate || !body.content) {
+  if (!body.referralId || !body.sessionDate || !body.content) {
     throw createError({
       statusCode: 400,
-      message: 'Missing required fields: referralId, noteDate, and content are required',
+      message: 'Missing required fields: referralId, sessionDate, and content are required',
     });
   }
 
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
   // Map request body to NewClinicalNote
   const newClinicalNote: NewClinicalNote = {
     referral_id: body.referralId,
-    note_date: body.noteDate,
+    session_date: body.sessionDate,
     content: body.content,
     author_id: body.authorId,
   };

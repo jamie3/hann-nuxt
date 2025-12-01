@@ -62,4 +62,9 @@ export class UserService {
 
     return this.mapToUser(userRow);
   }
+
+  async getAllUsers(): Promise<User[]> {
+    const userRows = await this.userRepository.findAll();
+    return userRows.map((row) => this.mapToUser(row));
+  }
 }

@@ -95,12 +95,7 @@ const userInitials = computed(() => {
 });
 
 const handleLogout = async () => {
-  try {
-    await $fetch('/api/auth/logout', { method: 'POST' });
-    await navigateTo('/login');
-  } catch (error) {
-    console.error('Logout failed:', error);
-  }
+  await navigateTo('/logout');
 };
 
 // Close dropdown when clicking outside

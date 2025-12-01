@@ -242,7 +242,7 @@
                 <div class="flex-1">
                   <div class="flex items-center gap-2">
                     <span class="text-sm font-medium text-gray-900">
-                      {{ formatDate(note.note_date) }}
+                      {{ formatDate(note.session_date) }}
                     </span>
                     <span class="text-xs text-gray-500">
                       • Created {{ formatDate(note.created_at) }}

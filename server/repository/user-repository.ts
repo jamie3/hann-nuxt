@@ -1,10 +1,10 @@
 import { BaseRepository } from './base-repository';
-import type { Database } from '../types/database-types';
+import type { DB } from '../types/database-types';
 import { Selectable } from 'kysely';
 
-export interface UserRow extends Selectable<Database['user']> {}
+export interface UserRow extends Selectable<DB['user']> {}
 
-export class UserRepository extends BaseRepository<Database, 'user'> {
+export class UserRepository extends BaseRepository<DB, 'user'> {
   constructor(db: any) {
     super(db, 'user');
   }
@@ -23,6 +23,15 @@ export class UserRepository extends BaseRepository<Database, 'user'> {
       .updateTable('user')
       .set({ last_login_at: new Date() })
       .where('id', '=', userId)
+      .execute();
+  }
+
+  async findAll(): Promise<UserRow[]> {
+    return await this.db
+      .selectFrom('user')
+      .selectAll()
+      .where('is_deleted', '=', false)
+      .orderBy('created_at', 'desc')
       .execute();
   }
 }

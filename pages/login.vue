@@ -2,7 +2,7 @@
   <div class="flex items-center justify-center min-h-screen">
     <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
       <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Login</h2>
-      
+
       <form @submit="onSubmit" class="space-y-4">
         <div>
           <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
@@ -55,13 +55,13 @@
 </template>
 
 <script setup lang="ts">
-import { useForm, useField } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
+import { useForm, useField } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/zod';
+import { z } from 'zod';
 
 definePageMeta({
-  layout: 'login'
-})
+  layout: 'login',
+});
 
 // Define validation schema
 const schema = toTypedSchema(
@@ -69,37 +69,37 @@ const schema = toTypedSchema(
     username: z.string().min(1, 'Username is required'),
     password: z.string().min(3, 'Password must be at least 3 characters'),
   })
-)
+);
 
 // Initialize form
 const { handleSubmit, errors, isSubmitting } = useForm({
   validationSchema: schema,
-})
+});
 
 // Define fields
-const { value: username } = useField<string>('username')
-const { value: password } = useField<string>('password')
+const { value: username } = useField<string>('username');
+const { value: password } = useField<string>('password');
+
+// Use auth composable
+const { login } = useAuth();
 
 // Error message from API
-const errorMessage = ref<string>('')
+const errorMessage = ref<string>('');
 
 // Handle form submission
 const onSubmit = handleSubmit(async (values) => {
-  errorMessage.value = ''
-  
-  try {
-    await $fetch('/api/auth/login', {
-      method: 'POST',
-      body: {
-        username: values.username,
-        password: values.password,
-      },
-    })
-    
+  errorMessage.value = '';
+
+  const result = await login({
+    username: values.username,
+    password: values.password,
+  });
+
+  if (result.success) {
     // Redirect to home page after successful login
-    await navigateTo('/')
-  } catch (error: any) {
-    errorMessage.value = error.data?.message || 'Login failed. Please try again.'
+    await navigateTo('/');
+  } else {
+    errorMessage.value = result.error || 'Login failed. Please try again.';
   }
-})
+});
 </script>

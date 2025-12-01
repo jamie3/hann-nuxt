@@ -50,14 +50,14 @@
           </select>
         </div>
 
-        <!-- Note Date -->
+        <!-- Session Date -->
         <div class="mb-6">
-          <label for="noteDate" class="block text-sm font-medium text-gray-700 mb-2">
-            Note Date <span class="text-red-500">*</span>
+          <label for="sessionDate" class="block text-sm font-medium text-gray-700 mb-2">
+            Session Date <span class="text-red-500">*</span>
           </label>
           <input
-            id="noteDate"
-            v-model="form.noteDate"
+            id="sessionDate"
+            v-model="form.sessionDate"
             type="date"
             required
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -115,7 +115,7 @@ const router = useRouter();
 // Form state
 const form = ref({
   referralId: '',
-  noteDate: new Date().toISOString().split('T')[0], // Today's date
+  sessionDate: new Date().toISOString().split('T')[0], // Today's date
   content: '',
 });
 
@@ -153,7 +153,7 @@ const handleSubmit = async () => {
       method: 'POST',
       body: {
         referralId: form.value.referralId,
-        noteDate: form.value.noteDate,
+        sessionDate: form.value.sessionDate,
         content: form.value.content,
       },
     });

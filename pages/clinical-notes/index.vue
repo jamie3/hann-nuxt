@@ -63,7 +63,7 @@
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-for="note in clinicalNotes" :key="note.id" class="hover:bg-gray-50 cursor-pointer">
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              {{ formatDate(note.note_date) }}
+              {{ formatDate(note.session_date) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               #{{ note.referral_id.substring(0, 8) }}

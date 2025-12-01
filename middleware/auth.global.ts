@@ -2,7 +2,13 @@ export default defineNuxtRouteMiddleware((to) => {
   const { loggedIn } = useUserSession();
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/login', '/referral/self', '/referral/professional', '/referral/success'];
+  const publicRoutes = [
+    '/login',
+    '/logout',
+    '/referral/self',
+    '/referral/professional',
+    '/referral/success',
+  ];
 
   // Check if the current route is public
   const isPublicRoute = publicRoutes.includes(to.path);
