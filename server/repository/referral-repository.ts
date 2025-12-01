@@ -2,8 +2,8 @@ import { BaseRepository } from './base-repository';
 import type { Database } from '../types/database-types';
 import { Selectable, Insertable } from 'kysely';
 
-export type ReferralRow = Selectable<Database['referral']>;
-export type ReferralInsert = Insertable<Database['referral']>;
+export interface ReferralRow extends Selectable<Database['referral']> {}
+export interface ReferralInsert extends Insertable<Database['referral']> {}
 
 export class ReferralRepository extends BaseRepository<Database, 'referral'> {
   constructor(db: any) {
@@ -27,6 +27,7 @@ export class ReferralRepository extends BaseRepository<Database, 'referral'> {
       .selectFrom('referral')
       .selectAll()
       .where('referral_type', '=', referralType)
+      .where('is_deleted', '=', false)
       .orderBy('created_at', 'desc')
       .execute();
   }
@@ -36,6 +37,7 @@ export class ReferralRepository extends BaseRepository<Database, 'referral'> {
       .selectFrom('referral')
       .selectAll()
       .where('email', '=', email)
+      .where('is_deleted', '=', false)
       .orderBy('created_at', 'desc')
       .execute();
   }

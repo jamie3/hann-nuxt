@@ -1,0 +1,98 @@
+import {
+  ClinicalNoteRepository,
+  ClinicalNoteRow,
+  ClinicalNoteInsert,
+  ClinicalNoteUpdate,
+} from '../repository/clinical-note-repository';
+import type {
+  ClinicalNote,
+  NewClinicalNote,
+  UpdateClinicalNote,
+} from '../types/clinical-note-types';
+
+export class ClinicalNoteService {
+  private clinicalNoteRepository: ClinicalNoteRepository;
+
+  constructor(clinicalNoteRepository: ClinicalNoteRepository) {
+    this.clinicalNoteRepository = clinicalNoteRepository;
+  }
+
+  // Map database row to domain model
+  private mapToClinicalNote(row: ClinicalNoteRow): ClinicalNote {
+    return {
+      id: row.id,
+      referral_id: row.referral_id,
+      note_date: new Date(row.note_date),
+      content: row.content,
+      author_id: row.author_id,
+      created_at: new Date(row.created_at),
+      updated_at: new Date(row.updated_at),
+    };
+  }
+
+  // Map domain model to database insert
+  private mapToInsert(note: NewClinicalNote): ClinicalNoteInsert {
+    return {
+      referral_id: note.referral_id,
+      note_date: typeof note.note_date === 'string' ? new Date(note.note_date) : note.note_date,
+      content: note.content,
+      author_id: note.author_id || null,
+    };
+  }
+
+  // Map domain model to database update
+  private mapToUpdate(note: UpdateClinicalNote): ClinicalNoteUpdate {
+    const update: ClinicalNoteUpdate = {};
+
+    if (note.note_date !== undefined) {
+      update.note_date =
+        typeof note.note_date === 'string' ? new Date(note.note_date) : note.note_date;
+    }
+
+    if (note.content !== undefined) {
+      update.content = note.content;
+    }
+
+    if (note.author_id !== undefined) {
+      update.author_id = note.author_id;
+    }
+
+    return update;
+  }
+
+  async createClinicalNote(data: NewClinicalNote): Promise<ClinicalNote> {
+    const insertData = this.mapToInsert(data);
+    const row = await this.clinicalNoteRepository.create(insertData);
+    return this.mapToClinicalNote(row);
+  }
+
+  async getAllClinicalNotes(): Promise<ClinicalNote[]> {
+    const rows = await this.clinicalNoteRepository.findAllRows();
+    return rows.map((row) => this.mapToClinicalNote(row));
+  }
+
+  async getClinicalNoteById(id: string): Promise<ClinicalNote | null> {
+    const row = await this.clinicalNoteRepository.findByIdRow(id);
+    return row ? this.mapToClinicalNote(row) : null;
+  }
+
+  async getClinicalNotesByReferralId(referralId: string): Promise<ClinicalNote[]> {
+    const rows = await this.clinicalNoteRepository.findByReferralId(referralId);
+    return rows.map((row) => this.mapToClinicalNote(row));
+  }
+
+  async getClinicalNotesByAuthorId(authorId: string): Promise<ClinicalNote[]> {
+    const rows = await this.clinicalNoteRepository.findByAuthorId(authorId);
+    return rows.map((row) => this.mapToClinicalNote(row));
+  }
+
+  async updateClinicalNote(id: string, data: UpdateClinicalNote): Promise<ClinicalNote> {
+    const updateData = this.mapToUpdate(data);
+    const row = await this.clinicalNoteRepository.updateNote(id, updateData);
+    return this.mapToClinicalNote(row);
+  }
+
+  async deleteClinicalNote(id: string): Promise<void> {
+    await this.clinicalNoteRepository.deleteNote(id);
+  }
+}

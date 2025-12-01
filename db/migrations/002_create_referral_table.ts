@@ -25,6 +25,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('opened_at', 'timestamptz')
     .addColumn('closed_at', 'timestamptz')
     .addColumn('referred_at', 'timestamptz', (col) => col.defaultTo(sql`CURRENT_TIMESTAMP`))
+    .addColumn('is_deleted', 'boolean', (col) => col.defaultTo(false).notNull())
     .addColumn('created_at', 'timestamptz', (col) =>
       col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )

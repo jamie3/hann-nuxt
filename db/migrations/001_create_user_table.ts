@@ -15,6 +15,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('username', 'varchar(255)', (col) => col.notNull().unique())
     .addColumn('password', 'varchar(255)', (col) => col.notNull())
     .addColumn('last_login_at', 'timestamptz')
+    .addColumn('is_deleted', 'boolean', (col) => col.defaultTo(false).notNull())
     .addColumn('created_at', 'timestamptz', (col) =>
       col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )

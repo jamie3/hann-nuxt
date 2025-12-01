@@ -10,13 +10,13 @@ export interface ClinicalNote {
 
 export interface NewClinicalNote {
   referral_id: string;
-  note_date: Date | string;
+  note_date: string | Date;
   content: string;
   author_id?: string;
 }
 
 export interface UpdateClinicalNote {
-  note_date?: Date | string;
+  note_date?: string | Date;
   content?: string;
-  author_id?: string;
+  author_id?: string | null;
 }

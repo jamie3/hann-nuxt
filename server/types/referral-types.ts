@@ -1,6 +1,5 @@
 export interface Referral {
   id: string;
-  referred_at: Date | null;
   first_name: string;
   last_name: string;
   date_of_birth: Date;
@@ -19,9 +18,10 @@ export interface Referral {
   method_of_payment: string | null;
   referrer_prefers_contact: boolean | null;
   referral_type: 'professional' | 'self';
-  status: 'closed' | 'opened' | 'new';
+  status: string;
   opened_at: Date | null;
   closed_at: Date | null;
+  referred_at: Date | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -29,7 +29,7 @@ export interface Referral {
 export interface NewReferral {
   first_name: string;
   last_name: string;
-  date_of_birth: Date | string;
+  date_of_birth: string | Date;
   parents_guardians?: string;
   primary_telephone: string;
   secondary_telephone?: string;

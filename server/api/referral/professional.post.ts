@@ -1,5 +1,4 @@
-import { ReferralRepository } from '../../repository/referral-repository';
-import { ReferralService } from '../../service/referral-service';
+import { getReferralService } from '../../service';
 import type { NewReferral } from '../../types/referral-types';
 
 export default defineEventHandler(async (event) => {
@@ -19,9 +18,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const db = useDB();
-  const referralRepository = new ReferralRepository(db);
-  const referralService = new ReferralService(referralRepository);
+  const referralService = getReferralService();
 
   // Map request body to NewReferral
   const newReferral: NewReferral = {

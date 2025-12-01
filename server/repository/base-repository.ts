@@ -30,7 +30,11 @@ export abstract class BaseRepository<DB, TableName extends keyof DB & string> {
   }
 
   async findAll(): Promise<Selectable<DB[TableName]>[]> {
-    return await this.db.selectFrom(this.tableName).selectAll().execute();
+    return await this.db
+      .selectFrom(this.tableName)
+      .selectAll()
+      .where('is_deleted' as any, '=', false)
+      .execute();
   }
 
   async findById(id: string | number): Promise<Selectable<DB[TableName]> | undefined> {
@@ -38,12 +42,14 @@ export abstract class BaseRepository<DB, TableName extends keyof DB & string> {
       .selectFrom(this.tableName)
       .selectAll()
       .where('id' as any, '=', id)
+      .where('is_deleted' as any, '=', false)
       .executeTakeFirst();
   }
 
   async delete(id: string | number): Promise<void> {
     await this.db
-      .deleteFrom(this.tableName)
+      .updateTable(this.tableName)
+      .set({ is_deleted: true } as any)
       .where('id' as any, '=', id)
       .execute();
   }

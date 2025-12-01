@@ -1,6 +1,6 @@
 import { ReferralRepository, ReferralRow, ReferralInsert } from '../repository/referral-repository';
-import type { Referral, NewReferral } from '../types/referral-types';
 import { differenceInYears } from 'date-fns';
+import type { Referral, NewReferral } from '../types/referral-types';
 
 export class ReferralService {
   private referralRepository: ReferralRepository;
@@ -97,5 +97,51 @@ export class ReferralService {
   async getReferralsByEmail(email: string): Promise<Referral[]> {
     const rows = await this.referralRepository.findByEmail(email);
     return rows.map((row) => this.mapToReferral(row));
+  }
+
+  async openReferral(id: string): Promise<Referral> {
+    const row = await this.referralRepository.findByIdRow(id);
+
+    if (!row) {
+      throw new Error(`Referral with id ${id} not found`);
+    }
+
+    // Validate that status is 'new' or 'closed'
+    if (row.status !== 'new' && row.status !== 'closed') {
+      throw new Error(
+        `Cannot open referral with status '${row.status}'. Referral must be 'new' or 'closed' to be opened.`
+      );
+    }
+
+    // Update the referral to opened status
+    const updatedRow = await this.referralRepository.update(id, {
+      status: 'opened',
+      opened_at: new Date(),
+    });
+
+    return this.mapToReferral(updatedRow);
+  }
+
+  async closeReferral(id: string): Promise<Referral> {
+    const row = await this.referralRepository.findByIdRow(id);
+
+    if (!row) {
+      throw new Error(`Referral with id ${id} not found`);
+    }
+
+    // Validate that status is 'new' or 'opened'
+    if (row.status !== 'new' && row.status !== 'opened') {
+      throw new Error(
+        `Cannot close referral with status '${row.status}'. Referral must be 'new' or 'opened' to be closed.`
+      );
+    }
+
+    // Update the referral to closed status
+    const updatedRow = await this.referralRepository.update(id, {
+      status: 'closed',
+      closed_at: new Date(),
+    });
+
+    return this.mapToReferral(updatedRow);
   }
 }

@@ -31,10 +31,42 @@ export const useReferral = () => {
     }
   };
 
+  const openReferral = async (id: string) => {
+    try {
+      const response = await $fetch<ReferralResponse>(`/api/referral/${id}/open`, {
+        method: 'POST',
+      });
+
+      if (response.success && response.referral) {
+        referral.value = response.referral;
+      }
+      return response;
+    } catch (err: any) {
+      throw err;
+    }
+  };
+
+  const closeReferral = async (id: string) => {
+    try {
+      const response = await $fetch<ReferralResponse>(`/api/referral/${id}/close`, {
+        method: 'POST',
+      });
+
+      if (response.success && response.referral) {
+        referral.value = response.referral;
+      }
+      return response;
+    } catch (err: any) {
+      throw err;
+    }
+  };
+
   return {
     referral: readonly(referral),
     loading: readonly(loading),
     error: readonly(error),
     getReferral,
+    openReferral,
+    closeReferral,
   };
 };

@@ -7,19 +7,27 @@ Kysely Rules
 
 - By default dont add indexes
 - Add updated_at and created_at should be timestampz
+- Use kysely code gen to connect to the database and generate the types in the database-types.ts
 
 Nuxt
 
 - Use Nuxt Pages
+- In the nuxt pages we should never call the server routes directly. It should always be done through a composable. For example the useReferral().
 
 Service Layer
 
 - Service code shall reside in the server/service folder.
+- Types for the service should be inside the types folder.
 
 Repository Layer
 
 - Repository code shall reside in server/repository.
 - There should be a base repository that uses generics and supports insert, update, findAll, findById
+- The service/index.ts should create singletons for all the services. The Nuxt server routes should use the singletons not create a new instance every time.
+
+Api Layer
+
+- The nuxt routes should use the api.ts for its types to send back to the Nuxt application.
 
 1. Login/Logout
 
@@ -69,3 +77,8 @@ Repository Layer
 - This middleware checks if the user is logged in and has a session
 - It should use nuxt auth util
 - This would be associated with the user table
+
+9. Formatting
+
+- We should use the utils folder to format data.
+- dateTimeUtils.ts should use date-fns to format
