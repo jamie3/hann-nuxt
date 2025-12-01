@@ -1,12 +1,12 @@
 import { BaseRepository } from './base-repository';
-import type { Database } from '../types/database-types';
+import type { DB } from '../types/database-types';
 import { Selectable, Insertable, Updateable } from 'kysely';
 
-export interface ClinicalNoteRow extends Selectable<Database['clinical_note']> {}
-export interface ClinicalNoteInsert extends Insertable<Database['clinical_note']> {}
-export interface ClinicalNoteUpdate extends Updateable<Database['clinical_note']> {}
+export interface ClinicalNoteRow extends Selectable<DB['clinical_note']> {}
+export interface ClinicalNoteInsert extends Insertable<DB['clinical_note']> {}
+export interface ClinicalNoteUpdate extends Updateable<DB['clinical_note']> {}
 
-export class ClinicalNoteRepository extends BaseRepository<Database, 'clinical_note'> {
+export class ClinicalNoteRepository extends BaseRepository<DB, 'clinical_note'> {
   constructor(db: any) {
     super(db, 'clinical_note');
   }
@@ -20,7 +20,7 @@ export class ClinicalNoteRepository extends BaseRepository<Database, 'clinical_n
       .selectFrom('clinical_note')
       .selectAll()
       .where('is_deleted', '=', false)
-      .orderBy('note_date', 'desc')
+      .orderBy('session_date', 'desc')
       .execute();
   }
 
@@ -34,7 +34,7 @@ export class ClinicalNoteRepository extends BaseRepository<Database, 'clinical_n
       .selectAll()
       .where('referral_id', '=', referralId)
       .where('is_deleted', '=', false)
-      .orderBy('note_date', 'desc')
+      .orderBy('session_date', 'desc')
       .execute();
   }
 
@@ -44,7 +44,7 @@ export class ClinicalNoteRepository extends BaseRepository<Database, 'clinical_n
       .selectAll()
       .where('author_id', '=', authorId)
       .where('is_deleted', '=', false)
-      .orderBy('note_date', 'desc')
+      .orderBy('session_date', 'desc')
       .execute();
   }
 

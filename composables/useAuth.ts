@@ -54,6 +54,21 @@ export const useAuth = () => {
     }
   };
 
+  const performLogin = async (credentials: LoginCredentials) => {
+    const result = await login(credentials);
+
+    if (result.success) {
+      // Fetch the user session to update client-side state
+      const { fetch: fetchSession } = useUserSession();
+      await fetchSession();
+
+      // Redirect to home page after successful login
+      await navigateTo('/');
+    }
+
+    return result;
+  };
+
   const performLogout = async () => {
     const result = await logout();
 
@@ -72,6 +87,7 @@ export const useAuth = () => {
     error: readonly(error),
     login,
     logout,
+    performLogin,
     performLogout,
   };
 };
