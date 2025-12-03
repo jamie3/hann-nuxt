@@ -11,27 +11,67 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration - Read from environment or use defaults
-MYSQL_HOST="${MYSQL_HOST:-hanndb-instance-1.caxokwegqpck.ca-central-1.rds.amazonaws.com}"
-MYSQL_PORT="${MYSQL_PORT:-3306}"
+# Check if SSH tunnel is running on port 3307
+TUNNEL_RUNNING=false
+if lsof -Pi :3307 -sTCP:LISTEN -t >/dev/null 2>&1; then
+    TUNNEL_RUNNING=true
+fi
+
+# If tunnel is running and no explicit host is set, use 127.0.0.1:3307
+# Note: Use 127.0.0.1 instead of localhost to force TCP connection (avoid Unix socket)
+if [ "$TUNNEL_RUNNING" = true ] && [ -z "$MYSQL_HOST" ]; then
+    MYSQL_HOST="127.0.0.1"
+    MYSQL_PORT="3307"
+else
+    MYSQL_HOST="${MYSQL_HOST:-hanndb-instance-1.caxokwegqpck.ca-central-1.rds.amazonaws.com}"
+    MYSQL_PORT="${MYSQL_PORT:-3306}"
+fi
+
 MYSQL_USER="${MYSQL_USER:-ghanndb}"
 MYSQL_PASSWORD="${MYSQL_PASSWORD}"
 MYSQL_DATABASE="${MYSQL_DATABASE:-hanndb}"
 OUTPUT_FILE="${OUTPUT_FILE:-schema-export.sql}"
 
 # Check if mysql client is installed
-if ! command -v mysql &> /dev/null; then
-    echo -e "${RED}Error: mysql client is not installed${NC}"
+# On macOS with Homebrew, mysql-client may not be in PATH
+MYSQL_BIN=""
+MYSQLDUMP_BIN=""
+
+# Check common locations for mysql
+if command -v mysql &> /dev/null; then
+    MYSQL_BIN="mysql"
+elif [ -f "/opt/homebrew/opt/mysql-client/bin/mysql" ]; then
+    MYSQL_BIN="/opt/homebrew/opt/mysql-client/bin/mysql"
+elif [ -f "/usr/local/opt/mysql-client/bin/mysql" ]; then
+    MYSQL_BIN="/usr/local/opt/mysql-client/bin/mysql"
+else
+    echo -e "${RED}Error: mysql command not found${NC}"
     echo "Please install MySQL client:"
     echo "  macOS: brew install mysql-client"
     echo "  Ubuntu/Debian: sudo apt-get install mysql-client"
-    echo "  CentOS/RHEL: sudo yum install mysql"
+    echo "  CentOS/RHEL: sudo yum install mysql-client"
+    echo ""
+    echo "After installation on macOS, reload your shell:"
+    echo "  source ~/.zshrc"
     exit 1
 fi
 
-# Check if mysqldump is installed
-if ! command -v mysqldump &> /dev/null; then
-    echo -e "${RED}Error: mysqldump is not installed${NC}"
-    echo "Please install MySQL client tools (includes mysqldump)"
+# Check for mysqldump
+if command -v mysqldump &> /dev/null; then
+    MYSQLDUMP_BIN="mysqldump"
+elif [ -f "/opt/homebrew/opt/mysql-client/bin/mysqldump" ]; then
+    MYSQLDUMP_BIN="/opt/homebrew/opt/mysql-client/bin/mysqldump"
+elif [ -f "/usr/local/opt/mysql-client/bin/mysqldump" ]; then
+    MYSQLDUMP_BIN="/usr/local/opt/mysql-client/bin/mysqldump"
+else
+    echo -e "${RED}Error: mysqldump command not found${NC}"
+    echo "Please install mysql-client (includes mysqldump):"
+    echo "  macOS: brew install mysql-client"
+    echo "  Ubuntu/Debian: sudo apt-get install mysql-client"
+    echo "  CentOS/RHEL: sudo yum install mysql-client"
+    echo ""
+    echo "After installation on macOS, reload your shell:"
+    echo "  source ~/.zshrc"
     exit 1
 fi
 
@@ -58,7 +98,7 @@ echo ""
 
 # Test connection
 echo -e "${YELLOW}Testing connection...${NC}"
-if ! mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "SELECT 1;" "$MYSQL_DATABASE" &> /dev/null; then
+if ! "$MYSQL_BIN" -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "SELECT 1;" "$MYSQL_DATABASE" &> /dev/null; then
     echo -e "${RED}✗ Failed to connect to MySQL${NC}"
     echo "Please check:"
     echo "  1. Host and port are correct"
@@ -72,7 +112,7 @@ echo ""
 
 # Get list of tables
 echo -e "${YELLOW}Fetching table list...${NC}"
-TABLES=$(mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -N -e "SHOW TABLES;" "$MYSQL_DATABASE" 2>/dev/null)
+TABLES=$("$MYSQL_BIN" -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -N -e "SHOW TABLES;" "$MYSQL_DATABASE" 2>/dev/null)
 
 if [ -z "$TABLES" ]; then
     echo -e "${YELLOW}No tables found in database '$MYSQL_DATABASE'${NC}"
@@ -86,39 +126,10 @@ echo ""
 # Export schema using mysqldump
 echo -e "${YELLOW}Exporting schema...${NC}"
 
-# Create header for output file
-cat > "$OUTPUT_FILE" << EOF
--- MySQL Schema Export
--- Database: $MYSQL_DATABASE
--- Host: $MYSQL_HOST:$MYSQL_PORT
--- Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: \`$MYSQL_DATABASE\`
---
-
-EOF
-
-# Export schema only (no data) with DROP TABLE statements
-mysqldump -h "$MYSQL_HOST" \
-          -P "$MYSQL_PORT" \
-          -u "$MYSQL_USER" \
-          -p"$MYSQL_PASSWORD" \
-          --no-data \
-          --add-drop-table \
-          --routines \
-          --triggers \
-          --events \
-          --single-transaction \
-          "$MYSQL_DATABASE" >> "$OUTPUT_FILE" 2>/dev/null
+# Export schema only (no data)
+# Format: mysqldump -u username -p --host=IP --port=PORT --no-data databasename > schema.sql
+# Using --password flag for proper password handling
+"$MYSQLDUMP_BIN" -u "$MYSQL_USER" --password="$MYSQL_PASSWORD" --host="$MYSQL_HOST" --port="$MYSQL_PORT" --no-data "$MYSQL_DATABASE" > "$OUTPUT_FILE" 2>/dev/null
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ Schema exported successfully${NC}"

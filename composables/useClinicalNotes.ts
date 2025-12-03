@@ -37,15 +37,12 @@ export const useClinicalNotes = () => {
     error.value = null;
 
     try {
-      const { data, error: fetchError } = await useFetch<ClinicalNotesResponse>(
+      const response = await $fetch<ClinicalNotesResponse>(
         `/api/referral/${referralId}/clinical-notes`
       );
 
-      if (fetchError.value) {
-        error.value = fetchError.value.message || 'Failed to load clinical notes';
-        clinicalNotes.value = [];
-      } else if (data.value) {
-        clinicalNotes.value = data.value.clinicalNotes;
+      if (response && response.clinicalNotes) {
+        clinicalNotes.value = response.clinicalNotes;
       }
     } catch (err: any) {
       error.value = err.message || 'An error occurred';
@@ -55,11 +52,28 @@ export const useClinicalNotes = () => {
     }
   };
 
+  const createClinicalNote = async (data: {
+    referralId: string;
+    sessionDate: string;
+    content: string;
+  }) => {
+    try {
+      const response = await $fetch('/api/clinical-notes/create', {
+        method: 'POST',
+        body: data,
+      });
+      return response;
+    } catch (err: any) {
+      throw err;
+    }
+  };
+
   return {
     clinicalNotes: readonly(clinicalNotes),
     loading: readonly(loading),
     error: readonly(error),
     getClinicalNotes,
     getClinicalNotesByReferralId,
+    createClinicalNote,
   };
 };

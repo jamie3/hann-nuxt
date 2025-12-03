@@ -14,8 +14,30 @@ export class ReferralRepository extends BaseRepository<Database, 'referral'> {
     return await this.insert(data);
   }
 
-  async findAllRows(): Promise<ReferralRow[]> {
-    return await this.findAll();
+  async findAllRows(
+    sortBy: string = 'updated_at',
+    sortOrder: 'asc' | 'desc' = 'desc'
+  ): Promise<ReferralRow[]> {
+    // Map frontend column names to database column names
+    const columnMap: Record<string, string> = {
+      updated_at: 'updated_at',
+      last_name: 'last_name',
+      first_name: 'first_name',
+      date_of_birth: 'date_of_birth',
+      referred_at: 'referred_at',
+      referral_type: 'referral_type',
+      status: 'status',
+      opened_at: 'opened_at',
+    };
+
+    const dbColumn = columnMap[sortBy] || 'updated_at';
+
+    return await this.db
+      .selectFrom('referral')
+      .selectAll()
+      .where('is_deleted', '=', false)
+      .orderBy(dbColumn as any, sortOrder)
+      .execute();
   }
 
   async findByIdRow(id: string): Promise<ReferralRow | undefined> {

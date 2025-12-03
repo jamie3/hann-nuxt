@@ -6,13 +6,13 @@
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PEM_FILE="$SCRIPT_DIR/hann-mysql-ec2.pem"
-EC2_HOST="ec2-3-96-173-161.ca-central-1.compute.amazonaws.com"
+EC2_HOST="ec2-15-222-238-198.ca-central-1.compute.amazonaws.com"
 EC2_USER="ec2-user"
 LOCAL_PORT="3307"
 REMOTE_PORT="3306"
 
 # RDS endpoint
-RDS_ENDPOINT="${MYSQL_RDS_ENDPOINT:-hanndb-instance-1.caxokwegqpck.ca-central-1.rds.amazonaws.com}"
+RDS_ENDPOINT="${MYSQL_RDS_ENDPOINT:-hanndb.cluster-caxokwegqpck.ca-central-1.rds.amazonaws.com}"
 
 # Colors for output
 GREEN='\033[0;32m'

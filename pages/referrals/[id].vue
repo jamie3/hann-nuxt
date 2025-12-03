@@ -33,21 +33,48 @@
               </svg>
               Back to Referrals
             </NuxtLink>
-            <h1 class="text-3xl font-bold text-gray-900">
-              {{ referral.first_name }} {{ referral.last_name }}
-            </h1>
+            <div class="flex items-center gap-3">
+              <h1 class="text-3xl font-bold text-gray-900">
+                {{ referral.first_name }} {{ referral.last_name }}
+              </h1>
+
+              <!-- Referral Type Badge -->
+              <span
+                class="px-3 py-1 text-sm font-semibold rounded-full"
+                :class="
+                  referral.referral_type === 'professional'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-green-100 text-green-800'
+                "
+              >
+                {{ referral.referral_type === 'professional' ? 'Professional' : 'Self' }}
+              </span>
+
+              <!-- Status Badge -->
+              <span
+                class="px-3 py-1 text-sm font-semibold rounded-full"
+                :class="{
+                  'bg-yellow-100 text-yellow-800': referral.status === 'new',
+                  'bg-blue-100 text-blue-800': referral.status === 'opened',
+                  'bg-gray-100 text-gray-800': referral.status === 'closed',
+                }"
+              >
+                {{ referral.status }}
+              </span>
+            </div>
           </div>
           <div class="flex items-center gap-3">
-            <span
-              class="px-3 py-1 text-sm font-semibold rounded-full"
-              :class="{
-                'bg-yellow-100 text-yellow-800': referral.status === 'new',
-                'bg-blue-100 text-blue-800': referral.status === 'opened',
-                'bg-gray-100 text-gray-800': referral.status === 'closed',
-              }"
+            <!-- Edit Button -->
+            <button
+              @click="openEditModal"
+              :disabled="referral.status === 'closed'"
+              class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              :title="
+                referral.status === 'closed' ? 'Cannot edit closed referrals' : 'Edit Referral'
+              "
             >
-              {{ referral.status }}
-            </span>
+              Edit Referral
+            </button>
 
             <!-- Open Button (visible when status is 'new' or 'closed') -->
             <button
@@ -198,12 +225,12 @@
         <div class="bg-white shadow-sm rounded-lg p-6 lg:col-span-3">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900">Clinical Notes</h2>
-            <NuxtLink
-              :to="`/clinical-notes/new?referralId=${id}`"
+            <button
+              @click="openNewNoteModal"
               class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
             >
               New Note
-            </NuxtLink>
+            </button>
           </div>
 
           <!-- Notes Loading -->
@@ -368,6 +395,20 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <EditReferralModal
+      v-model="showEditModal"
+      :referral="referral"
+      @updated="handleReferralUpdated"
+    />
+
+    <!-- New Clinical Note Modal -->
+    <NewClinicalNoteModal
+      v-model="showNewNoteModal"
+      :referralId="id"
+      @created="handleNoteCreated"
+    />
   </div>
 </template>
 
@@ -402,6 +443,32 @@ const { clinicalNotes, loading: notesLoading, getClinicalNotesByReferralId } = u
 
 // State for updating
 const isUpdating = ref(false);
+
+// Edit modal state
+const showEditModal = ref(false);
+
+// New note modal state
+const showNewNoteModal = ref(false);
+
+// Open edit modal
+const openEditModal = () => {
+  showEditModal.value = true;
+};
+
+// Open new note modal
+const openNewNoteModal = () => {
+  showNewNoteModal.value = true;
+};
+
+// Handle referral updated
+const handleReferralUpdated = () => {
+  getReferral(id);
+};
+
+// Handle clinical note created
+const handleNoteCreated = () => {
+  getClinicalNotesByReferralId(id);
+};
 
 // Fetch referral immediately (works on both SSR and client)
 await getReferral(id);

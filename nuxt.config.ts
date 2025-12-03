@@ -17,5 +17,8 @@ export default defineNuxtConfig({
       password: process.env.DATABASE_PASSWORD || '',
       name: process.env.DATABASE_NAME || 'hann',
     },
+    public: {
+      googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+    },
   },
 });

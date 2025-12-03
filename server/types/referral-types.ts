@@ -5,6 +5,7 @@ export interface Referral {
   date_of_birth: Date;
   age: string;
   age_at_referral: string;
+  gender: string | null;
   parents_guardians: string | null;
   primary_telephone: string;
   secondary_telephone: string | null;
@@ -31,6 +32,7 @@ export interface NewReferral {
   first_name: string;
   last_name: string;
   date_of_birth: string | Date;
+  gender?: string;
   parents_guardians?: string;
   primary_telephone: string;
   secondary_telephone?: string;

@@ -26,6 +26,7 @@ export class ReferralService {
       age_at_referral: row.referred_at
         ? this.calculateAge(new Date(row.date_of_birth), new Date(row.referred_at))
         : 'N/A',
+      gender: row.gender,
       parents_guardians: row.parents_guardians,
       primary_telephone: row.primary_telephone,
       secondary_telephone: row.secondary_telephone,
@@ -42,6 +43,7 @@ export class ReferralService {
       status: row.status,
       opened_at: row.opened_at ? new Date(row.opened_at) : null,
       closed_at: row.closed_at ? new Date(row.closed_at) : null,
+      archived_at: null,
       referred_at: row.referred_at ? new Date(row.referred_at) : null,
       created_at: new Date(row.created_at),
       updated_at: new Date(row.updated_at),
@@ -79,8 +81,11 @@ export class ReferralService {
     return this.mapToReferral(row);
   }
 
-  async getAllReferrals(): Promise<Referral[]> {
-    const rows = await this.referralRepository.findAllRows();
+  async getAllReferrals(
+    sortBy: string = 'updated_at',
+    sortOrder: 'asc' | 'desc' = 'desc'
+  ): Promise<Referral[]> {
+    const rows = await this.referralRepository.findAllRows(sortBy, sortOrder);
     return rows.map((row) => this.mapToReferral(row));
   }
 
@@ -141,6 +146,54 @@ export class ReferralService {
       status: 'closed',
       closed_at: new Date(),
     });
+
+    return this.mapToReferral(updatedRow);
+  }
+
+  async updateReferral(id: string, data: Partial<NewReferral>): Promise<Referral> {
+    const row = await this.referralRepository.findByIdRow(id);
+
+    if (!row) {
+      throw new Error(`Referral with id ${id} not found`);
+    }
+
+    // Validate that status is not 'closed'
+    if (row.status === 'closed') {
+      throw new Error('Cannot update a closed referral');
+    }
+
+    // Prepare update data - only include fields that are provided
+    const updateData: any = {};
+
+    if (data.first_name !== undefined) updateData.first_name = data.first_name;
+    if (data.last_name !== undefined) updateData.last_name = data.last_name;
+    if (data.date_of_birth !== undefined) {
+      updateData.date_of_birth =
+        typeof data.date_of_birth === 'string' ? new Date(data.date_of_birth) : data.date_of_birth;
+    }
+    if (data.parents_guardians !== undefined)
+      updateData.parents_guardians = data.parents_guardians || null;
+    if (data.primary_telephone !== undefined) updateData.primary_telephone = data.primary_telephone;
+    if (data.secondary_telephone !== undefined)
+      updateData.secondary_telephone = data.secondary_telephone || null;
+    if (data.email !== undefined) updateData.email = data.email || null;
+    if (data.mailing_address !== undefined)
+      updateData.mailing_address = data.mailing_address || null;
+    if (data.referrer_name !== undefined) updateData.referrer_name = data.referrer_name || null;
+    if (data.referrer_relationship !== undefined)
+      updateData.referrer_relationship = data.referrer_relationship || null;
+    if (data.referrer_email !== undefined) updateData.referrer_email = data.referrer_email || null;
+    if (data.requested_service !== undefined) updateData.requested_service = data.requested_service;
+    if (data.presenting_issues !== undefined)
+      updateData.presenting_issues = data.presenting_issues || null;
+    if (data.method_of_payment !== undefined)
+      updateData.method_of_payment = data.method_of_payment || null;
+    if (data.referrer_prefers_contact !== undefined)
+      updateData.referrer_prefers_contact = data.referrer_prefers_contact ?? null;
+    if (data.referral_type !== undefined) updateData.referral_type = data.referral_type;
+
+    // Update the referral
+    const updatedRow = await this.referralRepository.update(id, updateData);
 
     return this.mapToReferral(updatedRow);
   }

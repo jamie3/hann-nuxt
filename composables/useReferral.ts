@@ -15,13 +15,10 @@ export const useReferral = () => {
     error.value = null;
 
     try {
-      const { data, error: fetchError } = await useFetch<ReferralResponse>(`/api/referral/${id}`);
+      const response = await $fetch<ReferralResponse>(`/api/referral/${id}`);
 
-      if (fetchError.value) {
-        error.value = fetchError.value.message || 'Failed to load referral';
-        referral.value = null;
-      } else if (data.value) {
-        referral.value = data.value.referral;
+      if (response && response.referral) {
+        referral.value = response.referral;
       }
     } catch (err: any) {
       error.value = err.message || 'An error occurred';
@@ -61,6 +58,22 @@ export const useReferral = () => {
     }
   };
 
+  const updateReferral = async (id: string, data: any) => {
+    try {
+      const response = await $fetch<ReferralResponse>(`/api/referral/${id}/update`, {
+        method: 'POST',
+        body: data,
+      });
+
+      if (response.success && response.referral) {
+        referral.value = response.referral;
+      }
+      return response;
+    } catch (err: any) {
+      throw err;
+    }
+  };
+
   return {
     referral: readonly(referral),
     loading: readonly(loading),
@@ -68,5 +81,6 @@ export const useReferral = () => {
     getReferral,
     openReferral,
     closeReferral,
+    updateReferral,
   };
 };

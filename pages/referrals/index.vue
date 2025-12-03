@@ -94,7 +94,31 @@
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Name
+                #
+              </th>
+              <th
+                @click="handleSort('updated_at')"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              >
+                Updated Date {{ getSortIndicator('updated_at') }}
+              </th>
+              <th
+                @click="handleSort('last_name')"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              >
+                Last Name {{ getSortIndicator('last_name') }}
+              </th>
+              <th
+                @click="handleSort('first_name')"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              >
+                First Name {{ getSortIndicator('first_name') }}
+              </th>
+              <th
+                @click="handleSort('date_of_birth')"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              >
+                Date of Birth {{ getSortIndicator('date_of_birth') }}
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -104,47 +128,86 @@
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Type
+                Referral Age
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                @click="handleSort('referred_at')"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               >
-                Status
+                Referral Date {{ getSortIndicator('referred_at') }}
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                @click="handleSort('referral_type')"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               >
-                Service
+                Type {{ getSortIndicator('referral_type') }}
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                @click="handleSort('status')"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               >
-                Contact
+                Status {{ getSortIndicator('status') }}
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                @click="handleSort('opened_at')"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               >
-                Referral Date
+                Opened Date {{ getSortIndicator('opened_at') }}
+              </th>
+              <th
+                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Actions
               </th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr
-              v-for="referral in filteredReferrals"
+              v-for="(referral, index) in filteredReferrals"
               :key="referral.id"
-              @click="navigateTo(`/referrals/${referral.id}`)"
-              class="hover:bg-gray-50 cursor-pointer"
+              class="hover:bg-gray-50"
             >
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ index + 1 }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{
+                  referral.updated_at ? new Date(referral.updated_at).toLocaleDateString() : 'N/A'
+                }}
+              </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">
-                  {{ referral.first_name }} {{ referral.last_name }}
-                </div>
-                <div v-if="referral.parents_guardians" class="text-sm text-gray-500">
-                  Guardian: {{ referral.parents_guardians }}
-                </div>
+                <NuxtLink
+                  :to="`/referrals/${referral.id}`"
+                  class="text-sm font-medium text-blue-600 hover:text-blue-900 cursor-pointer"
+                >
+                  {{ referral.last_name }}
+                </NuxtLink>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <NuxtLink
+                  :to="`/referrals/${referral.id}`"
+                  class="text-sm font-medium text-blue-600 hover:text-blue-900 cursor-pointer"
+                >
+                  {{ referral.first_name }}
+                </NuxtLink>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{
+                  referral.date_of_birth
+                    ? new Date(referral.date_of_birth).toLocaleDateString()
+                    : 'N/A'
+                }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{ referral.age }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ referral.age_at_referral || 'N/A' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{
+                  referral.referred_at ? new Date(referral.referred_at).toLocaleDateString() : 'N/A'
+                }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
@@ -170,17 +233,22 @@
                   {{ referral.status }}
                 </span>
               </td>
-              <td class="px-6 py-4">
-                <div class="text-sm text-gray-900">{{ referral.requested_service }}</div>
-              </td>
-              <td class="px-6 py-4">
-                <div class="text-sm text-gray-900">{{ referral.primary_telephone }}</div>
-                <div v-if="referral.email" class="text-sm text-gray-500">{{ referral.email }}</div>
-              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{
-                  referral.referred_at ? new Date(referral.referred_at).toLocaleDateString() : 'N/A'
-                }}
+                {{ referral.opened_at ? new Date(referral.opened_at).toLocaleDateString() : 'N/A' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button
+                  @click="openReferralDetail(referral.id)"
+                  class="text-blue-600 hover:text-blue-900 mr-3"
+                >
+                  View
+                </button>
+                <button
+                  @click="openEditModal(referral)"
+                  class="text-green-600 hover:text-green-900"
+                >
+                  Edit
+                </button>
               </td>
             </tr>
           </tbody>
@@ -192,6 +260,13 @@
         <p class="text-gray-500">No referrals found.</p>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <EditReferralModal
+      v-model="showEditModal"
+      :referral="selectedReferral"
+      @updated="handleReferralUpdated"
+    />
   </div>
 </template>
 
@@ -202,16 +277,63 @@ definePageMeta({
   layout: 'default',
 });
 
-// Fetch referrals
-const { data, error, pending, refresh } = await useFetch('/api/referrals');
+// Sorting state
+const sortBy = ref('updated_at');
+const sortOrder = ref<'asc' | 'desc'>('desc');
+
+// Fetch referrals with sorting
+const { data, error, pending, refresh } = await useFetch('/api/referrals', {
+  query: {
+    sortBy,
+    sortOrder,
+  },
+  watch: [sortBy, sortOrder],
+});
 
 // Filter and search state
 const searchQuery = ref('');
-const sortOrder = ref<'asc' | 'desc'>('desc');
 const typeFilter = ref<'all' | 'professional' | 'self'>('all');
 const statusFilter = ref<'all' | 'new' | 'opened' | 'closed'>('all');
 
-// Filtered and sorted referrals
+// Edit modal state
+const showEditModal = ref(false);
+const selectedReferral = ref<Referral | null>(null);
+
+// Open referral detail page
+const openReferralDetail = (id: string) => {
+  navigateTo(`/referrals/${id}`);
+};
+
+// Open edit modal
+const openEditModal = (referral: any) => {
+  selectedReferral.value = referral as Referral;
+  showEditModal.value = true;
+};
+
+// Handle referral updated
+const handleReferralUpdated = () => {
+  refresh();
+};
+
+// Handle column sort
+const handleSort = (column: string) => {
+  if (sortBy.value === column) {
+    // Toggle sort order if same column
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    // Set new column and default to descending
+    sortBy.value = column;
+    sortOrder.value = 'desc';
+  }
+};
+
+// Get sort indicator for a column
+const getSortIndicator = (column: string) => {
+  if (sortBy.value !== column) return '';
+  return sortOrder.value === 'asc' ? '↑' : '↓';
+};
+
+// Filtered referrals (sorting is handled server-side)
 const filteredReferrals = computed(() => {
   if (!data.value?.referrals) return [];
 
@@ -236,18 +358,6 @@ const filteredReferrals = computed(() => {
   if (statusFilter.value !== 'all') {
     referrals = referrals.filter((referral) => referral.status === statusFilter.value);
   }
-
-  // Apply sort by referral date
-  referrals.sort((a, b) => {
-    const dateA = a.referred_at ? new Date(a.referred_at).getTime() : 0;
-    const dateB = b.referred_at ? new Date(b.referred_at).getTime() : 0;
-
-    if (sortOrder.value === 'desc') {
-      return dateB - dateA; // Newest first
-    } else {
-      return dateA - dateB; // Oldest first
-    }
-  });
 
   return referrals;
 });

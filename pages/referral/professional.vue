@@ -57,6 +57,27 @@
             </p>
           </div>
 
+          <!-- Gender -->
+          <div>
+            <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">
+              Gender <span class="text-red-500">*</span>
+            </label>
+            <select
+              v-model="gender"
+              id="gender"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.gender }"
+            >
+              <option value="">Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Non-binary">Non-binary</option>
+            </select>
+            <p v-if="errors.gender" class="mt-1 text-sm text-red-500">
+              {{ errors.gender }}
+            </p>
+          </div>
+
           <!-- Parents / Guardians -->
           <div>
             <label for="parentsGuardians" class="block text-sm font-medium text-gray-700 mb-1">
@@ -112,55 +133,65 @@
           </div>
 
           <!-- Mailing Address -->
-          <div>
-            <label for="mailingAddress" class="block text-sm font-medium text-gray-700 mb-1">
-              Mailing Address
-            </label>
-            <textarea
-              v-model="mailingAddress"
-              id="mailingAddress"
-              rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
-          </div>
+          <GooglePlacesAutocomplete
+            v-model="mailingAddress"
+            label="Mailing Address"
+            input-id="mailingAddress"
+            placeholder="Start typing your address..."
+            :required="true"
+            :has-error="!!errors.mailingAddress"
+            :error-message="errors.mailingAddress"
+          />
 
           <!-- Referrer Name -->
           <div>
             <label for="referrerName" class="block text-sm font-medium text-gray-700 mb-1">
-              Referrer Name
+              Referrer Name <span class="text-red-500">*</span>
             </label>
             <input
               v-model="referrerName"
               type="text"
               id="referrerName"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.referrerName }"
             />
+            <p v-if="errors.referrerName" class="mt-1 text-sm text-red-500">
+              {{ errors.referrerName }}
+            </p>
           </div>
 
           <!-- Referrer Relationship -->
           <div>
             <label for="referrerRelationship" class="block text-sm font-medium text-gray-700 mb-1">
-              Referrer Relationship
+              Referrer Relationship <span class="text-red-500">*</span>
             </label>
             <input
               v-model="referrerRelationship"
               type="text"
               id="referrerRelationship"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.referrerRelationship }"
             />
+            <p v-if="errors.referrerRelationship" class="mt-1 text-sm text-red-500">
+              {{ errors.referrerRelationship }}
+            </p>
           </div>
 
           <!-- Referrer Email -->
           <div>
             <label for="referrerEmail" class="block text-sm font-medium text-gray-700 mb-1">
-              Referrer Email
+              Referrer Email <span class="text-red-500">*</span>
             </label>
             <input
               v-model="referrerEmail"
               type="email"
               id="referrerEmail"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.referrerEmail }"
             />
+            <p v-if="errors.referrerEmail" class="mt-1 text-sm text-red-500">
+              {{ errors.referrerEmail }}
+            </p>
           </div>
 
           <!-- Requested Therapy -->
@@ -191,19 +222,25 @@
           <!-- Presenting Issues -->
           <div>
             <label for="presentingIssues" class="block text-sm font-medium text-gray-700 mb-1">
-              Presenting Issues or Concerns
+              Presenting Issues or Concerns <span class="text-red-500">*</span>
             </label>
             <textarea
               v-model="presentingIssues"
               id="presentingIssues"
               rows="4"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.presentingIssues }"
             ></textarea>
+            <p v-if="errors.presentingIssues" class="mt-1 text-sm text-red-500">
+              {{ errors.presentingIssues }}
+            </p>
           </div>
 
           <!-- Method of Payment -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Method of Payment</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Method of Payment <span class="text-red-500">*</span>
+            </label>
             <div class="space-y-2">
               <label class="flex items-center">
                 <input
@@ -242,12 +279,17 @@
                 <span class="text-sm text-gray-700">3rd party payment provider</span>
               </label>
             </div>
+            <p v-if="errors.methodOfPayment" class="mt-1 text-sm text-red-500">
+              {{ errors.methodOfPayment }}
+            </p>
           </div>
 
+          <!-- Referrer Prefers Contact -->
           <!-- Referrer Prefers Contact -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Does the referrer prefer to speak with Dr. Hann before we contact the client?
+              <span class="text-red-500">*</span>
             </label>
             <div class="space-y-2">
               <label class="flex items-center">
@@ -259,6 +301,9 @@
                 <span class="text-sm text-gray-700">No</span>
               </label>
             </div>
+            <p v-if="errors.referrerPrefersContact" class="mt-1 text-sm text-red-500">
+              {{ errors.referrerPrefersContact }}
+            </p>
           </div>
 
           <!-- Turnstile -->
@@ -305,18 +350,21 @@ const schema = toTypedSchema(
     firstName: z.string().min(1, 'First name is required'),
     lastName: z.string().min(1, 'Last name is required'),
     dateOfBirth: z.string().min(1, 'Date of birth is required'),
+    gender: z.string().min(1, 'Gender is required'),
     parentsGuardians: z.string().optional(),
     primaryTelephone: z.string().min(1, 'Primary telephone is required'),
     secondaryTelephone: z.string().optional(),
     email: z.string().email('Invalid email address').optional().or(z.literal('')),
-    mailingAddress: z.string().optional(),
-    referrerName: z.string().optional(),
-    referrerRelationship: z.string().optional(),
-    referrerEmail: z.string().email('Invalid email address').optional().or(z.literal('')),
+    mailingAddress: z.string().min(1, 'Mailing address is required'),
+    referrerName: z.string().min(1, 'Referrer name is required'),
+    referrerRelationship: z.string().min(1, 'Referrer relationship is required'),
+    referrerEmail: z.string().email('Invalid email address').min(1, 'Referrer email is required'),
     requestedService: z.string().min(1, 'Requested service is required'),
-    presentingIssues: z.string().optional(),
-    methodOfPayment: z.string().optional(),
-    referrerPrefersContact: z.boolean().optional(),
+    presentingIssues: z.string().min(1, 'Presenting issues or concerns is required'),
+    methodOfPayment: z.string().min(1, 'Method of payment is required'),
+    referrerPrefersContact: z.boolean().refine((val) => val !== undefined && val !== null, {
+      message: 'Please select whether the referrer prefers contact',
+    }),
   })
 );
 
@@ -329,6 +377,7 @@ const { handleSubmit, errors, isSubmitting } = useForm({
 const { value: firstName } = useField<string>('firstName');
 const { value: lastName } = useField<string>('lastName');
 const { value: dateOfBirth } = useField<string>('dateOfBirth');
+const { value: gender } = useField<string>('gender');
 const { value: parentsGuardians } = useField<string>('parentsGuardians');
 const { value: primaryTelephone } = useField<string>('primaryTelephone');
 const { value: secondaryTelephone } = useField<string>('secondaryTelephone');

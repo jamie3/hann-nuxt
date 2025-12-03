@@ -57,6 +57,27 @@
             </p>
           </div>
 
+          <!-- Gender -->
+          <div>
+            <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">
+              Gender <span class="text-red-500">*</span>
+            </label>
+            <select
+              v-model="gender"
+              id="gender"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.gender }"
+            >
+              <option value="">Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Non-binary">Non-binary</option>
+            </select>
+            <p v-if="errors.gender" class="mt-1 text-sm text-red-500">
+              {{ errors.gender }}
+            </p>
+          </div>
+
           <!-- Parents / Guardians -->
           <div>
             <label for="parentsGuardians" class="block text-sm font-medium text-gray-700 mb-1">
@@ -118,17 +139,15 @@
           </div>
 
           <!-- Mailing Address -->
-          <div>
-            <label for="mailingAddress" class="block text-sm font-medium text-gray-700 mb-1">
-              Mailing Address
-            </label>
-            <textarea
-              v-model="mailingAddress"
-              id="mailingAddress"
-              rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
-          </div>
+          <GooglePlacesAutocomplete
+            v-model="mailingAddress"
+            label="Mailing Address"
+            input-id="mailingAddress"
+            placeholder="Start typing your address..."
+            :required="true"
+            :has-error="!!errors.mailingAddress"
+            :error-message="errors.mailingAddress"
+          />
 
           <!-- Requested Service -->
           <div>
@@ -142,13 +161,9 @@
               :class="{ 'border-red-500': errors.requestedService }"
             >
               <option value="">Select a service</option>
-              <option value="Child Therapy">Child Therapy</option>
-              <option value="Adolescent Therapy">Adolescent Therapy</option>
-              <option value="Adult Individual Therapy">Adult Individual Therapy</option>
-              <option value="Couple Therapy">Couple Therapy</option>
-              <option value="Family Therapy">Family Therapy</option>
-              <option value="Assessment">Assessment</option>
-              <option value="Consultation">Consultation</option>
+              <option v-for="service in REQUESTED_SERVICES" :key="service" :value="service">
+                {{ service }}
+              </option>
             </select>
             <p v-if="errors.requestedService" class="mt-1 text-sm text-red-500">
               {{ errors.requestedService }}
@@ -158,14 +173,18 @@
           <!-- Presenting Issues -->
           <div>
             <label for="presentingIssues" class="block text-sm font-medium text-gray-700 mb-1">
-              Presenting Issues or Concerns
+              Presenting Issues or Concerns <span class="text-red-500">*</span>
             </label>
             <textarea
               v-model="presentingIssues"
               id="presentingIssues"
               rows="4"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.presentingIssues }"
             ></textarea>
+            <p v-if="errors.presentingIssues" class="mt-1 text-sm text-red-500">
+              {{ errors.presentingIssues }}
+            </p>
           </div>
 
           <!-- Turnstile -->
@@ -201,6 +220,7 @@
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
+import { REQUESTED_SERVICES } from '~/server/types/requested-service';
 
 definePageMeta({
   layout: 'login',
@@ -212,13 +232,14 @@ const schema = toTypedSchema(
     firstName: z.string().min(1, 'First name is required'),
     lastName: z.string().min(1, 'Last name is required'),
     dateOfBirth: z.string().min(1, 'Date of birth is required'),
+    gender: z.string().min(1, 'Gender is required'),
     parentsGuardians: z.string().optional(),
     primaryTelephone: z.string().min(1, 'Primary telephone is required'),
     secondaryTelephone: z.string().optional(),
     email: z.string().email('Invalid email address').min(1, 'Email is required'),
-    mailingAddress: z.string().optional(),
+    mailingAddress: z.string().min(1, 'Mailing address is required'),
     requestedService: z.string().min(1, 'Requested service is required'),
-    presentingIssues: z.string().optional(),
+    presentingIssues: z.string().min(1, 'Presenting issues or concerns is required'),
   })
 );
 
@@ -231,6 +252,7 @@ const { handleSubmit, errors, isSubmitting } = useForm({
 const { value: firstName } = useField<string>('firstName');
 const { value: lastName } = useField<string>('lastName');
 const { value: dateOfBirth } = useField<string>('dateOfBirth');
+const { value: gender } = useField<string>('gender');
 const { value: parentsGuardians } = useField<string>('parentsGuardians');
 const { value: primaryTelephone } = useField<string>('primaryTelephone');
 const { value: secondaryTelephone } = useField<string>('secondaryTelephone');
