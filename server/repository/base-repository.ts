@@ -1,6 +1,12 @@
-import { Kysely, Insertable, Updateable, Selectable } from 'kysely';
+import { Kysely } from 'kysely';
 
-export abstract class BaseRepository<DB, TableName extends keyof DB & string> {
+export abstract class BaseRepository<
+  DB,
+  TableName extends keyof DB & string,
+  SelectType,
+  InsertType,
+  UpdateType,
+> {
   protected db: Kysely<DB>;
   protected tableName: TableName;
 
@@ -9,41 +15,38 @@ export abstract class BaseRepository<DB, TableName extends keyof DB & string> {
     this.tableName = tableName;
   }
 
-  async insert(data: Insertable<DB[TableName]>): Promise<Selectable<DB[TableName]>> {
-    return await this.db
+  async insert(data: InsertType): Promise<SelectType> {
+    return (await this.db
       .insertInto(this.tableName)
-      .values(data)
+      .values(data as any)
       .returningAll()
-      .executeTakeFirstOrThrow();
+      .executeTakeFirstOrThrow()) as Promise<SelectType>;
   }
 
-  async update(
-    id: string | number,
-    data: Updateable<DB[TableName]>
-  ): Promise<Selectable<DB[TableName]>> {
-    return await this.db
+  async update(id: string | number, data: UpdateType): Promise<SelectType> {
+    return (await this.db
       .updateTable(this.tableName)
-      .set(data)
+      .set(data as any)
       .where('id' as any, '=', id)
       .returningAll()
-      .executeTakeFirstOrThrow();
+      .executeTakeFirstOrThrow()) as Promise<SelectType>;
   }
 
-  async findAll(): Promise<Selectable<DB[TableName]>[]> {
-    return await this.db
+  async findAll(): Promise<SelectType[]> {
+    return (await this.db
       .selectFrom(this.tableName)
       .selectAll()
       .where('is_deleted' as any, '=', false)
-      .execute();
+      .execute()) as Promise<SelectType[]>;
   }
 
-  async findById(id: string | number): Promise<Selectable<DB[TableName]> | undefined> {
-    return await this.db
+  async findById(id: string | number): Promise<SelectType | undefined> {
+    return (await this.db
       .selectFrom(this.tableName)
       .selectAll()
       .where('id' as any, '=', id)
       .where('is_deleted' as any, '=', false)
-      .executeTakeFirst();
+      .executeTakeFirst()) as Promise<SelectType | undefined>;
   }
 
   async delete(id: string | number): Promise<void> {

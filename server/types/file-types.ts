@@ -8,8 +8,8 @@ export interface File {
   file_data: Buffer;
   uploaded_by: string | null;
   is_deleted: boolean;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface NewFile {
@@ -28,6 +28,6 @@ export interface FileMetadata {
   file_size: number;
   mime_type: string;
   uploaded_by: string | null;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
 }

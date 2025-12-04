@@ -1,12 +1,12 @@
 import { BaseRepository } from './base-repository';
-import type { Database } from '../types/database-types';
+import type { DB } from '../types/database-types';
 import { Selectable, Insertable, Updateable } from 'kysely';
 
-export interface FileRow extends Selectable<Database['file']> {}
-export interface FileInsert extends Insertable<Database['file']> {}
-export interface FileUpdate extends Updateable<Database['file']> {}
+export interface FileRow extends Selectable<DB['file']> {}
+export interface FileInsert extends Insertable<DB['file']> {}
+export interface FileUpdate extends Updateable<DB['file']> {}
 
-export class FileRepository extends BaseRepository<Database, 'file'> {
+export class FileRepository extends BaseRepository<DB, 'file', FileRow, FileInsert, FileUpdate> {
   constructor(db: any) {
     super(db, 'file');
   }

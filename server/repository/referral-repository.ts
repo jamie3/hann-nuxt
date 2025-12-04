@@ -1,11 +1,18 @@
 import { BaseRepository } from './base-repository';
-import type { Database } from '../types/database-types';
-import { Selectable, Insertable } from 'kysely';
+import type { DB } from '../types/database-types';
+import { Selectable, Insertable, Updateable } from 'kysely';
 
-export interface ReferralRow extends Selectable<Database['referral']> {}
-export interface ReferralInsert extends Insertable<Database['referral']> {}
+export interface ReferralRow extends Selectable<DB['referral']> {}
+export interface ReferralInsert extends Insertable<DB['referral']> {}
+export interface ReferralUpdate extends Updateable<DB['referral']> {}
 
-export class ReferralRepository extends BaseRepository<Database, 'referral'> {
+export class ReferralRepository extends BaseRepository<
+  DB,
+  'referral',
+  ReferralRow,
+  ReferralInsert,
+  ReferralUpdate
+> {
   constructor(db: any) {
     super(db, 'referral');
   }

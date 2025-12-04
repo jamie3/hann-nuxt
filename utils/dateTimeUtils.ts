@@ -4,6 +4,7 @@ import { format, parseISO } from 'date-fns';
  * Formats a date to "Jan 1, 2025" format
  */
 export const formatDate = (date: Date | string): string => {
+  console.log('formatDate', date);
   const dateObj = typeof date === 'string' ? parseISO(date) : date;
   return format(dateObj, 'MMM d, yyyy');
 };

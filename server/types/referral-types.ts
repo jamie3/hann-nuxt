@@ -2,7 +2,7 @@ export interface Referral {
   id: string;
   first_name: string;
   last_name: string;
-  date_of_birth: Date;
+  date_of_birth: string;
   age: string;
   age_at_referral: string;
   gender: string | null;
@@ -20,12 +20,12 @@ export interface Referral {
   referrer_prefers_contact: boolean | null;
   referral_type: 'professional' | 'self';
   status: 'closed' | 'opened' | 'new' | 'archived';
-  opened_at: Date | null;
-  closed_at: Date | null;
-  archived_at: Date | null;
-  referred_at: Date | null;
-  created_at: Date;
-  updated_at: Date;
+  opened_at: string | null;
+  closed_at: string | null;
+  archived_at: string | null;
+  referred_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface NewReferral {

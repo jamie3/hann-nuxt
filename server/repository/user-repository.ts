@@ -1,10 +1,12 @@
 import { BaseRepository } from './base-repository';
 import type { DB } from '../types/database-types';
-import { Selectable } from 'kysely';
+import { Selectable, Insertable, Updateable } from 'kysely';
 
 export interface UserRow extends Selectable<DB['user']> {}
+export interface UserInsert extends Insertable<DB['user']> {}
+export interface UserUpdate extends Updateable<DB['user']> {}
 
-export class UserRepository extends BaseRepository<DB, 'user'> {
+export class UserRepository extends BaseRepository<DB, 'user', UserRow, UserInsert, UserUpdate> {
   constructor(db: any) {
     super(db, 'user');
   }

@@ -1,12 +1,22 @@
-import { ReferralRepository, ReferralRow, ReferralInsert } from '../repository/referral-repository';
+import {
+  ReferralRepository,
+  ReferralRow,
+  ReferralInsert,
+  ReferralUpdate,
+} from '../repository/referral-repository';
+import { FileRepository } from '../repository/file-repository';
 import { differenceInYears } from 'date-fns';
 import type { Referral, NewReferral } from '../types/referral-types';
+import { pdfService } from './pdf-service';
+import { emailService } from './email-service';
 
 export class ReferralService {
   private referralRepository: ReferralRepository;
+  private fileRepository: FileRepository;
 
-  constructor(referralRepository: ReferralRepository) {
+  constructor(referralRepository: ReferralRepository, fileRepository: FileRepository) {
     this.referralRepository = referralRepository;
+    this.fileRepository = fileRepository;
   }
 
   // Calculate age from date of birth to a reference date
@@ -21,12 +31,12 @@ export class ReferralService {
       id: row.id,
       first_name: row.first_name,
       last_name: row.last_name,
-      date_of_birth: new Date(row.date_of_birth),
-      age: this.calculateAge(new Date(row.date_of_birth)),
+      date_of_birth: row.date_of_birth.toISOString(),
+      age: this.calculateAge(row.date_of_birth),
       age_at_referral: row.referred_at
-        ? this.calculateAge(new Date(row.date_of_birth), new Date(row.referred_at))
+        ? this.calculateAge(row.date_of_birth, row.referred_at)
         : 'N/A',
-      gender: row.gender,
+      gender: row.gender || null,
       parents_guardians: row.parents_guardians,
       primary_telephone: row.primary_telephone,
       secondary_telephone: row.secondary_telephone,
@@ -39,14 +49,14 @@ export class ReferralService {
       presenting_issues: row.presenting_issues,
       method_of_payment: row.method_of_payment,
       referrer_prefers_contact: row.referrer_prefers_contact,
-      referral_type: row.referral_type,
-      status: row.status,
-      opened_at: row.opened_at ? new Date(row.opened_at) : null,
-      closed_at: row.closed_at ? new Date(row.closed_at) : null,
+      referral_type: row.referral_type as 'professional' | 'self',
+      status: row.status as 'closed' | 'opened' | 'new' | 'archived',
+      opened_at: row.opened_at ? row.opened_at.toISOString() : null,
+      closed_at: row.closed_at ? row.closed_at.toISOString() : null,
       archived_at: null,
-      referred_at: row.referred_at ? new Date(row.referred_at) : null,
-      created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at),
+      referred_at: row.referred_at ? row.referred_at.toISOString() : null,
+      created_at: row.created_at.toISOString(),
+      updated_at: row.updated_at.toISOString(),
     };
   }
 
@@ -78,7 +88,47 @@ export class ReferralService {
   async createReferral(data: NewReferral): Promise<Referral> {
     const insertData = this.mapToInsert(data);
     const row = await this.referralRepository.create(insertData);
-    return this.mapToReferral(row);
+    const referral = this.mapToReferral(row);
+
+    // Generate PDF and email in the background (don't block the response)
+    this.generateAndEmailPDF(referral).catch((error) => {
+      console.error('Error generating/emailing PDF:', error);
+    });
+
+    return referral;
+  }
+
+  private async generateAndEmailPDF(referral: Referral): Promise<void> {
+    try {
+      // Generate PDF
+      const pdfBuffer = await pdfService.generateReferralPDF(referral);
+
+      // Store PDF in file table
+      await this.fileRepository.create({
+        referral_id: referral.id,
+        file_name: `referral-${referral.id}.pdf`,
+        file_size: BigInt(pdfBuffer.length),
+        mime_type: 'application/pdf',
+        file_data: pdfBuffer,
+        uploaded_by: null,
+      });
+
+      // Send email with PDF
+      const referralTypeFormatted =
+        referral.referral_type === 'professional' ? 'Professional' : 'Self';
+      await emailService.sendReferralNotification(referralTypeFormatted, pdfBuffer, referral.email);
+    } catch (error) {
+      console.error('Failed to generate/email PDF:', error);
+      throw error;
+    }
+  }
+
+  async generateReferralPDF(id: string): Promise<Buffer> {
+    const referral = await this.getReferralById(id);
+    if (!referral) {
+      throw new Error(`Referral with id ${id} not found`);
+    }
+    return pdfService.generateReferralPDF(referral);
   }
 
   async getAllReferrals(
@@ -163,7 +213,7 @@ export class ReferralService {
     }
 
     // Prepare update data - only include fields that are provided
-    const updateData: any = {};
+    const updateData: ReferralUpdate = {};
 
     if (data.first_name !== undefined) updateData.first_name = data.first_name;
     if (data.last_name !== undefined) updateData.last_name = data.last_name;

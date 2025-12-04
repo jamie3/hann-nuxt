@@ -1,12 +1,12 @@
 export interface ClinicalNote {
   id: string;
   referral_id: string;
-  session_date: Date;
+  session_date: string;
   content: string;
   author_id: string | null;
   is_deleted: boolean;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
   first_name?: string;
   last_name?: string;
 }

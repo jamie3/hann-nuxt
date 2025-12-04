@@ -6,10 +6,10 @@ export interface User {
   locked: boolean;
   disabled: boolean;
   failed_login_attempts: number;
-  last_login_at: Date | null;
+  last_login_at: string | null;
   is_deleted: boolean;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface NewUser {
@@ -25,5 +25,5 @@ export interface UpdateUser {
   locked?: boolean;
   disabled?: boolean;
   failed_login_attempts?: number;
-  last_login_at?: Date | null;
+  last_login_at?: string | null;
 }

@@ -54,25 +54,9 @@
         </div>
 
         <!-- Contact Information -->
-        <div class="text-gray-600 mb-8">
+        <div class="text-gray-600">
           <p class="mb-2">If you have any questions, please contact us:</p>
           <p class="font-medium text-gray-900">Dr. S. Gerald Hann Psychology</p>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <NuxtLink
-            to="/"
-            class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Return to Home
-          </NuxtLink>
-          <NuxtLink
-            to="/referral/self"
-            class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Submit Another Referral
-          </NuxtLink>
         </div>
       </div>
     </div>

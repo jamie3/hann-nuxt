@@ -18,7 +18,8 @@ export function getReferralService(): ReferralService {
   if (!referralService) {
     const db = useDB();
     const referralRepository = new ReferralRepository(db);
-    referralService = new ReferralService(referralRepository);
+    const fileRepository = new FileRepository(db);
+    referralService = new ReferralService(referralRepository, fileRepository);
   }
   return referralService;
 }

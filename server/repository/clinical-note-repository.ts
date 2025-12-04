@@ -6,7 +6,13 @@ export interface ClinicalNoteRow extends Selectable<DB['clinical_note']> {}
 export interface ClinicalNoteInsert extends Insertable<DB['clinical_note']> {}
 export interface ClinicalNoteUpdate extends Updateable<DB['clinical_note']> {}
 
-export class ClinicalNoteRepository extends BaseRepository<DB, 'clinical_note'> {
+export class ClinicalNoteRepository extends BaseRepository<
+  DB,
+  'clinical_note',
+  ClinicalNoteRow,
+  ClinicalNoteInsert,
+  ClinicalNoteUpdate
+> {
   constructor(db: any) {
     super(db, 'clinical_note');
   }
