@@ -171,8 +171,8 @@
             />
           </div>
 
-          <!-- Method of Payment -->
-          <div>
+          <!-- Method of Payment (Professional only) -->
+          <div v-if="formData.referral_type === 'professional'">
             <label class="block text-sm font-medium text-gray-700 mb-1">Method of Payment</label>
             <select
               v-model="formData.method_of_payment"
