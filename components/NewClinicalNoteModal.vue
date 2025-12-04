@@ -20,16 +20,15 @@
 
       <!-- Modal Body -->
       <form v-else @submit.prevent="handleSubmit" class="mt-4">
-        <!-- Referral Selection -->
-        <div class="mb-4">
+        <!-- Referral Selection (only show if no referralId provided) -->
+        <div v-if="!referralId" class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Referral <span class="text-red-500">*</span>
           </label>
           <select
             v-model="formData.referralId"
             required
-            :disabled="!!referralId"
-            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select a referral</option>
             <option v-for="referral in referrals" :key="referral.id" :value="referral.id">
@@ -112,6 +111,7 @@ const isSubmitting = ref(false);
 const errorMessage = ref('');
 const loadingReferrals = ref(false);
 const referrals = ref<any[]>([]);
+const { referralId } = toRefs(props);
 
 // Form data
 const formData = ref<{
@@ -119,7 +119,7 @@ const formData = ref<{
   sessionDate: string;
   content: string;
 }>({
-  referralId: props.referralId || '',
+  referralId: referralId.value ?? '',
   sessionDate: new Date().toISOString().split('T')[0], // Today's date
   content: '',
 });
@@ -131,14 +131,14 @@ watch(
     if (isOpen) {
       // Reset form when modal opens
       formData.value = {
-        referralId: props.referralId || '',
+        referralId: referralId.value ?? '',
         sessionDate: new Date().toISOString().split('T')[0],
         content: '',
       };
       errorMessage.value = '';
 
-      // Load referrals if not already loaded
-      if (referrals.value.length === 0) {
+      // Only load referrals if no referralId was provided
+      if (!referralId.value && referrals.value.length === 0) {
         loadingReferrals.value = true;
         try {
           const { data, error } = await useFetch('/api/referrals');
