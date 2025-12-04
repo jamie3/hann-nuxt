@@ -29,5 +29,6 @@ logs
 .env.*
 !.env.example
 
-# PEM files (private keys, certificates)
+# PEM files and certificates (private keys, SSL certificates)
 *.pem
+*.crt

@@ -5,10 +5,20 @@ export default defineEventHandler((event) => {
   const method = event.node.req.method;
   const url = event.node.req.url;
 
+  // Get client IP address (considering proxies)
+  const forwardedFor = event.node.req.headers['x-forwarded-for'];
+  const realIp = event.node.req.headers['x-real-ip'];
+  const sourceIp =
+    (typeof forwardedFor === 'string' ? forwardedFor.split(',')[0] : null) ||
+    (typeof realIp === 'string' ? realIp : null) ||
+    event.node.req.socket.remoteAddress ||
+    'unknown';
+
   // Log incoming request
   logger.info('Incoming request', {
     method,
     url,
+    sourceIp,
     headers: {
       userAgent: event.node.req.headers['user-agent'],
       contentType: event.node.req.headers['content-type'],
@@ -23,6 +33,7 @@ export default defineEventHandler((event) => {
     const logData = {
       method,
       url,
+      sourceIp,
       statusCode,
       duration: `${duration}ms`,
     };
