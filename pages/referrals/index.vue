@@ -93,9 +93,10 @@
           <thead class="bg-gray-50">
             <tr>
               <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                @click="handleSort('id')"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               >
-                #
+                # {{ getSortIndicator('id') }}
               </th>
               <th
                 @click="handleSort('updated_at')"
@@ -244,10 +245,7 @@
                 >
                   View
                 </button>
-                <button
-                  @click="openEditModal(referral)"
-                  class="text-green-600 hover:text-green-900"
-                >
+                <button @click="openEditModal(referral)" class="text-blue-600 hover:text-blue-900">
                   Edit
                 </button>
               </td>

@@ -36,7 +36,7 @@
           <div class="flex gap-3">
             <button
               @click="handleEdit"
-              class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700"
+              class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
             >
               Edit Note
             </button>

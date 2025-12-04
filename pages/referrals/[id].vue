@@ -68,7 +68,7 @@
             <button
               @click="openEditModal"
               :disabled="referral.status === 'closed'"
-              class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               :title="
                 referral.status === 'closed' ? 'Cannot edit closed referrals' : 'Edit Referral'
               "
