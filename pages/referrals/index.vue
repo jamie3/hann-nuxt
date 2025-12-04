@@ -1,6 +1,22 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-6">Referrals</h1>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-900">Referrals</h1>
+      <div class="flex gap-3">
+        <NuxtLink
+          to="/referral/self"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+        >
+          New Self Referral
+        </NuxtLink>
+        <NuxtLink
+          to="/referral/professional"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        >
+          New Professional Referral
+        </NuxtLink>
+      </div>
+    </div>
 
     <!-- Search and Filters -->
     <div v-if="!pending && !error" class="mb-6 bg-white shadow-sm rounded-lg p-4">
