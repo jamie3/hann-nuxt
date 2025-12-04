@@ -65,13 +65,13 @@
             <select
               v-model="gender"
               id="gender"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               :class="{ 'border-red-500': errors.gender }"
             >
               <option value="">Select gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Non-binary">Non-binary</option>
+              <option v-for="genderOption in GENDERS" :key="genderOption" :value="genderOption">
+                {{ genderOption }}
+              </option>
             </select>
             <p v-if="errors.gender" class="mt-1 text-sm text-red-500">
               {{ errors.gender }}
@@ -157,7 +157,7 @@
             <select
               v-model="requestedService"
               id="requestedService"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               :class="{ 'border-red-500': errors.requestedService }"
             >
               <option value="">Select a service</option>
@@ -220,7 +220,7 @@
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
-import { REQUESTED_SERVICES } from '~/server/types/requested-service';
+import { REQUESTED_SERVICES, GENDERS } from '~/types/referral-options';
 
 definePageMeta({
   layout: 'login',

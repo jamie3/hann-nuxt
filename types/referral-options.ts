@@ -1,16 +1,19 @@
 export const REQUESTED_SERVICES = [
-  'Individual Therapy',
-  'Couples Therapy',
-  'Family Therapy',
   'Child Therapy',
   'Adolescent Therapy',
-  'Group Therapy',
-  'Psychological Assessment',
-  'Cognitive Behavioral Therapy',
-  'Other',
+  'Adult Individual Therapy',
+  'Couple Therapy',
+  'Family Therapy',
+  'Assessment',
+  'Consultation',
 ] as const;
 
-export const PAYMENT_METHODS = ['Private Pay', 'Insurance', 'EAP', 'Other'] as const;
+export const PAYMENT_METHODS = [
+  'Private health insurance',
+  'Government agency',
+  'Employee assistance program',
+  '3rd party payment provider',
+] as const;
 
 export const GENDERS = ['Male', 'Female', 'Non-binary', 'Other', 'Prefer not to say'] as const;
 
