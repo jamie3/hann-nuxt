@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
-import { Kysely, PostgresDialect, Generated } from 'kysely';
+import { Kysely, PostgresDialect } from 'kysely';
+import type { Generated } from 'kysely';
 import { Pool } from 'pg';
 import { config } from 'dotenv';
 import { readFileSync } from 'fs';
@@ -57,18 +58,20 @@ async function createUser() {
     database,
   };
 
-  // Add SSL configuration for test environment
-  if (envName === 'test') {
-    const caCertPath = join(process.cwd(), 'db', 'ca-certificate-test.crt');
+  // Add SSL configuration for test and production environments
+  if (envName === 'test' || envName === 'production') {
+    const certFileName =
+      envName === 'test' ? 'ca-certificate-test.crt' : 'ca-certificate-production.crt';
+    const caCertPath = join(process.cwd(), 'db', certFileName);
     try {
       const ca = readFileSync(caCertPath, 'utf8');
       poolConfig.ssl = {
         rejectUnauthorized: true,
         ca: ca,
       };
-      console.log('✓ Using SSL with CA certificate for test environment\n');
+      console.log(`✓ Using SSL with CA certificate for ${envName} environment\n`);
     } catch (error) {
-      console.error('❌ Failed to read CA certificate:', error);
+      console.error(`❌ Failed to read CA certificate from ${caCertPath}:`, error);
       process.exit(1);
     }
   }

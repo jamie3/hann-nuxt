@@ -179,7 +179,7 @@ const handleDelete = () => {
 
 // Handle note deleted
 const handleNoteDeleted = () => {
-  // Redirect to clinical notes list after successful deletion
-  router.push('/clinical-notes');
+  // Redirect to previous page after successful deletion
+  router.back();
 };
 </script>

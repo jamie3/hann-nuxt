@@ -62,18 +62,20 @@ async function runMigrations() {
     database,
   };
 
-  // Add SSL configuration for test environment
-  if (envName === 'test') {
-    const caCertPath = join(process.cwd(), 'db', 'ca-certificate-test.crt');
+  // Add SSL configuration for test and production environments
+  if (envName === 'test' || envName === 'production') {
+    const certFileName =
+      envName === 'test' ? 'ca-certificate-test.crt' : 'ca-certificate-production.crt';
+    const caCertPath = join(process.cwd(), 'db', certFileName);
     try {
       const ca = readFileSync(caCertPath, 'utf8');
       poolConfig.ssl = {
         rejectUnauthorized: true,
         ca: ca,
       };
-      console.log('✓ Using SSL with CA certificate for test environment\n');
+      console.log(`✓ Using SSL with CA certificate for ${envName} environment\n`);
     } catch (error) {
-      console.error('❌ Failed to read CA certificate:', error);
+      console.error(`❌ Failed to read CA certificate from ${caCertPath}:`, error);
       process.exit(1);
     }
   }

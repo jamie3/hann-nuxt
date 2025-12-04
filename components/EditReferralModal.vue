@@ -56,6 +56,17 @@
             />
           </div>
 
+          <!-- Referral Date -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Referral Date *</label>
+            <input
+              v-model="formData.referred_at"
+              type="date"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
           <!-- Primary Telephone -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Primary Telephone *</label>
@@ -241,6 +252,7 @@ const formData = ref({
   first_name: '',
   last_name: '',
   date_of_birth: '',
+  referred_at: '',
   primary_telephone: '',
   secondary_telephone: '',
   email: '',
@@ -264,6 +276,9 @@ watch(
         first_name: newReferral.first_name,
         last_name: newReferral.last_name,
         date_of_birth: new Date(newReferral.date_of_birth).toISOString().split('T')[0],
+        referred_at: newReferral.referred_at
+          ? new Date(newReferral.referred_at).toISOString().split('T')[0]
+          : '',
         primary_telephone: newReferral.primary_telephone,
         secondary_telephone: newReferral.secondary_telephone || '',
         email: newReferral.email || '',

@@ -171,6 +171,10 @@ export class ReferralService {
       updateData.date_of_birth =
         typeof data.date_of_birth === 'string' ? new Date(data.date_of_birth) : data.date_of_birth;
     }
+    if (data.referred_at !== undefined) {
+      updateData.referred_at =
+        typeof data.referred_at === 'string' ? new Date(data.referred_at) : data.referred_at;
+    }
     if (data.parents_guardians !== undefined)
       updateData.parents_guardians = data.parents_guardians || null;
     if (data.primary_telephone !== undefined) updateData.primary_telephone = data.primary_telephone;

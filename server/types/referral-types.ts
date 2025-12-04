@@ -32,6 +32,7 @@ export interface NewReferral {
   first_name: string;
   last_name: string;
   date_of_birth: string | Date;
+  referred_at?: string | Date;
   gender?: string;
   parents_guardians?: string;
   primary_telephone: string;
