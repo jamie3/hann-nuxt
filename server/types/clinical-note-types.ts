@@ -4,6 +4,7 @@ export interface ClinicalNote {
   session_date: Date;
   content: string;
   author_id: string | null;
+  is_deleted: boolean;
   created_at: Date;
   updated_at: Date;
 }
@@ -19,4 +20,5 @@ export interface UpdateClinicalNote {
   session_date?: string | Date;
   content?: string;
   author_id?: string | null;
+  is_deleted?: boolean;
 }

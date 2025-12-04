@@ -33,12 +33,20 @@
         </NuxtLink>
         <div class="flex items-center justify-between">
           <h1 class="text-3xl font-bold text-gray-900">Clinical Note</h1>
-          <button
-            @click="handleEdit"
-            class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700"
-          >
-            Edit Note
-          </button>
+          <div class="flex gap-3">
+            <button
+              @click="handleEdit"
+              class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700"
+            >
+              Edit Note
+            </button>
+            <button
+              @click="handleDelete"
+              class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700"
+            >
+              Delete Note
+            </button>
+          </div>
         </div>
       </div>
 
@@ -93,6 +101,13 @@
       :clinicalNote="clinicalNote"
       @updated="handleNoteUpdated"
     />
+
+    <!-- Delete Confirmation Modal -->
+    <DeleteClinicalNoteModal
+      v-model="showDeleteModal"
+      :clinicalNoteId="id"
+      @deleted="handleNoteDeleted"
+    />
   </div>
 </template>
 
@@ -112,6 +127,7 @@ const clinicalNote = ref<ClinicalNote | null>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const showEditModal = ref(false);
+const showDeleteModal = ref(false);
 
 // Fetch clinical note
 const fetchClinicalNote = async () => {
@@ -154,5 +170,16 @@ const handleEdit = () => {
 // Handle note updated
 const handleNoteUpdated = () => {
   fetchClinicalNote();
+};
+
+// Handle delete - open modal
+const handleDelete = () => {
+  showDeleteModal.value = true;
+};
+
+// Handle note deleted
+const handleNoteDeleted = () => {
+  // Redirect to clinical notes list after successful deletion
+  router.push('/clinical-notes');
 };
 </script>
