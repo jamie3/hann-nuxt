@@ -201,4 +201,17 @@ export class ReferralService {
 
     return this.mapToReferral(updatedRow);
   }
+
+  async deleteReferral(id: string): Promise<void> {
+    const row = await this.referralRepository.findByIdRow(id);
+
+    if (!row) {
+      throw new Error(`Referral with id ${id} not found`);
+    }
+
+    // Soft delete by setting is_deleted to true
+    await this.referralRepository.update(id, {
+      is_deleted: true,
+    });
+  }
 }

@@ -76,6 +76,14 @@
               Edit Referral
             </button>
 
+            <!-- Delete Button -->
+            <button
+              @click="openDeleteModal"
+              class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700"
+            >
+              Delete Referral
+            </button>
+
             <!-- Open Button (visible when status is 'new' or 'closed') -->
             <button
               v-if="referral.status === 'new' || referral.status === 'closed'"
@@ -403,6 +411,13 @@
       @updated="handleReferralUpdated"
     />
 
+    <!-- Delete Modal -->
+    <DeleteReferralModal
+      v-model="showDeleteModal"
+      :referralId="id"
+      @deleted="handleReferralDeleted"
+    />
+
     <!-- New Clinical Note Modal -->
     <NewClinicalNoteModal
       v-model="showNewNoteModal"
@@ -447,6 +462,9 @@ const isUpdating = ref(false);
 // Edit modal state
 const showEditModal = ref(false);
 
+// Delete modal state
+const showDeleteModal = ref(false);
+
 // New note modal state
 const showNewNoteModal = ref(false);
 
@@ -455,9 +473,20 @@ const openEditModal = () => {
   showEditModal.value = true;
 };
 
+// Open delete modal
+const openDeleteModal = () => {
+  showDeleteModal.value = true;
+};
+
 // Open new note modal
 const openNewNoteModal = () => {
   showNewNoteModal.value = true;
+};
+
+// Handle referral deleted
+const handleReferralDeleted = () => {
+  // Redirect to referrals list after successful deletion
+  navigateTo('/referrals');
 };
 
 // Handle referral updated
