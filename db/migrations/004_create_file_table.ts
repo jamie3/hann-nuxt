@@ -4,15 +4,21 @@ import { createUpdatedAtTrigger, dropUpdatedAtTrigger } from '../helpers/trigger
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('file')
-    .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`uuid_generate_v4()`))
-    .addColumn('referral_id', 'uuid', (col) =>
+    .addColumn('id', 'serial', (col) => col.primaryKey())
+    .addColumn('public_id', 'uuid', (col) =>
+      col
+        .notNull()
+        .unique()
+        .defaultTo(sql`uuid_generate_v4()`)
+    )
+    .addColumn('referral_id', 'integer', (col) =>
       col.notNull().references('referral.id').onDelete('cascade')
     )
     .addColumn('file_name', 'varchar(255)', (col) => col.notNull())
     .addColumn('file_size', 'bigint', (col) => col.notNull())
     .addColumn('mime_type', 'varchar(100)', (col) => col.notNull())
     .addColumn('file_data', 'bytea', (col) => col.notNull())
-    .addColumn('uploaded_by', 'uuid', (col) => col.references('user.id').onDelete('set null'))
+    .addColumn('uploaded_by', 'integer', (col) => col.references('user.id').onDelete('set null'))
     .addColumn('is_deleted', 'boolean', (col) => col.defaultTo(false).notNull())
     .addColumn('created_at', 'timestamptz', (col) =>
       col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()

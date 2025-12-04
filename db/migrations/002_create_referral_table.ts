@@ -4,7 +4,13 @@ import { createUpdatedAtTrigger, dropUpdatedAtTrigger } from '../helpers/trigger
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('referral')
-    .addColumn('id', 'uuid', (col) => col.primaryKey().defaultTo(sql`uuid_generate_v4()`))
+    .addColumn('id', 'serial', (col) => col.primaryKey())
+    .addColumn('public_id', 'uuid', (col) =>
+      col
+        .notNull()
+        .unique()
+        .defaultTo(sql`uuid_generate_v4()`)
+    )
     .addColumn('first_name', 'varchar(255)', (col) => col.notNull())
     .addColumn('last_name', 'varchar(255)', (col) => col.notNull())
     .addColumn('date_of_birth', 'date', (col) => col.notNull())
