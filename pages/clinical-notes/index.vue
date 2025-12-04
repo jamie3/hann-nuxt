@@ -5,12 +5,12 @@
         <h1 class="text-3xl font-bold text-gray-900">Clinical Notes</h1>
         <p class="mt-2 text-sm text-gray-600">View and manage all clinical notes</p>
       </div>
-      <NuxtLink
-        to="/clinical-notes/new"
+      <button
+        @click="showNewModal = true"
         class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
       >
         New Clinical Note
-      </NuxtLink>
+      </button>
     </div>
 
     <!-- Loading State -->
@@ -107,6 +107,9 @@
       <h3 class="mt-2 text-sm font-medium text-gray-900">No clinical notes</h3>
       <p class="mt-1 text-sm text-gray-500">Get started by creating a new clinical note.</p>
     </div>
+
+    <!-- New Clinical Note Modal -->
+    <NewClinicalNoteModal v-model="showNewModal" @created="handleNoteCreated" />
   </div>
 </template>
 
@@ -120,8 +123,16 @@ definePageMeta({
 // Use the clinical notes composable
 const { clinicalNotes, loading, error, getClinicalNotes } = useClinicalNotes();
 
+// Modal state
+const showNewModal = ref(false);
+
 // Fetch clinical notes immediately
 await getClinicalNotes();
+
+// Handle note created
+const handleNoteCreated = () => {
+  getClinicalNotes();
+};
 
 // Set page meta
 useHead({

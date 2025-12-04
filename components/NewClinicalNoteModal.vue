@@ -6,22 +6,39 @@
   >
     <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
       <!-- Modal Header -->
-      <div class="flex justify-between items-center pb-3 border-b">
+      <div class="pb-3 border-b">
         <h3 class="text-xl font-semibold text-gray-900">New Clinical Note</h3>
-        <button @click="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            ></path>
-          </svg>
-        </button>
+      </div>
+
+      <!-- Loading Referrals -->
+      <div v-if="loadingReferrals" class="text-center py-8">
+        <div
+          class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
+        ></div>
+        <p class="mt-4 text-gray-600">Loading referrals...</p>
       </div>
 
       <!-- Modal Body -->
-      <form @submit.prevent="handleSubmit" class="mt-4">
+      <form v-else @submit.prevent="handleSubmit" class="mt-4">
+        <!-- Referral Selection -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Referral <span class="text-red-500">*</span>
+          </label>
+          <select
+            v-model="formData.referralId"
+            required
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select a referral</option>
+            <option v-for="referral in referrals" :key="referral.id" :value="referral.id">
+              {{ referral.first_name }} {{ referral.last_name }} (#{{
+                referral.id.substring(0, 8)
+              }})
+            </option>
+          </select>
+        </div>
+
         <!-- Session Date -->
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -79,7 +96,7 @@
 <script setup lang="ts">
 interface Props {
   modelValue: boolean;
-  referralId: string;
+  referralId?: string;
 }
 
 const props = defineProps<Props>();
@@ -92,24 +109,49 @@ const { createClinicalNote } = useClinicalNotes();
 
 const isSubmitting = ref(false);
 const errorMessage = ref('');
+const loadingReferrals = ref(false);
+const referrals = ref<any[]>([]);
 
 // Form data
-const formData = ref({
+const formData = ref<{
+  referralId: string;
+  sessionDate: string;
+  content: string;
+}>({
+  referralId: (props.referralId ?? '') as string,
   sessionDate: new Date().toISOString().split('T')[0], // Today's date
   content: '',
 });
 
-// Watch for modal opening to reset form
+// Load referrals when modal opens
 watch(
   () => props.modelValue,
-  (isOpen) => {
+  async (isOpen) => {
     if (isOpen) {
       // Reset form when modal opens
       formData.value = {
+        referralId: (props.referralId ?? '') as string,
         sessionDate: new Date().toISOString().split('T')[0],
         content: '',
       };
       errorMessage.value = '';
+
+      // Load referrals if not already loaded
+      if (referrals.value.length === 0) {
+        loadingReferrals.value = true;
+        try {
+          const { data, error } = await useFetch('/api/referrals');
+          if (error.value) {
+            errorMessage.value = 'Failed to load referrals';
+          } else if (data.value) {
+            referrals.value = (data.value as any).referrals || [];
+          }
+        } catch (err: any) {
+          errorMessage.value = err.message || 'Failed to load referrals';
+        } finally {
+          loadingReferrals.value = false;
+        }
+      }
     }
   }
 );
@@ -120,12 +162,19 @@ const closeModal = () => {
 };
 
 const handleSubmit = async () => {
+  const referralId: string = formData.value.referralId || '';
+
+  if (!referralId) {
+    errorMessage.value = 'Please select a referral';
+    return;
+  }
+
   isSubmitting.value = true;
   errorMessage.value = '';
 
   try {
     await createClinicalNote({
-      referralId: props.referralId,
+      referralId,
       sessionDate: formData.value.sessionDate,
       content: formData.value.content,
     });
