@@ -1,8 +1,24 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">Files</h1>
-      <p class="mt-2 text-sm text-gray-600">View and manage all uploaded files</p>
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Files</h1>
+        <p class="mt-2 text-sm text-gray-600">View and manage all uploaded files</p>
+      </div>
+      <button
+        @click="fetchFiles()"
+        class="px-4 py-2 border-2 border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors font-medium"
+        title="Refresh"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          ></path>
+        </svg>
+      </button>
     </div>
 
     <!-- Loading State -->
