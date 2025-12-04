@@ -24,6 +24,29 @@ export class ClinicalNoteRepository extends BaseRepository<DB, 'clinical_note'> 
       .execute();
   }
 
+  async findAllWithReferralInfo(): Promise<
+    Array<ClinicalNoteRow & { first_name: string; last_name: string }>
+  > {
+    return await this.db
+      .selectFrom('clinical_note')
+      .innerJoin('referral', 'referral.id', 'clinical_note.referral_id')
+      .select([
+        'clinical_note.id',
+        'clinical_note.referral_id',
+        'clinical_note.session_date',
+        'clinical_note.content',
+        'clinical_note.author_id',
+        'clinical_note.is_deleted',
+        'clinical_note.created_at',
+        'clinical_note.updated_at',
+        'referral.first_name',
+        'referral.last_name',
+      ])
+      .where('clinical_note.is_deleted', '=', false)
+      .orderBy('clinical_note.session_date', 'desc')
+      .execute();
+  }
+
   async findByIdRow(id: string): Promise<ClinicalNoteRow | undefined> {
     return await this.findById(id);
   }

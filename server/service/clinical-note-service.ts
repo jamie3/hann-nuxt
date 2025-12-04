@@ -25,8 +25,27 @@ export class ClinicalNoteService {
       session_date: new Date(row.session_date),
       content: row.content,
       author_id: row.author_id,
+      is_deleted: row.is_deleted,
       created_at: new Date(row.created_at),
       updated_at: new Date(row.updated_at),
+    };
+  }
+
+  // Map database row with referral info to domain model
+  private mapToClinicalNoteWithReferral(
+    row: ClinicalNoteRow & { first_name: string; last_name: string }
+  ): ClinicalNote {
+    return {
+      id: row.id,
+      referral_id: row.referral_id,
+      session_date: new Date(row.session_date),
+      content: row.content,
+      author_id: row.author_id,
+      is_deleted: row.is_deleted,
+      created_at: new Date(row.created_at),
+      updated_at: new Date(row.updated_at),
+      first_name: row.first_name,
+      last_name: row.last_name,
     };
   }
 
@@ -68,8 +87,8 @@ export class ClinicalNoteService {
   }
 
   async getAllClinicalNotes(): Promise<ClinicalNote[]> {
-    const rows = await this.clinicalNoteRepository.findAllRows();
-    return rows.map((row) => this.mapToClinicalNote(row));
+    const rows = await this.clinicalNoteRepository.findAllWithReferralInfo();
+    return rows.map((row) => this.mapToClinicalNoteWithReferral(row));
   }
 
   async getClinicalNoteById(id: string): Promise<ClinicalNote | null> {

@@ -48,16 +48,22 @@
         <thead class="bg-gray-50">
           <tr>
             <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              @click="handleSort('session_date')"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
-              Session Date
+              Session Date {{ getSortIndicator('session_date') }}
             </th>
             <th
               scope="col"
               class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Referral ID
+              First Name
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Last Name
             </th>
             <th
               scope="col"
@@ -66,10 +72,10 @@
               Content Preview
             </th>
             <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              @click="handleSort('created_at')"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
-              Created
+              Created {{ getSortIndicator('created_at') }}
             </th>
             <th scope="col" class="relative px-6 py-3">
               <span class="sr-only">Actions</span>
@@ -77,12 +83,15 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="note in clinicalNotes" :key="note.id" class="hover:bg-gray-50 cursor-pointer">
+          <tr v-for="note in paginatedNotes" :key="note.id" class="hover:bg-gray-50 cursor-pointer">
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
               {{ formatDate(note.session_date) }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              #{{ note.referral_id.substring(0, 8) }}
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ note.first_name || 'N/A' }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ note.last_name || 'N/A' }}
             </td>
             <td class="px-6 py-4 text-sm text-gray-900">
               <div class="max-w-xs truncate">
@@ -103,6 +112,84 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Pagination -->
+      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
+        <div class="flex-1 flex justify-between sm:hidden">
+          <button
+            @click="previousPage"
+            :disabled="currentPage === 1"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Showing
+              <span class="font-medium">{{ startIndex + 1 }}</span>
+              to
+              <span class="font-medium">{{ Math.min(endIndex, clinicalNotes.length) }}</span>
+              of
+              <span class="font-medium">{{ clinicalNotes.length }}</span>
+              results
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+              <button
+                @click="previousPage"
+                :disabled="currentPage === 1"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span class="sr-only">Previous</span>
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <button
+                v-for="page in displayedPages"
+                :key="page"
+                @click="goToPage(page)"
+                :class="[
+                  page === currentPage
+                    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
+                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                ]"
+              >
+                {{ page }}
+              </button>
+              <button
+                @click="nextPage"
+                :disabled="currentPage === totalPages"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span class="sr-only">Next</span>
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Empty State -->
@@ -142,12 +229,110 @@ const { clinicalNotes, loading, error, getClinicalNotes } = useClinicalNotes();
 // Modal state
 const showNewModal = ref(false);
 
+// Sorting state
+const sortBy = ref<'session_date' | 'created_at'>('session_date');
+const sortOrder = ref<'asc' | 'desc'>('desc');
+
+// Pagination state
+const currentPage = ref(1);
+const itemsPerPage = 25;
+
+// Sorted clinical notes
+const sortedNotes = computed(() => {
+  const notes = [...clinicalNotes.value];
+
+  notes.sort((a, b) => {
+    let aValue: any;
+    let bValue: any;
+
+    if (sortBy.value === 'session_date') {
+      aValue = new Date(a.session_date).getTime();
+      bValue = new Date(b.session_date).getTime();
+    } else if (sortBy.value === 'created_at') {
+      aValue = new Date(a.created_at).getTime();
+      bValue = new Date(b.created_at).getTime();
+    }
+
+    if (sortOrder.value === 'asc') {
+      return aValue - bValue;
+    } else {
+      return bValue - aValue;
+    }
+  });
+
+  return notes;
+});
+
+// Computed properties for pagination
+const totalPages = computed(() => Math.ceil(sortedNotes.value.length / itemsPerPage));
+
+const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage);
+const endIndex = computed(() => startIndex.value + itemsPerPage);
+
+const paginatedNotes = computed(() => {
+  return sortedNotes.value.slice(startIndex.value, endIndex.value);
+});
+
+// Sorting methods
+const handleSort = (column: 'session_date' | 'created_at') => {
+  if (sortBy.value === column) {
+    // Toggle sort order if same column
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    // Set new column and default to descending
+    sortBy.value = column;
+    sortOrder.value = 'desc';
+  }
+};
+
+const getSortIndicator = (column: string) => {
+  if (sortBy.value !== column) return '';
+  return sortOrder.value === 'asc' ? '↑' : '↓';
+};
+
+// Display up to 5 page numbers
+const displayedPages = computed(() => {
+  const pages = [];
+  const maxPagesToShow = 5;
+  let startPage = Math.max(1, currentPage.value - Math.floor(maxPagesToShow / 2));
+  let endPage = Math.min(totalPages.value, startPage + maxPagesToShow - 1);
+
+  // Adjust start if we're near the end
+  if (endPage - startPage < maxPagesToShow - 1) {
+    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    pages.push(i);
+  }
+
+  return pages;
+});
+
+// Pagination methods
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const previousPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const goToPage = (page: number) => {
+  currentPage.value = page;
+};
+
 // Fetch clinical notes immediately
 await getClinicalNotes();
 
-// Handle note created
+// Handle note created - refresh and reset to first page
 const handleNoteCreated = () => {
   getClinicalNotes();
+  currentPage.value = 1;
 };
 
 // Set page meta
