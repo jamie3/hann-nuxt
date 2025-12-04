@@ -16,6 +16,7 @@ export default defineNuxtConfig({
       user: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || '',
       name: process.env.DATABASE_NAME || 'hann',
+      caCertificate: process.env.DATABASE_CA_CERTIFICATE || '',
     },
     public: {
       googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
