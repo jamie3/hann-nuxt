@@ -28,7 +28,8 @@
           <select
             v-model="formData.referralId"
             required
-            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            :disabled="!!referralId"
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
             <option value="">Select a referral</option>
             <option v-for="referral in referrals" :key="referral.id" :value="referral.id">
@@ -118,7 +119,7 @@ const formData = ref<{
   sessionDate: string;
   content: string;
 }>({
-  referralId: (props.referralId ?? '') as string,
+  referralId: props.referralId || '',
   sessionDate: new Date().toISOString().split('T')[0], // Today's date
   content: '',
 });
@@ -130,7 +131,7 @@ watch(
     if (isOpen) {
       // Reset form when modal opens
       formData.value = {
-        referralId: (props.referralId ?? '') as string,
+        referralId: props.referralId || '',
         sessionDate: new Date().toISOString().split('T')[0],
         content: '',
       };
