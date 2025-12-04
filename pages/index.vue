@@ -214,6 +214,9 @@ definePageMeta({
   layout: 'default',
 });
 
+// Redirect to referrals page
+navigateTo('/referrals', { replace: true });
+
 // Set page meta
 useHead({
   title: 'Hann Psychological Services - Full-stack Application',
