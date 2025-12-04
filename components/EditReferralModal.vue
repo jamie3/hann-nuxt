@@ -56,6 +56,20 @@
             />
           </div>
 
+          <!-- Gender -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+            <select
+              v-model="formData.gender"
+              class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select gender</option>
+              <option v-for="gender in GENDERS" :key="gender" :value="gender">
+                {{ gender }}
+              </option>
+            </select>
+          </div>
+
           <!-- Referral Date -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Referral Date *</label>
@@ -108,37 +122,23 @@
             />
           </div>
 
-          <!-- Referral Type -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Referral Type *</label>
-            <select
-              v-model="formData.referral_type"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>Select type</option>
-              <option value="self">Self</option>
-              <option value="professional">Professional</option>
-            </select>
-          </div>
-
           <!-- Requested Service -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Requested Service *</label>
             <select
               v-model="formData.requested_service"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="" disabled>Select a service</option>
+              <option value="">Select a service</option>
               <option v-for="service in REQUESTED_SERVICES" :key="service" :value="service">
                 {{ service }}
               </option>
             </select>
           </div>
 
-          <!-- Referrer Name -->
-          <div>
+          <!-- Referrer Name (Professional only) -->
+          <div v-if="formData.referral_type === 'professional'">
             <label class="block text-sm font-medium text-gray-700 mb-1">Referrer Name</label>
             <input
               v-model="formData.referrer_name"
@@ -147,8 +147,8 @@
             />
           </div>
 
-          <!-- Referrer Relationship -->
-          <div>
+          <!-- Referrer Relationship (Professional only) -->
+          <div v-if="formData.referral_type === 'professional'">
             <label class="block text-sm font-medium text-gray-700 mb-1"
               >Referrer Relationship</label
             >
@@ -159,8 +159,8 @@
             />
           </div>
 
-          <!-- Referrer Email -->
-          <div>
+          <!-- Referrer Email (Professional only) -->
+          <div v-if="formData.referral_type === 'professional'">
             <label class="block text-sm font-medium text-gray-700 mb-1">Referrer Email</label>
             <input
               v-model="formData.referrer_email"
@@ -172,11 +172,15 @@
           <!-- Method of Payment -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Method of Payment</label>
-            <input
+            <select
               v-model="formData.method_of_payment"
-              type="text"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+              class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select payment method</option>
+              <option v-for="method in PAYMENT_METHODS" :key="method" :value="method">
+                {{ method }}
+              </option>
+            </select>
           </div>
 
           <!-- Mailing Address (full width) -->
@@ -229,7 +233,7 @@
 
 <script setup lang="ts">
 import type { Referral } from '~/server/types/referral-types';
-import { REQUESTED_SERVICES } from '~/server/types/requested-service';
+import { REQUESTED_SERVICES, PAYMENT_METHODS, GENDERS } from '~/types/referral-options';
 
 interface Props {
   modelValue: boolean;
@@ -252,6 +256,7 @@ const formData = ref({
   first_name: '',
   last_name: '',
   date_of_birth: '',
+  gender: '',
   referred_at: '',
   primary_telephone: '',
   secondary_telephone: '',
@@ -276,6 +281,7 @@ watch(
         first_name: newReferral.first_name,
         last_name: newReferral.last_name,
         date_of_birth: new Date(newReferral.date_of_birth).toISOString().split('T')[0],
+        gender: newReferral.gender || '',
         referred_at: newReferral.referred_at
           ? new Date(newReferral.referred_at).toISOString().split('T')[0]
           : '',
