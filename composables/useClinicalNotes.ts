@@ -15,14 +15,10 @@ export const useClinicalNotes = () => {
     error.value = null;
 
     try {
-      const { data, error: fetchError } =
-        await useFetch<ClinicalNotesResponse>('/api/clinical-notes');
+      const response = await $fetch<ClinicalNotesResponse>('/api/clinical-notes');
 
-      if (fetchError.value) {
-        error.value = fetchError.value.message || 'Failed to load clinical notes';
-        clinicalNotes.value = [];
-      } else if (data.value) {
-        clinicalNotes.value = data.value.clinicalNotes;
+      if (response && response.clinicalNotes) {
+        clinicalNotes.value = response.clinicalNotes;
       }
     } catch (err: any) {
       error.value = err.message || 'An error occurred';
