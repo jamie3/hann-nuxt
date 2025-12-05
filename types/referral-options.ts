@@ -15,7 +15,13 @@ export const PAYMENT_METHODS = [
   '3rd party payment provider',
 ] as const;
 
-export const GENDERS = ['Male', 'Female', 'Non-binary', 'Other', 'Prefer not to say'] as const;
+export const GENDERS = [
+  'Male',
+  'Female',
+  'Gender Diverse or Non-Binary',
+  'Other',
+  'Prefer not to say',
+] as const;
 
 export type RequestedService = (typeof REQUESTED_SERVICES)[number];
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
