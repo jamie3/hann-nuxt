@@ -73,10 +73,12 @@
             v-model="statusFilter"
             class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
+            <option value="active">Active (No Archived)</option>
             <option value="all">All Statuses</option>
             <option value="new">New</option>
             <option value="opened">Opened</option>
             <option value="closed">Closed</option>
+            <option value="archived">Archived</option>
           </select>
         </div>
       </div>
@@ -369,8 +371,8 @@ const searchQuery = ref((route.query.search as string) || '');
 const typeFilter = ref<'all' | 'professional' | 'self'>(
   (route.query.type as 'all' | 'professional' | 'self') || 'all'
 );
-const statusFilter = ref<'all' | 'new' | 'opened' | 'closed'>(
-  (route.query.status as 'all' | 'new' | 'opened' | 'closed') || 'all'
+const statusFilter = ref<'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived'>(
+  (route.query.status as 'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived') || 'active'
 );
 
 // Pagination state - initialize from URL
@@ -417,7 +419,11 @@ const filteredReferrals = computed(() => {
   }
 
   // Apply status filter
-  if (statusFilter.value !== 'all') {
+  if (statusFilter.value === 'active') {
+    // Exclude archived referrals (default behavior)
+    referrals = referrals.filter((referral) => referral.status !== 'archived');
+  } else if (statusFilter.value !== 'all') {
+    // Filter to specific status
     referrals = referrals.filter((referral) => referral.status === statusFilter.value);
   }
 
@@ -460,7 +466,7 @@ const updateURL = () => {
   // Add non-default values to query
   if (searchQuery.value) query.search = searchQuery.value;
   if (typeFilter.value !== 'all') query.type = typeFilter.value;
-  if (statusFilter.value !== 'all') query.status = statusFilter.value;
+  if (statusFilter.value !== 'active') query.status = statusFilter.value;
   if (currentPage.value !== 1) query.page = currentPage.value.toString();
   if (sortBy.value !== 'updated_at') query.sortBy = sortBy.value;
   if (sortOrder.value !== 'desc') query.sortOrder = sortOrder.value;
