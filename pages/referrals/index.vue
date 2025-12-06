@@ -85,7 +85,7 @@
 
       <!-- Results Count -->
       <div class="mt-3 text-sm text-gray-600">
-        Showing {{ filteredReferrals.length }} of {{ data?.referrals.length || 0 }} referrals
+        Showing {{ totalRecords }} referral{{ totalRecords !== 1 ? 's' : '' }}
       </div>
     </div>
 
@@ -175,11 +175,7 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr
-              v-for="(referral, index) in paginatedReferrals"
-              :key="referral.id"
-              class="hover:bg-gray-50"
-            >
+            <tr v-for="(referral, index) in referrals" :key="referral.id" class="hover:bg-gray-50">
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ startIndex + index + 1 }}
               </td>
@@ -256,7 +252,7 @@
 
       <!-- Pagination -->
       <div
-        v-if="filteredReferrals.length > 0"
+        v-if="referrals.length > 0"
         class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200"
       >
         <div class="flex-1 flex justify-between sm:hidden">
@@ -281,9 +277,9 @@
               Showing
               <span class="font-medium">{{ startIndex + 1 }}</span>
               to
-              <span class="font-medium">{{ Math.min(endIndex, filteredReferrals.length) }}</span>
+              <span class="font-medium">{{ endIndex }}</span>
               of
-              <span class="font-medium">{{ filteredReferrals.length }}</span>
+              <span class="font-medium">{{ totalRecords }}</span>
               results
             </p>
           </div>
@@ -356,17 +352,6 @@ const router = useRouter();
 // Initialize state from URL query params
 const sortBy = ref((route.query.sortBy as string) || 'updated_at');
 const sortOrder = ref<'asc' | 'desc'>((route.query.sortOrder as 'asc' | 'desc') || 'desc');
-
-// Fetch referrals with sorting
-const { data, error, pending, refresh } = await useFetch('/api/referrals', {
-  query: {
-    sortBy,
-    sortOrder,
-  },
-  watch: [sortBy, sortOrder],
-});
-
-// Filter and search state - initialize from URL query params
 const searchQuery = ref((route.query.search as string) || '');
 const typeFilter = ref<'all' | 'professional' | 'self'>(
   (route.query.type as 'all' | 'professional' | 'self') || 'all'
@@ -374,10 +359,22 @@ const typeFilter = ref<'all' | 'professional' | 'self'>(
 const statusFilter = ref<'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived'>(
   (route.query.status as 'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived') || 'active'
 );
-
-// Pagination state - initialize from URL
 const currentPage = ref(parseInt((route.query.page as string) || '1'));
 const itemsPerPage = 25;
+
+// Fetch referrals with all filters
+const { data, error, pending, refresh } = await useFetch('/api/referrals', {
+  query: computed(() => ({
+    page: currentPage.value,
+    limit: itemsPerPage,
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
+    search: searchQuery.value,
+    type: typeFilter.value,
+    status: statusFilter.value,
+  })),
+  watch: [currentPage, sortBy, sortOrder, searchQuery, typeFilter, statusFilter],
+});
 
 // Handle column sort
 const handleSort = (column: string) => {
@@ -397,48 +394,13 @@ const getSortIndicator = (column: string) => {
   return sortOrder.value === 'asc' ? '↑' : '↓';
 };
 
-// Filtered referrals (sorting is handled server-side)
-const filteredReferrals = computed(() => {
-  if (!data.value?.referrals) return [];
-
-  let referrals = [...data.value.referrals];
-
-  // Apply search filter
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase().trim();
-    referrals = referrals.filter((referral) => {
-      const fullName = `${referral.first_name} ${referral.last_name}`.toLowerCase();
-      const email = referral.email?.toLowerCase() || '';
-      return fullName.includes(query) || email.includes(query);
-    });
-  }
-
-  // Apply type filter
-  if (typeFilter.value !== 'all') {
-    referrals = referrals.filter((referral) => referral.referral_type === typeFilter.value);
-  }
-
-  // Apply status filter
-  if (statusFilter.value === 'active') {
-    // Exclude archived referrals (default behavior)
-    referrals = referrals.filter((referral) => referral.status !== 'archived');
-  } else if (statusFilter.value !== 'all') {
-    // Filter to specific status
-    referrals = referrals.filter((referral) => referral.status === statusFilter.value);
-  }
-
-  return referrals;
-});
-
-// Computed properties for pagination
-const totalPages = computed(() => Math.ceil(filteredReferrals.value.length / itemsPerPage));
+// Server-provided data
+const referrals = computed(() => data.value?.referrals || []);
+const totalRecords = computed(() => data.value?.total || 0);
+const totalPages = computed(() => Math.ceil(totalRecords.value / itemsPerPage));
 
 const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage);
-const endIndex = computed(() => startIndex.value + itemsPerPage);
-
-const paginatedReferrals = computed(() => {
-  return filteredReferrals.value.slice(startIndex.value, endIndex.value);
-});
+const endIndex = computed(() => Math.min(startIndex.value + itemsPerPage, totalRecords.value));
 
 // Display up to 5 page numbers
 const displayedPages = computed(() => {
@@ -495,15 +457,9 @@ const goToPage = (page: number) => {
   updateURL();
 };
 
-// Reset to page 1 and update URL when filters change
+// Reset to page 1 when filters change (URL update handled by useFetch)
 watch([searchQuery, typeFilter, statusFilter], () => {
   currentPage.value = 1;
-  updateURL();
-});
-
-// Update URL when sort changes
-watch([sortBy, sortOrder], () => {
-  updateURL();
 });
 
 // Set page meta

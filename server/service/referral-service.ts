@@ -133,11 +133,32 @@ export class ReferralService {
   }
 
   async getAllReferrals(
+    page: number = 1,
+    limit: number = 25,
     sortBy: string = 'updated_at',
-    sortOrder: 'asc' | 'desc' = 'desc'
-  ): Promise<Referral[]> {
-    const rows = await this.referralRepository.findAllRows(sortBy, sortOrder);
-    return rows.map((row) => this.mapToReferral(row));
+    sortOrder: 'asc' | 'desc' = 'desc',
+    search: string = '',
+    type: string = '',
+    status: string = ''
+  ): Promise<{ referrals: Referral[]; total: number; page: number; limit: number }> {
+    const offset = (page - 1) * limit;
+    const rows = await this.referralRepository.findAllRows(
+      limit,
+      offset,
+      sortBy,
+      sortOrder,
+      search,
+      type,
+      status
+    );
+    const total = await this.referralRepository.count(search, type, status);
+
+    return {
+      referrals: rows.map((row) => this.mapToReferral(row)),
+      total,
+      page,
+      limit,
+    };
   }
 
   async getReferralById(id: string): Promise<Referral | null> {
