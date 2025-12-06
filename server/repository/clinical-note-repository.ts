@@ -30,10 +30,18 @@ export class ClinicalNoteRepository extends BaseRepository<
       .execute();
   }
 
-  async findAllWithReferralInfo(): Promise<
-    Array<ClinicalNoteRow & { first_name: string; last_name: string }>
-  > {
-    return await this.db
+  async findAllWithReferralInfo(
+    limit: number = 25,
+    offset: number = 0,
+    sortBy: string = 'session_date',
+    sortOrder: 'asc' | 'desc' = 'desc',
+    search: string = ''
+  ): Promise<Array<ClinicalNoteRow & { first_name: string; last_name: string }>> {
+    // Map sort column to full column name
+    const sortColumn =
+      sortBy === 'created_at' ? 'clinical_note.created_at' : 'clinical_note.session_date';
+
+    let query = this.db
       .selectFrom('clinical_note')
       .innerJoin('referral', 'referral.id', 'clinical_note.referral_id')
       .select([
@@ -48,9 +56,45 @@ export class ClinicalNoteRepository extends BaseRepository<
         'referral.first_name',
         'referral.last_name',
       ])
-      .where('clinical_note.is_deleted', '=', false)
-      .orderBy('clinical_note.session_date', 'desc')
-      .execute();
+      .where('clinical_note.is_deleted', '=', false);
+
+    // Add search filter if provided
+    if (search.trim()) {
+      const searchTerm = `%${search.trim()}%`;
+      query = query.where((eb) =>
+        eb.or([
+          eb('clinical_note.content', 'ilike', searchTerm),
+          eb('referral.first_name', 'ilike', searchTerm),
+          eb('referral.last_name', 'ilike', searchTerm),
+        ])
+      );
+    }
+
+    return await query.orderBy(sortColumn, sortOrder).limit(limit).offset(offset).execute();
+  }
+
+  async count(search: string = ''): Promise<number> {
+    let query = this.db
+      .selectFrom('clinical_note')
+      .innerJoin('referral', 'referral.id', 'clinical_note.referral_id')
+      .select((eb) => eb.fn.count<number>('clinical_note.id').as('count'))
+      .where('clinical_note.is_deleted', '=', false);
+
+    // Add search filter if provided
+    if (search.trim()) {
+      const searchTerm = `%${search.trim()}%`;
+      query = query.where((eb) =>
+        eb.or([
+          eb('clinical_note.content', 'ilike', searchTerm),
+          eb('referral.first_name', 'ilike', searchTerm),
+          eb('referral.last_name', 'ilike', searchTerm),
+        ])
+      );
+    }
+
+    const result = await query.executeTakeFirst();
+
+    return result?.count ? Number(result.count) : 0;
   }
 
   async findByIdRow(id: string): Promise<ClinicalNoteRow | undefined> {

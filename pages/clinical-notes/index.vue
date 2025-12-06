@@ -29,6 +29,27 @@
       </div>
     </div>
 
+    <!-- Search Bar -->
+    <div v-if="!loading && !error" class="mb-6 bg-white shadow-sm rounded-lg p-4">
+      <div class="grid grid-cols-1 gap-4">
+        <div>
+          <label for="search" class="block text-sm font-medium text-gray-700 mb-1"> Search </label>
+          <input
+            id="search"
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search by content, first name, or last name..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+
+      <!-- Results Count -->
+      <div class="mt-3 text-sm text-gray-600">
+        Showing {{ endIndex - startIndex }} of {{ totalRecords }} clinical notes
+      </div>
+    </div>
+
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-8">
       <div
@@ -83,7 +104,7 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="note in paginatedNotes" :key="note.id" class="hover:bg-gray-50 cursor-pointer">
+          <tr v-for="note in clinicalNotes" :key="note.id" class="hover:bg-gray-50 cursor-pointer">
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
               {{ formatDate(note.session_date) }}
             </td>
@@ -137,9 +158,9 @@
               Showing
               <span class="font-medium">{{ startIndex + 1 }}</span>
               to
-              <span class="font-medium">{{ Math.min(endIndex, clinicalNotes.length) }}</span>
+              <span class="font-medium">{{ endIndex }}</span>
               of
-              <span class="font-medium">{{ clinicalNotes.length }}</span>
+              <span class="font-medium">{{ totalRecords }}</span>
               results
             </p>
           </div>
@@ -224,7 +245,15 @@ definePageMeta({
 });
 
 // Use the clinical notes composable
-const { clinicalNotes, loading, error, getClinicalNotes } = useClinicalNotes();
+const {
+  clinicalNotes,
+  loading,
+  error,
+  total,
+  currentPage: composablePage,
+  limit: composableLimit,
+  getClinicalNotes,
+} = useClinicalNotes();
 
 // Modal state
 const showNewModal = ref(false);
@@ -233,44 +262,45 @@ const showNewModal = ref(false);
 const sortBy = ref<'session_date' | 'created_at'>('session_date');
 const sortOrder = ref<'asc' | 'desc'>('desc');
 
-// Pagination state
-const currentPage = ref(1);
+// Search state
+const searchQuery = ref('');
+const searchTimeout = ref<NodeJS.Timeout | null>(null);
+
+// Pagination state (local)
+const localPage = ref(1);
 const itemsPerPage = 25;
 
-// Sorted clinical notes
-const sortedNotes = computed(() => {
-  const notes = [...clinicalNotes.value];
-
-  notes.sort((a, b) => {
-    let aValue: any;
-    let bValue: any;
-
-    if (sortBy.value === 'session_date') {
-      aValue = new Date(a.session_date).getTime();
-      bValue = new Date(b.session_date).getTime();
-    } else if (sortBy.value === 'created_at') {
-      aValue = new Date(a.created_at).getTime();
-      bValue = new Date(b.created_at).getTime();
-    }
-
-    if (sortOrder.value === 'asc') {
-      return aValue - bValue;
-    } else {
-      return bValue - aValue;
-    }
-  });
-
-  return notes;
-});
+// Use server-provided values when available
+const currentPage = computed(() => composablePage.value || localPage.value);
+const totalRecords = computed(() => total.value);
 
 // Computed properties for pagination
-const totalPages = computed(() => Math.ceil(sortedNotes.value.length / itemsPerPage));
+const totalPages = computed(() => Math.ceil(totalRecords.value / itemsPerPage));
 
 const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage);
-const endIndex = computed(() => startIndex.value + itemsPerPage);
+const endIndex = computed(() => Math.min(startIndex.value + itemsPerPage, totalRecords.value));
 
-const paginatedNotes = computed(() => {
-  return sortedNotes.value.slice(startIndex.value, endIndex.value);
+// Fetch data from server
+const fetchData = async () => {
+  await getClinicalNotes(
+    localPage.value,
+    itemsPerPage,
+    sortBy.value,
+    sortOrder.value,
+    searchQuery.value
+  );
+};
+
+// Watch search query with debounce
+watch(searchQuery, () => {
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value);
+  }
+
+  searchTimeout.value = setTimeout(() => {
+    localPage.value = 1;
+    fetchData();
+  }, 300);
 });
 
 // Sorting methods
@@ -283,6 +313,8 @@ const handleSort = (column: 'session_date' | 'created_at') => {
     sortBy.value = column;
     sortOrder.value = 'desc';
   }
+  // Fetch with new sort
+  fetchData();
 };
 
 const getSortIndicator = (column: string) => {
@@ -312,27 +344,30 @@ const displayedPages = computed(() => {
 // Pagination methods
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
-    currentPage.value++;
+    localPage.value++;
+    fetchData();
   }
 };
 
 const previousPage = () => {
   if (currentPage.value > 1) {
-    currentPage.value--;
+    localPage.value--;
+    fetchData();
   }
 };
 
 const goToPage = (page: number) => {
-  currentPage.value = page;
+  localPage.value = page;
+  fetchData();
 };
 
 // Fetch clinical notes immediately
-await getClinicalNotes();
+await fetchData();
 
 // Handle note created - refresh and reset to first page
 const handleNoteCreated = () => {
-  getClinicalNotes();
-  currentPage.value = 1;
+  localPage.value = 1;
+  fetchData();
 };
 
 // Set page meta

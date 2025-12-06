@@ -86,9 +86,29 @@ export class ClinicalNoteService {
     return this.mapToClinicalNote(row);
   }
 
-  async getAllClinicalNotes(): Promise<ClinicalNote[]> {
-    const rows = await this.clinicalNoteRepository.findAllWithReferralInfo();
-    return rows.map((row) => this.mapToClinicalNoteWithReferral(row));
+  async getAllClinicalNotes(
+    page: number = 1,
+    limit: number = 25,
+    sortBy: string = 'session_date',
+    sortOrder: 'asc' | 'desc' = 'desc',
+    search: string = ''
+  ): Promise<{ clinicalNotes: ClinicalNote[]; total: number; page: number; limit: number }> {
+    const offset = (page - 1) * limit;
+    const rows = await this.clinicalNoteRepository.findAllWithReferralInfo(
+      limit,
+      offset,
+      sortBy,
+      sortOrder,
+      search
+    );
+    const total = await this.clinicalNoteRepository.count(search);
+
+    return {
+      clinicalNotes: rows.map((row) => this.mapToClinicalNoteWithReferral(row)),
+      total,
+      page,
+      limit,
+    };
   }
 
   async getClinicalNoteById(id: string): Promise<ClinicalNote | null> {
