@@ -3,25 +3,26 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType } from 'kysely';
+import type { ColumnType } from "kysely";
 
-export type Generated<T> =
-  T extends ColumnType<infer S, infer I, infer U>
-    ? ColumnType<S, I | undefined, U>
-    : ColumnType<T, T | undefined, T>;
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
 
 export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface ClinicalNote {
-  author_id: string | null;
+  author_id: number | null;
   content: string;
   created_at: Generated<Timestamp>;
-  id: Generated<string>;
+  id: Generated<number>;
   is_deleted: Generated<boolean>;
-  session_date: Timestamp;
-  referral_id: string;
+  original_id: Int8 | null;
+  public_id: Generated<string>;
+  referral_id: number;
+  session_date: Generated<Timestamp>;
   updated_at: Generated<Timestamp>;
 }
 
@@ -30,29 +31,71 @@ export interface File {
   file_data: Buffer;
   file_name: string;
   file_size: Int8;
-  id: Generated<string>;
+  id: Generated<number>;
   is_deleted: Generated<boolean>;
   mime_type: string;
-  referral_id: string;
+  public_id: Generated<string>;
+  referral_id: number;
   updated_at: Generated<Timestamp>;
-  uploaded_by: string | null;
+  uploaded_by: number | null;
+}
+
+export interface OriginalClients {
+  address: string | null;
+  archived: Generated<boolean | null>;
+  clinical_notes: string | null;
+  closed: Generated<boolean | null>;
+  deleted: Generated<boolean>;
+  dob: Timestamp | null;
+  email: string | null;
+  file_closed: Timestamp | null;
+  file_opened: Timestamp | null;
+  first_name: Generated<string>;
+  id: Generated<number>;
+  last_name: Generated<string>;
+  last_updated: Generated<Timestamp>;
+  notes: string | null;
+  parents: string | null;
+  phone: string | null;
+  phone_2: string | null;
+  referral_date: Timestamp | null;
+  referral_type: string;
+  referrer_email: Generated<string | null>;
+  referrer_name: string;
+  referrer_relationship: string | null;
+  therapy: Generated<string | null>;
+}
+
+export interface OriginalClinicalNote {
+  client_id: number;
+  clinical_note: string;
+  created: Timestamp;
+  deleted: Generated<boolean | null>;
+  id: Generated<Int8>;
+  session_date: Timestamp | null;
+  updated: Generated<Timestamp>;
+  version: Int8 | null;
 }
 
 export interface Referral {
+  archived_at: Timestamp | null;
   closed_at: Timestamp | null;
   created_at: Generated<Timestamp>;
-  date_of_birth: Timestamp;
+  date_of_birth: Timestamp | null;
   email: string | null;
   first_name: string;
-  id: Generated<string>;
+  gender: string | null;
+  id: Generated<number>;
   is_deleted: Generated<boolean>;
   last_name: string;
   mailing_address: string | null;
   method_of_payment: string | null;
   opened_at: Timestamp | null;
+  original_id: number | null;
   parents_guardians: string | null;
   presenting_issues: string | null;
   primary_telephone: string;
+  public_id: Generated<string>;
   referral_type: string;
   referred_at: Generated<Timestamp | null>;
   referrer_email: string | null;
@@ -69,12 +112,13 @@ export interface User {
   created_at: Generated<Timestamp>;
   disabled: Generated<boolean>;
   failed_login_attempts: Generated<number>;
-  id: Generated<string>;
+  id: Generated<number>;
   is_deleted: Generated<boolean>;
   last_login_at: Timestamp | null;
   locked: Generated<boolean>;
   name: string | null;
   password: string;
+  public_id: Generated<string>;
   updated_at: Generated<Timestamp>;
   username: string;
 }
@@ -82,6 +126,8 @@ export interface User {
 export interface DB {
   clinical_note: ClinicalNote;
   file: File;
+  original_clients: OriginalClients;
+  original_clinical_note: OriginalClinicalNote;
   referral: Referral;
   user: User;
 }

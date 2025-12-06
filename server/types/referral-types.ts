@@ -2,9 +2,9 @@ export interface Referral {
   id: string;
   first_name: string;
   last_name: string;
-  date_of_birth: string;
-  age: string;
-  age_at_referral: string;
+  date_of_birth: string | null;
+  age: string | null;
+  age_at_referral: string | null;
   gender: string | null;
   parents_guardians: string | null;
   primary_telephone: string;
@@ -31,7 +31,7 @@ export interface Referral {
 export interface NewReferral {
   first_name: string;
   last_name: string;
-  date_of_birth: string | Date;
+  date_of_birth: string | Date | null;
   referred_at?: string | Date;
   gender?: string;
   parents_guardians?: string;

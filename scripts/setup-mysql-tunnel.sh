@@ -6,7 +6,7 @@
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PEM_FILE="$SCRIPT_DIR/hann-mysql-ec2.pem"
-EC2_HOST="ec2-15-222-238-198.ca-central-1.compute.amazonaws.com"
+EC2_HOST="ec2-3-96-158-140.ca-central-1.compute.amazonaws.com"
 EC2_USER="ec2-user"
 LOCAL_PORT="3307"
 REMOTE_PORT="3306"

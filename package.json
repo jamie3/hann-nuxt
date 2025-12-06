@@ -13,7 +13,8 @@
     "create-user": "tsx scripts/create-user.ts",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:migrate:down": "tsx scripts/migrate-down.ts",
-    "db:types": "npx kysely-codegen --dialect postgres --out-file server/types/database-types.ts",
+    "db:import-mysql": "tsx scripts/migrate-mysql-to-postgres.ts --",
+    "db:types": "tsx scripts/generate-types.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ."

@@ -170,21 +170,16 @@
               >
                 Opened Date {{ getSortIndicator('opened_at') }}
               </th>
-              <th
-                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Actions
-              </th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr
-              v-for="(referral, index) in filteredReferrals"
+              v-for="(referral, index) in paginatedReferrals"
               :key="referral.id"
               class="hover:bg-gray-50"
             >
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ index + 1 }}
+                {{ startIndex + index + 1 }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{
@@ -252,20 +247,90 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ referral.opened_at ? new Date(referral.opened_at).toLocaleDateString() : 'N/A' }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button
-                  @click="openReferralDetail(referral.id)"
-                  class="text-blue-600 hover:text-blue-900 mr-3"
-                >
-                  View
-                </button>
-                <button @click="openEditModal(referral)" class="text-blue-600 hover:text-blue-900">
-                  Edit
-                </button>
-              </td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Pagination -->
+      <div
+        v-if="filteredReferrals.length > 0"
+        class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200"
+      >
+        <div class="flex-1 flex justify-between sm:hidden">
+          <button
+            @click="previousPage"
+            :disabled="currentPage === 1"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Showing
+              <span class="font-medium">{{ startIndex + 1 }}</span>
+              to
+              <span class="font-medium">{{ Math.min(endIndex, filteredReferrals.length) }}</span>
+              of
+              <span class="font-medium">{{ filteredReferrals.length }}</span>
+              results
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+              <button
+                @click="previousPage"
+                :disabled="currentPage === 1"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span class="sr-only">Previous</span>
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <button
+                v-for="page in displayedPages"
+                :key="page"
+                @click="goToPage(page)"
+                :class="[
+                  page === currentPage
+                    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
+                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                ]"
+              >
+                {{ page }}
+              </button>
+              <button
+                @click="nextPage"
+                :disabled="currentPage === totalPages"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span class="sr-only">Next</span>
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
       </div>
 
       <!-- Empty State -->
@@ -273,13 +338,6 @@
         <p class="text-gray-500">No referrals found.</p>
       </div>
     </div>
-
-    <!-- Edit Modal -->
-    <EditReferralModal
-      v-model="showEditModal"
-      :referral="selectedReferral"
-      @updated="handleReferralUpdated"
-    />
   </div>
 </template>
 
@@ -290,9 +348,12 @@ definePageMeta({
   layout: 'default',
 });
 
-// Sorting state
-const sortBy = ref('updated_at');
-const sortOrder = ref<'asc' | 'desc'>('desc');
+const route = useRoute();
+const router = useRouter();
+
+// Initialize state from URL query params
+const sortBy = ref((route.query.sortBy as string) || 'updated_at');
+const sortOrder = ref<'asc' | 'desc'>((route.query.sortOrder as 'asc' | 'desc') || 'desc');
 
 // Fetch referrals with sorting
 const { data, error, pending, refresh } = await useFetch('/api/referrals', {
@@ -303,30 +364,18 @@ const { data, error, pending, refresh } = await useFetch('/api/referrals', {
   watch: [sortBy, sortOrder],
 });
 
-// Filter and search state
-const searchQuery = ref('');
-const typeFilter = ref<'all' | 'professional' | 'self'>('all');
-const statusFilter = ref<'all' | 'new' | 'opened' | 'closed'>('all');
+// Filter and search state - initialize from URL query params
+const searchQuery = ref((route.query.search as string) || '');
+const typeFilter = ref<'all' | 'professional' | 'self'>(
+  (route.query.type as 'all' | 'professional' | 'self') || 'all'
+);
+const statusFilter = ref<'all' | 'new' | 'opened' | 'closed'>(
+  (route.query.status as 'all' | 'new' | 'opened' | 'closed') || 'all'
+);
 
-// Edit modal state
-const showEditModal = ref(false);
-const selectedReferral = ref<Referral | null>(null);
-
-// Open referral detail page
-const openReferralDetail = (id: string) => {
-  navigateTo(`/referrals/${id}`);
-};
-
-// Open edit modal
-const openEditModal = (referral: any) => {
-  selectedReferral.value = referral as Referral;
-  showEditModal.value = true;
-};
-
-// Handle referral updated
-const handleReferralUpdated = () => {
-  refresh();
-};
+// Pagination state - initialize from URL
+const currentPage = ref(parseInt((route.query.page as string) || '1'));
+const itemsPerPage = 25;
 
 // Handle column sort
 const handleSort = (column: string) => {
@@ -373,6 +422,82 @@ const filteredReferrals = computed(() => {
   }
 
   return referrals;
+});
+
+// Computed properties for pagination
+const totalPages = computed(() => Math.ceil(filteredReferrals.value.length / itemsPerPage));
+
+const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage);
+const endIndex = computed(() => startIndex.value + itemsPerPage);
+
+const paginatedReferrals = computed(() => {
+  return filteredReferrals.value.slice(startIndex.value, endIndex.value);
+});
+
+// Display up to 5 page numbers
+const displayedPages = computed(() => {
+  const pages = [];
+  const maxPagesToShow = 5;
+  let startPage = Math.max(1, currentPage.value - Math.floor(maxPagesToShow / 2));
+  let endPage = Math.min(totalPages.value, startPage + maxPagesToShow - 1);
+
+  // Adjust start if we're near the end
+  if (endPage - startPage < maxPagesToShow - 1) {
+    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    pages.push(i);
+  }
+
+  return pages;
+});
+
+// Update URL with current query state
+const updateURL = () => {
+  const query: Record<string, string> = {};
+
+  // Add non-default values to query
+  if (searchQuery.value) query.search = searchQuery.value;
+  if (typeFilter.value !== 'all') query.type = typeFilter.value;
+  if (statusFilter.value !== 'all') query.status = statusFilter.value;
+  if (currentPage.value !== 1) query.page = currentPage.value.toString();
+  if (sortBy.value !== 'updated_at') query.sortBy = sortBy.value;
+  if (sortOrder.value !== 'desc') query.sortOrder = sortOrder.value;
+
+  // Update URL without navigation
+  router.replace({ query });
+};
+
+// Pagination methods
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+    updateURL();
+  }
+};
+
+const previousPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+    updateURL();
+  }
+};
+
+const goToPage = (page: number) => {
+  currentPage.value = page;
+  updateURL();
+};
+
+// Reset to page 1 and update URL when filters change
+watch([searchQuery, typeFilter, statusFilter], () => {
+  currentPage.value = 1;
+  updateURL();
+});
+
+// Update URL when sort changes
+watch([sortBy, sortOrder], () => {
+  updateURL();
 });
 
 // Set page meta

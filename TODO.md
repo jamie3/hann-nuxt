@@ -28,3 +28,10 @@ TODO
 - Add google maps support
 - Add Cloudflare trustile
 - Email / Generate PDF needs to be fixed
+
+# User
+
+- Change password
+- Create user
+- Lock user after 5 failed attempts
+- Display User info page.

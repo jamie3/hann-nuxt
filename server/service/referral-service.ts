@@ -31,11 +31,12 @@ export class ReferralService {
       id: row.id,
       first_name: row.first_name,
       last_name: row.last_name,
-      date_of_birth: row.date_of_birth.toISOString(),
-      age: this.calculateAge(row.date_of_birth),
-      age_at_referral: row.referred_at
-        ? this.calculateAge(row.date_of_birth, row.referred_at)
-        : 'N/A',
+      date_of_birth: row.date_of_birth ? row.date_of_birth.toISOString() : null,
+      age: row.date_of_birth ? this.calculateAge(row.date_of_birth) : 'N/A',
+      age_at_referral:
+        row.date_of_birth && row.referred_at
+          ? this.calculateAge(row.date_of_birth, row.referred_at)
+          : 'N/A',
       gender: row.gender || null,
       parents_guardians: row.parents_guardians,
       primary_telephone: row.primary_telephone,
