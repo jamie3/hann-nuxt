@@ -199,7 +199,7 @@
             <div>
               <dt class="text-sm font-medium text-gray-500">Date of Birth</dt>
               <dd class="mt-1 text-sm text-gray-900">
-                {{ formatDate(referral.date_of_birth) }}
+                {{ referral.date_of_birth ? formatDate(referral.date_of_birth) : 'N/A' }}
               </dd>
             </div>
             <div>
