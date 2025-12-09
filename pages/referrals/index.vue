@@ -1,7 +1,10 @@
 <template>
   <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">Referrals</h1>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Referrals</h1>
+        <p class="mt-2 text-sm text-gray-600">View and manage all referrals</p>
+      </div>
       <div class="flex gap-3">
         <NuxtLink
           to="/referral/self"
