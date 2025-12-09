@@ -386,35 +386,83 @@ definePageMeta({
   layout: 'default',
 });
 
-const route = useRoute();
-const router = useRouter();
+// Use the referralList composable
+const {
+  referrals: referralsList,
+  loading,
+  error: composableError,
+  total,
+  getReferrals,
+} = useReferralList();
 
-// Initialize state from URL query params
-const sortBy = ref((route.query.sortBy as string) || 'updated_at');
-const sortOrder = ref<'asc' | 'desc'>((route.query.sortOrder as 'asc' | 'desc') || 'desc');
-const searchQuery = ref((route.query.search as string) || '');
-const typeFilter = ref<'all' | 'professional' | 'self'>(
-  (route.query.type as 'all' | 'professional' | 'self') || 'all'
-);
-const statusFilter = ref<'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived'>(
-  (route.query.status as 'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived') || 'active'
-);
-const currentPage = ref(parseInt((route.query.page as string) || '1'));
+// Initialize state
+const sortBy = ref('updated_at');
+const sortOrder = ref<'asc' | 'desc'>('desc');
+const searchQuery = ref('');
+const debouncedSearch = ref('');
+const typeFilter = ref<'all' | 'professional' | 'self'>('all');
+const statusFilter = ref<'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived'>('active');
+const localPage = ref(1);
 const itemsPerPage = ref(100);
 
-// Fetch referrals with all filters
-const { data, error, pending, refresh } = await useFetch('/api/referrals', {
-  query: computed(() => ({
-    page: currentPage.value,
+// Computed values
+const pending = computed(() => loading.value);
+const error = computed(() => composableError.value);
+const referrals = computed(() => referralsList.value);
+const totalRecords = computed(() => total.value);
+const currentPage = computed(() => localPage.value);
+const totalPages = computed(() => Math.ceil(totalRecords.value / itemsPerPage.value));
+
+const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage.value);
+const endIndex = computed(() =>
+  Math.min(startIndex.value + itemsPerPage.value, totalRecords.value)
+);
+
+// Mock data object for template compatibility
+const data = computed(() => ({
+  referrals: referrals.value,
+  total: totalRecords.value,
+}));
+
+// Fetch data function
+const fetchData = async () => {
+  await getReferrals({
+    page: localPage.value,
     limit: itemsPerPage.value,
     sortBy: sortBy.value,
     sortOrder: sortOrder.value,
-    search: searchQuery.value,
+    search: debouncedSearch.value,
     type: typeFilter.value,
     status: statusFilter.value,
-  })),
-  watch: [currentPage, sortBy, sortOrder, searchQuery, typeFilter, statusFilter, itemsPerPage],
+  });
+};
+
+// Debounce search query
+let searchTimeout: NodeJS.Timeout | null = null;
+watch(searchQuery, (newValue) => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+  searchTimeout = setTimeout(() => {
+    debouncedSearch.value = newValue;
+  }, 300);
 });
+
+// Watch debounced search and filters
+watch([debouncedSearch, typeFilter, statusFilter, itemsPerPage], () => {
+  localPage.value = 1;
+  fetchData();
+});
+
+// Watch sort changes
+watch([sortBy, sortOrder], () => {
+  fetchData();
+});
+
+// Refresh function
+const refresh = () => {
+  fetchData();
+};
 
 // Handle column sort
 const handleSort = (column: string) => {
@@ -433,16 +481,6 @@ const getSortIndicator = (column: string) => {
   if (sortBy.value !== column) return '';
   return sortOrder.value === 'asc' ? '↑' : '↓';
 };
-
-// Server-provided data
-const referrals = computed(() => data.value?.referrals || []);
-const totalRecords = computed(() => data.value?.total || 0);
-const totalPages = computed(() => Math.ceil(totalRecords.value / itemsPerPage.value));
-
-const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage.value);
-const endIndex = computed(() =>
-  Math.min(startIndex.value + itemsPerPage.value, totalRecords.value)
-);
 
 // Display up to 5 page numbers
 const displayedPages = computed(() => {
@@ -463,46 +501,28 @@ const displayedPages = computed(() => {
   return pages;
 });
 
-// Update URL with current query state
-const updateURL = () => {
-  const query: Record<string, string> = {};
-
-  // Add non-default values to query
-  if (searchQuery.value) query.search = searchQuery.value;
-  if (typeFilter.value !== 'all') query.type = typeFilter.value;
-  if (statusFilter.value !== 'active') query.status = statusFilter.value;
-  if (currentPage.value !== 1) query.page = currentPage.value.toString();
-  if (sortBy.value !== 'updated_at') query.sortBy = sortBy.value;
-  if (sortOrder.value !== 'desc') query.sortOrder = sortOrder.value;
-
-  // Update URL without navigation
-  router.replace({ query });
-};
-
 // Pagination methods
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-    updateURL();
+    localPage.value++;
+    fetchData();
   }
 };
 
 const previousPage = () => {
   if (currentPage.value > 1) {
-    currentPage.value--;
-    updateURL();
+    localPage.value--;
+    fetchData();
   }
 };
 
 const goToPage = (page: number) => {
-  currentPage.value = page;
-  updateURL();
+  localPage.value = page;
+  fetchData();
 };
 
-// Reset to page 1 when filters change (URL update handled by useFetch)
-watch([searchQuery, typeFilter, statusFilter, itemsPerPage], () => {
-  currentPage.value = 1;
-});
+// Initial fetch
+await fetchData();
 
 // Set page meta
 useHead({
