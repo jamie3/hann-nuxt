@@ -5,6 +5,12 @@ export default defineNuxtConfig({
 
   modules: ['@nuxtjs/tailwindcss', 'nuxt-auth-utils', 'nuxt-turnstile'],
 
+  nitro: {
+    experimental: {
+      bodySizeLimit: '500mb',
+    } as any,
+  },
+
   turnstile: {
     siteKey: process.env.NUXT_TURNSTILE_SITE_KEY || '',
   },
