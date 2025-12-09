@@ -62,8 +62,8 @@ export const useAuth = () => {
       const { fetch: fetchSession } = useUserSession();
       await fetchSession();
 
-      // Redirect to referrals page after successful login
-      await navigateTo('/referrals');
+      // Redirect to dashboard after successful login
+      await navigateTo('/');
     }
 
     return result;
