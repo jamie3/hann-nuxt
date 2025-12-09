@@ -38,7 +38,7 @@
     </div>
 
     <!-- Search and Filters -->
-    <div v-if="!pending && !error" class="mb-6 bg-white shadow-sm rounded-lg p-4">
+    <div class="mb-6 bg-white shadow-sm rounded-lg p-4">
       <div class="flex items-end gap-4">
         <!-- Search -->
         <div class="flex-1">
@@ -380,8 +380,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Referral } from '~/server/types/referral-types';
-
 definePageMeta({
   layout: 'default',
 });
