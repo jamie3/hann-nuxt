@@ -173,6 +173,12 @@
                 First Name {{ getSortIndicator('first_name') }}
               </th>
               <th
+                @click="handleSort('gender')"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              >
+                Gender {{ getSortIndicator('gender') }}
+              </th>
+              <th
                 @click="handleSort('date_of_birth')"
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               >
@@ -239,6 +245,9 @@
                 >
                   {{ referral.first_name }}
                 </NuxtLink>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ referral.gender || 'N/A' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{
