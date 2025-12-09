@@ -5,10 +5,57 @@
         <h1 class="text-3xl font-bold text-gray-900">Clinical Notes</h1>
         <p class="mt-2 text-sm text-gray-600">View and manage all clinical notes</p>
       </div>
-      <div class="flex gap-3">
+      <div>
+        <button
+          @click="showNewModal = true"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path>
+          </svg>
+          New Clinical Note
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div v-if="!loading && !error" class="mb-6 bg-white shadow-sm rounded-lg p-4">
+      <div class="flex items-end gap-4">
+        <div class="flex-1">
+          <label for="search" class="block text-sm font-medium text-gray-700 mb-1"> Search </label>
+          <input
+            id="search"
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search by content, first name, or last name..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label for="pageSize" class="block text-sm font-medium text-gray-700 mb-1">
+            Items per page
+          </label>
+          <select
+            id="pageSize"
+            v-model.number="itemsPerPage"
+            class="max-w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option :value="25">25</option>
+            <option :value="50">50</option>
+            <option :value="100">100</option>
+            <option :value="150">150</option>
+            <option :value="200">200</option>
+            <option :value="250">250</option>
+          </select>
+        </div>
         <button
           @click="getClinicalNotes()"
-          class="px-4 py-2 border-2 border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors font-medium"
+          class="px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium"
           title="Refresh"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,28 +67,6 @@
             ></path>
           </svg>
         </button>
-        <button
-          @click="showNewModal = true"
-          class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          New Clinical Note
-        </button>
-      </div>
-    </div>
-
-    <!-- Search Bar -->
-    <div v-if="!loading && !error" class="mb-6 bg-white shadow-sm rounded-lg p-4">
-      <div class="grid grid-cols-1 gap-4">
-        <div>
-          <label for="search" class="block text-sm font-medium text-gray-700 mb-1"> Search </label>
-          <input
-            id="search"
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search by content, first name, or last name..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
       </div>
 
       <!-- Results Count -->
@@ -78,13 +103,13 @@
               scope="col"
               class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              First Name
+              Last Name
             </th>
             <th
               scope="col"
               class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Last Name
+              First Name
             </th>
             <th
               scope="col"
@@ -109,10 +134,10 @@
               {{ formatDate(note.session_date) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              {{ note.first_name || 'N/A' }}
+              {{ note.last_name || 'N/A' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              {{ note.last_name || 'N/A' }}
+              {{ note.first_name || 'N/A' }}
             </td>
             <td class="px-6 py-4 text-sm text-gray-900">
               <div class="max-w-xs truncate">
@@ -268,23 +293,25 @@ const searchTimeout = ref<NodeJS.Timeout | null>(null);
 
 // Pagination state (local)
 const localPage = ref(1);
-const itemsPerPage = 25;
+const itemsPerPage = ref(100);
 
 // Use server-provided values when available
 const currentPage = computed(() => composablePage.value || localPage.value);
 const totalRecords = computed(() => total.value);
 
 // Computed properties for pagination
-const totalPages = computed(() => Math.ceil(totalRecords.value / itemsPerPage));
+const totalPages = computed(() => Math.ceil(totalRecords.value / itemsPerPage.value));
 
-const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage);
-const endIndex = computed(() => Math.min(startIndex.value + itemsPerPage, totalRecords.value));
+const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage.value);
+const endIndex = computed(() =>
+  Math.min(startIndex.value + itemsPerPage.value, totalRecords.value)
+);
 
 // Fetch data from server
 const fetchData = async () => {
   await getClinicalNotes(
     localPage.value,
-    itemsPerPage,
+    itemsPerPage.value,
     sortBy.value,
     sortOrder.value,
     searchQuery.value
@@ -301,6 +328,12 @@ watch(searchQuery, () => {
     localPage.value = 1;
     fetchData();
   }, 300);
+});
+
+// Watch items per page changes
+watch(itemsPerPage, () => {
+  localPage.value = 1; // Reset to first page when changing page size
+  fetchData();
 });
 
 // Sorting methods

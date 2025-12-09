@@ -3,30 +3,32 @@
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900">Referrals</h1>
       <div class="flex gap-3">
-        <button
-          @click="refresh()"
-          class="px-4 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
-          title="Refresh"
+        <NuxtLink
+          to="/referral/self"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
             ></path>
           </svg>
-        </button>
-        <NuxtLink
-          to="/referral/self"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-        >
           New Self Referral
         </NuxtLink>
         <NuxtLink
           to="/referral/professional"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
         >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+            ></path>
+          </svg>
           New Professional Referral
         </NuxtLink>
       </div>
@@ -34,9 +36,9 @@
 
     <!-- Search and Filters -->
     <div v-if="!pending && !error" class="mb-6 bg-white shadow-sm rounded-lg p-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="flex items-end gap-4">
         <!-- Search -->
-        <div>
+        <div class="flex-1">
           <label for="search" class="block text-sm font-medium text-gray-700 mb-1"> Search </label>
           <input
             id="search"
@@ -81,6 +83,41 @@
             <option value="archived">Archived</option>
           </select>
         </div>
+
+        <!-- Items per page -->
+        <div>
+          <label for="pageSize" class="block text-sm font-medium text-gray-700 mb-1">
+            Items per page
+          </label>
+          <select
+            id="pageSize"
+            v-model.number="itemsPerPage"
+            class="max-w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option :value="25">25</option>
+            <option :value="50">50</option>
+            <option :value="100">100</option>
+            <option :value="150">150</option>
+            <option :value="200">200</option>
+            <option :value="250">250</option>
+          </select>
+        </div>
+
+        <!-- Refresh -->
+        <button
+          @click="refresh()"
+          class="px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+          title="Refresh"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            ></path>
+          </svg>
+        </button>
       </div>
 
       <!-- Results Count -->
@@ -360,20 +397,20 @@ const statusFilter = ref<'active' | 'all' | 'new' | 'opened' | 'closed' | 'archi
   (route.query.status as 'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived') || 'active'
 );
 const currentPage = ref(parseInt((route.query.page as string) || '1'));
-const itemsPerPage = 25;
+const itemsPerPage = ref(100);
 
 // Fetch referrals with all filters
 const { data, error, pending, refresh } = await useFetch('/api/referrals', {
   query: computed(() => ({
     page: currentPage.value,
-    limit: itemsPerPage,
+    limit: itemsPerPage.value,
     sortBy: sortBy.value,
     sortOrder: sortOrder.value,
     search: searchQuery.value,
     type: typeFilter.value,
     status: statusFilter.value,
   })),
-  watch: [currentPage, sortBy, sortOrder, searchQuery, typeFilter, statusFilter],
+  watch: [currentPage, sortBy, sortOrder, searchQuery, typeFilter, statusFilter, itemsPerPage],
 });
 
 // Handle column sort
@@ -397,10 +434,12 @@ const getSortIndicator = (column: string) => {
 // Server-provided data
 const referrals = computed(() => data.value?.referrals || []);
 const totalRecords = computed(() => data.value?.total || 0);
-const totalPages = computed(() => Math.ceil(totalRecords.value / itemsPerPage));
+const totalPages = computed(() => Math.ceil(totalRecords.value / itemsPerPage.value));
 
-const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage);
-const endIndex = computed(() => Math.min(startIndex.value + itemsPerPage, totalRecords.value));
+const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage.value);
+const endIndex = computed(() =>
+  Math.min(startIndex.value + itemsPerPage.value, totalRecords.value)
+);
 
 // Display up to 5 page numbers
 const displayedPages = computed(() => {
@@ -458,7 +497,7 @@ const goToPage = (page: number) => {
 };
 
 // Reset to page 1 when filters change (URL update handled by useFetch)
-watch([searchQuery, typeFilter, statusFilter], () => {
+watch([searchQuery, typeFilter, statusFilter, itemsPerPage], () => {
   currentPage.value = 1;
 });
 
