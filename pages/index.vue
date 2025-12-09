@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto px-4 py-8">
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+      <h1 class="text-3xl font-bold text-gray-900">Welcome {{ userName }}</h1>
       <p class="mt-2 text-sm text-gray-600">Overview of your referral system</p>
     </div>
 
@@ -312,6 +312,12 @@ interface StatsResponse {
     totalNew: number;
   };
 }
+
+// Get current user
+const { user } = useUserSession();
+const userName = computed(
+  () => (user.value as any)?.name || (user.value as any)?.username || 'Guest'
+);
 
 // Fetch statistics
 const {

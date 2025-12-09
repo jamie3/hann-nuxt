@@ -15,13 +15,10 @@ export const useUsers = () => {
     error.value = null;
 
     try {
-      const { data, error: fetchError } = await useFetch<UsersResponse>('/api/users');
+      const response = await $fetch<UsersResponse>('/api/users');
 
-      if (fetchError.value) {
-        error.value = fetchError.value.message || 'Failed to load users';
-        users.value = [];
-      } else if (data.value) {
-        users.value = data.value.users;
+      if (response && response.users) {
+        users.value = response.users;
       }
     } catch (err: any) {
       error.value = err.message || 'An error occurred';

@@ -3,6 +3,7 @@ export interface User {
   username: string;
   password: string;
   name: string | null;
+  email: string | null;
   locked: boolean;
   disabled: boolean;
   failed_login_attempts: number;
@@ -16,12 +17,14 @@ export interface NewUser {
   username: string;
   password: string;
   name?: string;
+  email?: string;
 }
 
 export interface UpdateUser {
   username?: string;
   password?: string;
   name?: string | null;
+  email?: string | null;
   locked?: boolean;
   disabled?: boolean;
   failed_login_attempts?: number;
