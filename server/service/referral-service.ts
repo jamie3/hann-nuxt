@@ -28,7 +28,7 @@ export class ReferralService {
   // Map database row to domain model
   private mapToReferral(row: ReferralRow): Referral {
     return {
-      id: row.id,
+      id: row.id.toString(),
       first_name: row.first_name,
       last_name: row.last_name,
       date_of_birth: row.date_of_birth ? row.date_of_birth.toISOString() : null,
@@ -106,7 +106,7 @@ export class ReferralService {
 
       // Store PDF in file table
       await this.fileRepository.create({
-        referral_id: referral.id,
+        referral_id: parseInt(referral.id),
         file_name: `referral-${referral.id}.pdf`,
         file_size: BigInt(pdfBuffer.length),
         mime_type: 'application/pdf',
@@ -243,6 +243,7 @@ export class ReferralService {
       updateData.date_of_birth =
         typeof data.date_of_birth === 'string' ? new Date(data.date_of_birth) : data.date_of_birth;
     }
+    if (data.gender !== undefined) updateData.gender = data.gender || null;
     if (data.referred_at !== undefined) {
       updateData.referred_at =
         typeof data.referred_at === 'string' ? new Date(data.referred_at) : data.referred_at;
