@@ -111,6 +111,7 @@ export interface Referral {
 export interface User {
   created_at: Generated<Timestamp>;
   disabled: Generated<boolean>;
+  email: string | null;
   failed_login_attempts: Generated<number>;
   id: Generated<number>;
   is_deleted: Generated<boolean>;

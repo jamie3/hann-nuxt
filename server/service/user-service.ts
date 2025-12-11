@@ -13,17 +13,18 @@ export class UserService {
   // Map database row to domain model
   private mapToUser(row: UserRow): User {
     return {
-      id: row.id,
+      id: row.id.toString(),
       username: row.username,
       password: row.password,
       name: row.name ?? null,
+      email: row.email ?? null,
       locked: row.locked ?? false,
       disabled: row.disabled ?? false,
       failed_login_attempts: row.failed_login_attempts ?? 0,
-      last_login_at: row.last_login_at ? new Date(row.last_login_at) : null,
+      last_login_at: row.last_login_at ? row.last_login_at.toISOString() : null,
       is_deleted: row.is_deleted,
-      created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at),
+      created_at: row.created_at.toISOString(),
+      updated_at: row.updated_at.toISOString(),
     };
   }
 
@@ -95,6 +96,8 @@ export class UserService {
     const userRow = await this.userRepository.insert({
       username: data.username,
       password: hashedPassword,
+      name: data.name || null,
+      email: data.email || null,
     });
 
     return this.mapToUser(userRow);
@@ -103,5 +106,9 @@ export class UserService {
   async getAllUsers(): Promise<User[]> {
     const userRows = await this.userRepository.findAll();
     return userRows.map((row) => this.mapToUser(row));
+  }
+
+  async updateUser(id: string, data: Partial<UserRow>): Promise<void> {
+    await this.userRepository.update(id, data);
   }
 }

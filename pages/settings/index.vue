@@ -98,6 +98,12 @@
                 scope="col"
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
+                Email
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Created At
               </th>
               <th
@@ -134,6 +140,9 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ user.email || 'N/A' }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">{{ formatDate(user.created_at) }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -142,7 +151,9 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900">Edit</button>
+                <button @click="openEditModal(user)" class="text-blue-600 hover:text-blue-900">
+                  Edit
+                </button>
               </td>
             </tr>
           </tbody>
@@ -269,16 +280,22 @@
 
     <!-- New User Modal -->
     <NewUserModal v-model="showNewUserModal" @created="handleUserCreated" />
+
+    <!-- Edit User Modal -->
+    <EditUserModal v-model="showEditUserModal" :user="selectedUser" @updated="handleUserUpdated" />
   </div>
 </template>
 
 <script setup lang="ts">
+import type { User } from '~/server/types/user-types';
 definePageMeta({
   layout: 'default',
 });
 
 const activeTab = ref('users');
 const showNewUserModal = ref(false);
+const showEditUserModal = ref(false);
+const selectedUser = ref<User | null>(null);
 
 // Use the useUsers composable
 const { users, loading, error, getUsers } = useUsers();
@@ -286,8 +303,19 @@ const { users, loading, error, getUsers } = useUsers();
 // Fetch users immediately
 await getUsers();
 
+// Open edit modal
+const openEditModal = (user: User) => {
+  selectedUser.value = user;
+  showEditUserModal.value = true;
+};
+
 // Handle user created - refresh list
 const handleUserCreated = () => {
+  getUsers();
+};
+
+// Handle user updated - refresh list
+const handleUserUpdated = () => {
   getUsers();
 };
 

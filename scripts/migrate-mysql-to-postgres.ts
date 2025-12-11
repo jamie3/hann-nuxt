@@ -5,6 +5,7 @@ import type { DB } from '../server/types/database-types';
 import * as dotenv from 'dotenv';
 import * as readline from 'readline';
 import * as path from 'path';
+import { readFileSync } from 'fs';
 
 // Parse command line arguments for environment
 const args = process.argv.slice(2);
@@ -72,8 +73,8 @@ interface MySQLClinicalNote {
   deleted: number;
 }
 
-// Map to store MySQL ID to PostgreSQL UUID mapping
-const clientIdMap = new Map<number, string>();
+// Map to store MySQL ID to PostgreSQL ID mapping
+const clientIdMap = new Map<number, number>();
 
 // Database connections
 let mysqlConnection: mysql.Connection | null = null;
@@ -99,7 +100,7 @@ async function getMySQLConnection(): Promise<mysql.Connection> {
 
 function getPostgresDB(): Kysely<DB> {
   if (!pgDb) {
-    const poolConfig = {
+    const poolConfig: any = {
       host: process.env.DATABASE_HOST || 'localhost',
       port: parseInt(process.env.DATABASE_PORT || '5432'),
       user: process.env.DATABASE_USER || 'postgres',
@@ -107,6 +108,21 @@ function getPostgresDB(): Kysely<DB> {
       database: process.env.DATABASE_NAME || 'hann',
       max: 10,
     };
+
+    // Add SSL configuration for production environment
+    if (envName === 'production') {
+      const certPath = path.resolve(process.cwd(), 'db/ca-certificate-production.crt');
+      try {
+        const caCert = readFileSync(certPath, 'utf-8');
+        poolConfig.ssl = {
+          rejectUnauthorized: true,
+          ca: caCert,
+        };
+        console.log('✅ Using SSL certificate for PostgreSQL connection\n');
+      } catch (error) {
+        console.warn('⚠️  Failed to load CA certificate, proceeding without SSL');
+      }
+    }
 
     pgDb = new Kysely<DB>({
       dialect: new PostgresDialect({
@@ -166,7 +182,9 @@ async function migrateReferrals(): Promise<void> {
       const client = row as unknown as MySQLClient;
 
       // Transform MySQL data to PostgreSQL schema (date_of_birth can be null)
+      const createdAtDate = parseDate(client.referral_date) || new Date();
       const referralData = {
+        id: client.id, // Preserve MySQL ID as primary key
         original_id: client.id,
         first_name: client.first_name || '',
         last_name: client.last_name || '',
@@ -194,8 +212,8 @@ async function migrateReferrals(): Promise<void> {
         archived_at: client.archived ? parseDate(client.last_updated) : null,
         referred_at: parseDate(client.referral_date) || new Date(),
         is_deleted: Boolean(client.deleted),
-        created_at: parseDate(client.referral_date) || new Date(),
-        updated_at: parseDate(client.last_updated) || new Date(),
+        created_at: createdAtDate,
+        updated_at: parseDate(client.last_updated) || createdAtDate,
       };
 
       try {
@@ -206,7 +224,7 @@ async function migrateReferrals(): Promise<void> {
           .where('original_id', '=', client.id)
           .executeTakeFirst();
 
-        let referralId: string;
+        let referralId: number;
         let wasUpdated = false;
 
         if (existing) {
@@ -236,7 +254,7 @@ async function migrateReferrals(): Promise<void> {
           insertedCount++;
         }
 
-        // Store mapping of MySQL ID to PostgreSQL UUID
+        // Store mapping of MySQL ID to PostgreSQL ID
         clientIdMap.set(client.id, referralId);
 
         const totalProcessed = insertedCount + updatedCount;
@@ -298,15 +316,17 @@ async function migrateClinicalNotes(): Promise<void> {
       }
 
       // Transform MySQL data to PostgreSQL schema
+      const noteCreatedAt = parseDate(note.created) || new Date();
       const noteData = {
+        id: note.id, // Preserve MySQL ID as primary key
         original_id: note.id,
         referral_id: referralId,
         session_date: parseDate(note.session_date) || parseDate(note.created) || new Date(),
         content: note.clinical_note || '',
         author_id: null, // No author mapping available
         is_deleted: Boolean(note.deleted),
-        created_at: parseDate(note.created) || new Date(),
-        updated_at: parseDate(note.updated) || new Date(),
+        created_at: noteCreatedAt,
+        updated_at: noteCreatedAt,
       };
 
       try {

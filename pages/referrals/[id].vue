@@ -203,6 +203,10 @@
               </dd>
             </div>
             <div>
+              <dt class="text-sm font-medium text-gray-500">Gender</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.gender || 'N/A' }}</dd>
+            </div>
+            <div>
               <dt class="text-sm font-medium text-gray-500">Age</dt>
               <dd class="mt-1 text-sm text-gray-900">{{ referral.age }}</dd>
             </div>
@@ -300,12 +304,21 @@
         <div class="bg-white shadow-sm rounded-lg p-6 lg:col-span-3">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900">Clinical Notes</h2>
-            <button
-              @click="openNewNoteModal"
-              class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
-            >
-              New Clinical Note
-            </button>
+            <div class="flex gap-2">
+              <button
+                v-if="clinicalNotes.length > 0"
+                @click="toggleAllNotes"
+                class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50"
+              >
+                {{ allNotesExpanded ? 'Collapse All' : 'Expand All' }}
+              </button>
+              <button
+                @click="openNewNoteModal"
+                class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
+              >
+                New Clinical Note
+              </button>
+            </div>
           </div>
 
           <!-- Notes Loading -->
@@ -351,14 +364,25 @@
                     </span>
                   </div>
                 </div>
-                <NuxtLink
-                  :to="`/clinical-notes/${note.id}`"
-                  class="text-blue-600 hover:text-blue-800 text-sm"
-                >
-                  View
-                </NuxtLink>
+                <div class="flex items-center gap-2">
+                  <button
+                    @click="toggleNote(note.id)"
+                    class="text-gray-600 hover:text-gray-800 text-sm"
+                  >
+                    {{ expandedNotes.has(note.id) ? 'Collapse' : 'Expand' }}
+                  </button>
+                  <NuxtLink
+                    :to="`/clinical-notes/${note.id}`"
+                    class="text-blue-600 hover:text-blue-800 text-sm"
+                  >
+                    View
+                  </NuxtLink>
+                </div>
               </div>
-              <p class="text-sm text-gray-700 whitespace-pre-line line-clamp-3">
+              <p
+                class="text-sm text-gray-700 whitespace-pre-line"
+                :class="{ 'line-clamp-3': !expandedNotes.has(note.id) }"
+              >
                 {{ note.content }}
               </p>
             </div>
@@ -687,6 +711,36 @@ const handleEmailPDFSent = async (email: string) => {
     alert(err.data?.message || 'Failed to email PDF');
   } finally {
     isEmailing.value = false;
+  }
+};
+
+// Clinical notes expand/collapse functionality
+const expandedNotes = ref<Set<string>>(new Set());
+
+// Toggle individual note
+const toggleNote = (noteId: string) => {
+  if (expandedNotes.value.has(noteId)) {
+    expandedNotes.value.delete(noteId);
+  } else {
+    expandedNotes.value.add(noteId);
+  }
+};
+
+// Check if all notes are expanded
+const allNotesExpanded = computed(() => {
+  return clinicalNotes.value.length > 0 && expandedNotes.value.size === clinicalNotes.value.length;
+});
+
+// Toggle all notes
+const toggleAllNotes = () => {
+  if (allNotesExpanded.value) {
+    // Collapse all
+    expandedNotes.value.clear();
+  } else {
+    // Expand all
+    clinicalNotes.value.forEach((note) => {
+      expandedNotes.value.add(note.id);
+    });
   }
 };
 </script>
