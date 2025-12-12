@@ -408,12 +408,9 @@ const successMessage = ref<string>('');
 // Turnstile token
 const turnstileToken = ref<string>('');
 
-// Check if Turnstile is enabled (enabled by default unless explicitly set to "DISABLED")
+// Check if Turnstile is enabled
 const config = useRuntimeConfig();
-const turnstileEnabled = computed(() => {
-  const siteKey = config.public.turnstile?.siteKey || '';
-  return siteKey !== 'DISABLED' && siteKey !== '';
-});
+const turnstileEnabled = computed(() => config.public.turnstile?.enabled || false);
 
 // Handle form submission
 const onSubmit = handleSubmit(async (values) => {
