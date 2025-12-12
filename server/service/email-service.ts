@@ -89,12 +89,13 @@ export class EmailService {
     // Send confirmation email to client if email is provided
     if (referral.email) {
       try {
-        const confirmationContent =
-          '<h2>Thank you</h2><p>We have received your referral and will contact you shortly. If you have any questions please email info@hannpsychologicalservices.com</p>';
-
         const tag = 'referral-confirmation';
-
         const subject = `${referralType} Referral Confirmation`;
+
+        // Render confirmation template
+        const confirmationContent = await renderEmailTemplate('referral-confirmation', {
+          year: new Date().getFullYear(),
+        });
 
         const clientResponse = await this.client.sendEmail({
           From: fromEmail,
