@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
     '/api/referral/self',
     '/api/referral/professional',
     '/api/health',
+    '/api/webhooks/postmark',
   ];
 
   // Check if the current route is public

@@ -1,5 +1,6 @@
 import { UserRepository } from '~/server/repository/user-repository';
 import { useDB } from '~/server/utils/db';
+import { logger } from '~/server/lib/logger';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -26,7 +27,7 @@ export default defineEventHandler(async (event) => {
       message: 'User account unlocked successfully',
     };
   } catch (error: any) {
-    console.error('Error unlocking user:', error);
+    logger.error('Error unlocking user', { error: error.message });
     throw createError({
       statusCode: 500,
       statusMessage: error.message || 'Failed to unlock user account',

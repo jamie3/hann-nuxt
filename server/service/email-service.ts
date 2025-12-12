@@ -1,38 +1,49 @@
 import * as postmark from 'postmark';
+import { ReferralEmailRepository } from '../repository/referral-email-repository';
+import { useDB } from '../utils/db';
+import { env } from '../utils/env';
+import { logger } from '../lib/logger';
 
 export class EmailService {
   private client: postmark.ServerClient | null = null;
 
   constructor() {
-    const apiToken = process.env.POSTMARK_SERVER_API_TOKEN;
-    if (apiToken) {
-      this.client = new postmark.ServerClient(apiToken);
+    if (env.POSTMARK_SERVER_API_TOKEN) {
+      this.client = new postmark.ServerClient(env.POSTMARK_SERVER_API_TOKEN);
     } else {
-      console.warn('POSTMARK_SERVER_API_TOKEN not configured. Email sending will be disabled.');
+      logger.warn('POSTMARK_SERVER_API_TOKEN not configured. Email sending will be disabled.');
     }
   }
 
   async sendReferralNotification(
+    referralId: string,
     referralType: string,
     pdfBuffer: Buffer,
+    pdfFileId: number,
     clientEmail?: string | null
   ): Promise<void> {
     if (!this.client) {
-      console.warn('Postmark client not initialized. Skipping email.');
+      logger.warn('Postmark client not initialized. Skipping email.');
       return;
     }
 
-    const fromEmail = process.env.EMAIL_FROM || 'noreply@hannpsychologicalservices.com';
-    const toEmail = process.env.EMAIL_TO || 'info@hannpsychologicalservices.com';
+    const fromEmail = env.EMAIL_FROM;
+    const toEmail = env.EMAIL_TO;
+
+    const db = useDB();
+    const emailRepository = new ReferralEmailRepository(db);
 
     // Send email with PDF attachment to admin
     try {
+      const emailContent = `<h2>New Referral</h2><p>A new ${referralType} referral has been submitted.</p>`;
+      const tag = 'referral-notification';
+
       const response = await this.client.sendEmail({
         From: fromEmail,
         To: toEmail,
         Subject: `${referralType} Referral`,
         MessageStream: 'outbound',
-        HtmlBody: `<h2>New Referral</h2><p>A new ${referralType} referral has been submitted.</p>`,
+        HtmlBody: emailContent,
         Attachments: [
           {
             ContentID: 'referral.pdf',
@@ -41,29 +52,63 @@ export class EmailService {
             ContentType: 'application/pdf',
           },
         ],
+        Tag: tag,
       });
 
-      console.log('Email sent via Postmark:', response.MessageID);
+      logger.info('Referral notification email sent via Postmark', {
+        messageId: response.MessageID,
+      });
+
+      // Log the email to database
+      await emailRepository.create({
+        referral_id: parseInt(referralId),
+        from_email: fromEmail,
+        recipient_email: toEmail,
+        message_id: response.MessageID,
+        status: 'sent',
+        tag,
+        email_content: emailContent,
+        file_id: pdfFileId,
+      });
     } catch (error) {
-      console.error('Error sending notification email via Postmark:', error);
+      logger.error('Error sending notification email via Postmark', { error });
       throw error;
     }
 
     // Send confirmation email to client if email is provided
     if (clientEmail) {
       try {
+        const confirmationContent =
+          '<h2>Thank you</h2><p>We have received your referral and will contact you shortly. If you have any questions please email info@hannpsychologicalservices.com</p>';
+
+        const tag = 'referral-confirmation';
+
         const clientResponse = await this.client.sendEmail({
           From: fromEmail,
           To: clientEmail,
-          Subject: `${referralType} Referral`,
+          Subject: `${referralType} Referral Confirmation`,
           MessageStream: 'outbound',
-          HtmlBody:
-            '<h2>Thank you</h2><p>We have received your referral and will contact you shortly. If you have any questions please email info@hannpsychologicalservices.com</p>',
+          HtmlBody: confirmationContent,
+          Tag: tag,
         });
 
-        console.log('Confirmation email sent to client via Postmark:', clientResponse.MessageID);
+        logger.info('Referral confirmation email sent to client', {
+          messageId: clientResponse.MessageID,
+        });
+
+        // Log the client confirmation email to database
+        await emailRepository.create({
+          referral_id: parseInt(referralId),
+          from_email: fromEmail,
+          recipient_email: clientEmail,
+          message_id: clientResponse.MessageID,
+          status: 'sent',
+          tag,
+          email_content: confirmationContent,
+          file_id: null, // Confirmation email doesn't include PDF
+        });
       } catch (error) {
-        console.error('Error sending confirmation email via Postmark:', error);
+        logger.error('Error sending confirmation email via Postmark', { error });
         // Don't throw here - main notification was successful
       }
     }

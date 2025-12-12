@@ -1,6 +1,7 @@
 import { CreditCardRepository } from '~/server/repository/credit-card-repository';
 import { useDB } from '~/server/utils/db';
 import { encrypt } from '~/server/utils/encryption';
+import { logger } from '~/server/lib/logger';
 import { z } from 'zod';
 
 const creditCardSchema = z.object({
@@ -53,7 +54,7 @@ export default defineEventHandler(async (event) => {
       creditCardId: creditCard.id.toString(),
     };
   } catch (error: any) {
-    console.error('Error saving credit card:', error);
+    logger.error('Error saving credit card', { error: error.message });
     throw createError({
       statusCode: error.statusCode || 500,
       statusMessage: error.statusMessage || 'Failed to save credit card',

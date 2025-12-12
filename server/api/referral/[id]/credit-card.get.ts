@@ -1,6 +1,7 @@
 import { CreditCardRepository } from '~/server/repository/credit-card-repository';
 import { useDB } from '~/server/utils/db';
 import { decrypt, maskCardNumber } from '~/server/utils/encryption';
+import { logger } from '~/server/lib/logger';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -42,7 +43,7 @@ export default defineEventHandler(async (event) => {
       creditCard: decrypted,
     };
   } catch (error: any) {
-    console.error('Error fetching credit card:', error);
+    logger.error('Error fetching credit card', { error: error.message });
     throw createError({
       statusCode: 500,
       statusMessage: error.message || 'Failed to fetch credit card',

@@ -1,5 +1,6 @@
 import { CreditCardRepository } from '~/server/repository/credit-card-repository';
 import { useDB } from '~/server/utils/db';
+import { logger } from '~/server/lib/logger';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -23,7 +24,7 @@ export default defineEventHandler(async (event) => {
       message: 'Credit card deleted successfully',
     };
   } catch (error: any) {
-    console.error('Error deleting credit card:', error);
+    logger.error('Error deleting credit card', { error: error.message });
     throw createError({
       statusCode: error.statusCode || 500,
       statusMessage: error.statusMessage || 'Failed to delete credit card',

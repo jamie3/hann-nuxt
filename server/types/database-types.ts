@@ -37,6 +37,28 @@ export interface CreditCard {
   updated_at: Generated<Timestamp>;
 }
 
+export interface ReferralEmail {
+  id: Generated<number>;
+  referral_id: number;
+  from_email: string;
+  recipient_email: string;
+  message_id: string | null;
+  status: Generated<string>;
+  record_type: string | null;
+  tag: string | null;
+  email_content: string | null;
+  file_id: number | null;
+  delivered_at: Timestamp | null;
+  bounced_at: Timestamp | null;
+  opened_at: Timestamp | null;
+  clicked_at: Timestamp | null;
+  spam_complaint_at: Timestamp | null;
+  details: string | null;
+  metadata: any | null;
+  created_at: Generated<Timestamp>;
+  updated_at: Generated<Timestamp>;
+}
+
 export interface File {
   created_at: Generated<Timestamp>;
   file_data: Buffer;
@@ -142,5 +164,6 @@ export interface DB {
   original_clients: OriginalClients;
   original_clinical_note: OriginalClinicalNote;
   referral: Referral;
+  referral_email: ReferralEmail;
   user: User;
 }

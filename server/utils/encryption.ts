@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { logger } from '../lib/logger';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
@@ -17,9 +18,7 @@ function getEncryptionKey(): string {
       throw new Error('ENCRYPTION_KEY environment variable must be set in production');
     }
     // Development fallback - DO NOT use in production
-    console.warn(
-      'WARNING: Using default encryption key. Set ENCRYPTION_KEY in .env for production'
-    );
+    logger.warn('Using default encryption key. Set ENCRYPTION_KEY in .env for production');
     return 'dev-default-key-32-chars-long!!';
   }
 

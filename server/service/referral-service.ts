@@ -10,6 +10,7 @@ import type { Referral, NewReferral } from '../types/referral-types';
 import { pdfService } from './pdf-service';
 import { emailService } from './email-service';
 import { determineReferralStatus } from '../utils/referral-status';
+import { logger } from '../lib/logger';
 
 export class ReferralService {
   private referralRepository: ReferralRepository;
@@ -97,7 +98,7 @@ export class ReferralService {
 
     // Generate PDF and email in the background (don't block the response)
     this.generateAndEmailPDF(referral).catch((error) => {
-      console.error('Error generating/emailing PDF:', error);
+      logger.error('Error generating/emailing PDF', { error, referralId: referral.id });
     });
 
     return referral;
@@ -109,7 +110,7 @@ export class ReferralService {
       const pdfBuffer = await pdfService.generateReferralPDF(referral);
 
       // Store PDF in file table
-      await this.fileRepository.create({
+      const pdfFile = await this.fileRepository.create({
         referral_id: parseInt(referral.id),
         file_name: `referral-${referral.id}.pdf`,
         file_size: BigInt(pdfBuffer.length),
@@ -121,9 +122,15 @@ export class ReferralService {
       // Send email with PDF
       const referralTypeFormatted =
         referral.referral_type === 'professional' ? 'Professional' : 'Self';
-      await emailService.sendReferralNotification(referralTypeFormatted, pdfBuffer, referral.email);
+      await emailService.sendReferralNotification(
+        referral.id,
+        referralTypeFormatted,
+        pdfBuffer,
+        pdfFile.id,
+        referral.email
+      );
     } catch (error) {
-      console.error('Failed to generate/email PDF:', error);
+      logger.error('Failed to generate/email PDF', { error });
       throw error;
     }
   }
