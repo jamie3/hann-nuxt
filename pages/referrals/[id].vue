@@ -198,17 +198,79 @@
         </div>
 
         <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
-          <div>
+          <div class="flex items-center gap-2">
             <span class="font-medium">Assigned To:</span>
-            {{ referral.assigned_to_name || 'Not Assigned' }}
+            <div
+              v-if="!editingAssignedTo"
+              @click="startEditingAssignment"
+              class="group cursor-pointer flex items-center gap-1"
+              :title="'Click to assign'"
+            >
+              <span>{{ referral.assigned_to_name || 'Not Assigned' }}</span>
+              <svg
+                class="w-3.5 h-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                ></path>
+              </svg>
+            </div>
+            <select
+              v-else
+              v-model="selectedUserId"
+              @change="updateAssignment"
+              @blur="cancelEditingAssignment"
+              ref="assignmentSelect"
+              class="min-w-[200px] px-3 py-2 bg-white border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+            >
+              <option :value="null">Unassigned</option>
+              <option v-for="user in users" :key="user.id" :value="parseInt(user.id)">
+                {{ user.name || user.username }}
+              </option>
+            </select>
           </div>
         </div>
 
         <!-- Date Information -->
         <div class="flex flex-wrap gap-4 text-sm text-gray-600">
-          <div v-if="referral.referred_at">
+          <div class="flex items-center gap-2">
             <span class="font-medium">Referral Date:</span>
-            {{ formatDate(referral.referred_at) }}
+            <div
+              v-if="!editingReferralDate"
+              @click="startEditingReferralDate"
+              class="group cursor-pointer flex items-center gap-1"
+              :title="'Click to edit'"
+            >
+              <span>{{ referral.referred_at ? formatDate(referral.referred_at) : 'Not Set' }}</span>
+              <svg
+                class="w-3.5 h-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                ></path>
+              </svg>
+            </div>
+            <input
+              v-else
+              type="date"
+              v-model="selectedReferralDate"
+              @change="updateReferralDate"
+              @blur="cancelEditingReferralDate"
+              ref="referralDateInput"
+              class="px-3 py-2 bg-white border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+            />
           </div>
           <div v-if="referral.opened_at">
             <span class="font-medium">Opened At:</span>
@@ -705,6 +767,26 @@ const isUpdating = ref(false);
 // State for emailing PDF
 const isEmailing = ref(false);
 
+// Assignment editing state
+const editingAssignedTo = ref(false);
+const selectedUserId = ref<number | null>(null);
+const assignmentSelect = ref<HTMLSelectElement | null>(null);
+
+// Referral date editing state
+const editingReferralDate = ref(false);
+const selectedReferralDate = ref<string>('');
+const referralDateInput = ref<HTMLInputElement | null>(null);
+
+// Fetch users for assignment
+const { users: usersList, getUsers } = useUsers();
+const users = computed(() => {
+  return [...usersList.value].sort((a, b) => {
+    const nameA = (a.name || a.username).toLowerCase();
+    const nameB = (b.name || b.username).toLowerCase();
+    return nameA.localeCompare(nameB);
+  });
+});
+
 // Edit modal state
 const showEditModal = ref(false);
 
@@ -939,4 +1021,92 @@ const handleCreditCardSaved = async () => {
 if (id) {
   loadCreditCard();
 }
+
+// Fetch users list for assignment dropdown
+await getUsers();
+
+// Assignment editing functions
+const startEditingAssignment = () => {
+  editingAssignedTo.value = true;
+  selectedUserId.value = referral.value?.assigned_to ? parseInt(referral.value.assigned_to) : null;
+  // Focus the select element after it renders
+  nextTick(() => {
+    if (assignmentSelect.value) {
+      assignmentSelect.value.focus();
+    }
+  });
+};
+
+const cancelEditingAssignment = () => {
+  editingAssignedTo.value = false;
+  selectedUserId.value = null;
+};
+
+const updateAssignment = async () => {
+  if (!id) return;
+
+  try {
+    await $fetch(`/api/referral/${id}/assign`, {
+      method: 'POST',
+      body: {
+        userId: selectedUserId.value,
+      },
+    });
+
+    // Refresh the referral data to show updated assignment
+    await getReferral(id);
+    cancelEditingAssignment();
+  } catch (error) {
+    console.error('Failed to update assignment:', error);
+    alert('Failed to update assignment. Please try again.');
+    cancelEditingAssignment();
+  }
+};
+
+// Referral date editing functions
+const startEditingReferralDate = () => {
+  editingReferralDate.value = true;
+  // Format the date to YYYY-MM-DD for the date input
+  if (referral.value?.referred_at) {
+    const date = new Date(referral.value.referred_at);
+    const dateParts = date.toISOString().split('T');
+    selectedReferralDate.value = dateParts[0] || '';
+  } else {
+    selectedReferralDate.value = '';
+  }
+  // Focus the input element after it renders
+  nextTick(() => {
+    if (referralDateInput.value) {
+      referralDateInput.value.focus();
+    }
+  });
+};
+
+const cancelEditingReferralDate = () => {
+  editingReferralDate.value = false;
+  selectedReferralDate.value = '';
+};
+
+const updateReferralDate = async () => {
+  if (!id) return;
+
+  try {
+    await $fetch(`/api/referral/${id}/update`, {
+      method: 'POST',
+      body: {
+        referred_at: selectedReferralDate.value
+          ? new Date(selectedReferralDate.value).toISOString()
+          : null,
+      },
+    });
+
+    // Refresh the referral data to show updated date
+    await getReferral(id);
+    cancelEditingReferralDate();
+  } catch (error) {
+    console.error('Failed to update referral date:', error);
+    alert('Failed to update referral date. Please try again.');
+    cancelEditingReferralDate();
+  }
+};
 </script>
