@@ -1320,6 +1320,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nuxt/kit@npm:^4.1.3":
+  version: 4.2.2
+  resolution: "@nuxt/kit@npm:4.2.2"
+  dependencies:
+    c12: "npm:^3.3.2"
+    consola: "npm:^3.4.2"
+    defu: "npm:^6.1.4"
+    destr: "npm:^2.0.5"
+    errx: "npm:^0.1.0"
+    exsolve: "npm:^1.0.8"
+    ignore: "npm:^7.0.5"
+    jiti: "npm:^2.6.1"
+    klona: "npm:^2.0.6"
+    mlly: "npm:^1.8.0"
+    ohash: "npm:^2.0.11"
+    pathe: "npm:^2.0.3"
+    pkg-types: "npm:^2.3.0"
+    rc9: "npm:^2.1.2"
+    scule: "npm:^1.3.0"
+    semver: "npm:^7.7.3"
+    tinyglobby: "npm:^0.2.15"
+    ufo: "npm:^1.6.1"
+    unctx: "npm:^2.4.1"
+    untyped: "npm:^2.0.0"
+  checksum: 10/f2ee4a8f1f2364748994ad382a2b668968b661fa2eda3f5381f8dc8071d553c571c0f10cf11cb747e8c7a0b3011689921b154fcb717a6d0af96e58611434499d
+  languageName: node
+  linkType: hard
+
 "@nuxt/nitro-server@npm:4.2.1":
   version: 4.2.1
   resolution: "@nuxt/nitro-server@npm:4.2.1"
@@ -1366,6 +1394,51 @@ __metadata:
     pkg-types: "npm:^2.3.0"
     std-env: "npm:^3.10.0"
   checksum: 10/5f076d7d14863e859e1610e7b22c25632abe91e91d5b171ce4f886d84a4f3032c6ada8d145da664afe6df274e4dcc74a2ceb6b48e3083b3b232904a65a88550d
+  languageName: node
+  linkType: hard
+
+"@nuxt/scripts@npm:^0.13.0":
+  version: 0.13.0
+  resolution: "@nuxt/scripts@npm:0.13.0"
+  dependencies:
+    "@nuxt/kit": "npm:^4.1.3"
+    "@vueuse/core": "npm:^13.9.0"
+    consola: "npm:^3.4.2"
+    defu: "npm:^6.1.4"
+    h3: "npm:^1.15.4"
+    magic-string: "npm:^0.30.19"
+    ofetch: "npm:^1.4.1"
+    ohash: "npm:^2.0.11"
+    pathe: "npm:^2.0.3"
+    pkg-types: "npm:^2.3.0"
+    sirv: "npm:^3.0.2"
+    std-env: "npm:^3.10.0"
+    ufo: "npm:^1.6.1"
+    unplugin: "npm:^2.3.10"
+    unstorage: "npm:^1.17.1"
+    valibot: "npm:^1.1.0"
+  peerDependencies:
+    "@googlemaps/markerclusterer": ^2.6.2
+    "@paypal/paypal-js": ^8.1.2
+    "@stripe/stripe-js": ^7.0.0
+    "@types/google.maps": ^3.58.1
+    "@types/vimeo__player": ^2.18.3
+    "@types/youtube": ^0.1.0
+    "@unhead/vue": ^2.0.3
+  peerDependenciesMeta:
+    "@googlemaps/markerclusterer":
+      optional: true
+    "@paypal/paypal-js":
+      optional: true
+    "@stripe/stripe-js":
+      optional: true
+    "@types/google.maps":
+      optional: true
+    "@types/vimeo__player":
+      optional: true
+    "@types/youtube":
+      optional: true
+  checksum: 10/fac440f279fbd9809ccb77398f66ce23bc559984fd4bf10c176d05402c75eb751c8ae3ede7d145f7d76b9491b598620ce6d0dc95aee866e633c51dd60a08edb9
   languageName: node
   linkType: hard
 
@@ -1491,6 +1564,20 @@ __metadata:
     ufo: "npm:^1.5.4"
     unctx: "npm:^2.4.1"
   checksum: 10/1fd33bc7d529dbfb479d002ef05f0c1927ed57fd6ae81a428620b2f1eb5110449913cec06fba1b04153f4a8273259e57085934bfdae5a01a173d5aa1926b8712
+  languageName: node
+  linkType: hard
+
+"@nuxtjs/turnstile@npm:1.1.1":
+  version: 1.1.1
+  resolution: "@nuxtjs/turnstile@npm:1.1.1"
+  dependencies:
+    "@nuxt/kit": "npm:^3.16.0"
+    "@types/cloudflare-turnstile": "npm:0.2.2"
+    defu: "npm:^6.1.4"
+    pathe: "npm:^2.0.3"
+  peerDependencies:
+    "@nuxt/scripts": ^0.11.0 || ^0.12.0
+  checksum: 10/a7d79b3d553da0a20a4224df478937f9f39b81af079b97ea1d036b1f232e5c9dce9de6fa97fdd461a4b889a3ac33f5b1259b485dc84719a50002e2a37255578f
   languageName: node
   linkType: hard
 
@@ -2436,6 +2523,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/cloudflare-turnstile@npm:0.2.2":
+  version: 0.2.2
+  resolution: "@types/cloudflare-turnstile@npm:0.2.2"
+  checksum: 10/af489bd93ecf796061310407f359c416c7e306c86e61690ddec217b16a42b50e9ed5ec614043c321eb0f4585cc787d4c139734e117cd16f0aa6e67f9c02cedc6
+  languageName: node
+  linkType: hard
+
 "@types/estree@npm:*, @types/estree@npm:1.0.8, @types/estree@npm:^1.0.0, @types/estree@npm:^1.0.6":
   version: 1.0.8
   resolution: "@types/estree@npm:1.0.8"
@@ -2525,6 +2619,13 @@ __metadata:
   version: 1.3.5
   resolution: "@types/triple-beam@npm:1.3.5"
   checksum: 10/519b6a1b30d4571965c9706ad5400a200b94e4050feca3e7856e3ea7ac00ec9903e32e9a10e2762d0f7e472d5d03e5f4b29c16c0bd8c1f77c8876c683b2231f1
+  languageName: node
+  linkType: hard
+
+"@types/web-bluetooth@npm:^0.0.21":
+  version: 0.0.21
+  resolution: "@types/web-bluetooth@npm:0.0.21"
+  checksum: 10/f8796dc9f67ee556a2c895ee7d6c4f62b2a8c52963c3d5e81a2938d3313130f9f7330ff82a6a3dceb63217ba615020e1d4cca8842d469ba6d8ac782853d47d0d
   languageName: node
   linkType: hard
 
@@ -3274,6 +3375,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@vueuse/core@npm:^13.9.0":
+  version: 13.9.0
+  resolution: "@vueuse/core@npm:13.9.0"
+  dependencies:
+    "@types/web-bluetooth": "npm:^0.0.21"
+    "@vueuse/metadata": "npm:13.9.0"
+    "@vueuse/shared": "npm:13.9.0"
+  peerDependencies:
+    vue: ^3.5.0
+  checksum: 10/b7e9c91d0c0f32592f432030d9c31d8780765a109dd2ad48bbb29a6ddbbcdc620a89a34ff1dfed7f2cd4c144237df2414e735af691165a385fa942e2156f5dbd
+  languageName: node
+  linkType: hard
+
+"@vueuse/metadata@npm:13.9.0":
+  version: 13.9.0
+  resolution: "@vueuse/metadata@npm:13.9.0"
+  checksum: 10/6e25ea3fc82bf2964addd25db91272787e0ed3cfb16036a0efd1f3a56c2291186e7ab61ed6776429ab313065b23e37f5c05106f0267584158c04e675897a8a55
+  languageName: node
+  linkType: hard
+
+"@vueuse/shared@npm:13.9.0":
+  version: 13.9.0
+  resolution: "@vueuse/shared@npm:13.9.0"
+  peerDependencies:
+    vue: ^3.5.0
+  checksum: 10/cd7670805a2760b5ccd93855634288dbfdc41014cbeb97f1d47f057301bfa2d056f8eb86eb8b7bbd26c64633d72e4bc8713dec8467a3c21aa31c7eb7a8723440
+  languageName: node
+  linkType: hard
+
 "abbrev@npm:^3.0.0":
   version: 3.0.1
   resolution: "abbrev@npm:3.0.1"
@@ -3864,7 +3994,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"c12@npm:^3.0.2, c12@npm:^3.2.0, c12@npm:^3.3.1":
+"c12@npm:^3.0.2, c12@npm:^3.2.0, c12@npm:^3.3.1, c12@npm:^3.3.2":
   version: 3.3.2
   resolution: "c12@npm:3.3.2"
   dependencies:
@@ -6520,8 +6650,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "hann-nuxt@workspace:."
   dependencies:
+    "@nuxt/scripts": "npm:^0.13.0"
     "@nuxtjs/eslint-config-typescript": "npm:^12.1.0"
     "@nuxtjs/tailwindcss": "npm:^6.14.0"
+    "@nuxtjs/turnstile": "npm:1.1.1"
     "@types/bcrypt": "npm:^6.0.0"
     "@types/pdfkit": "npm:^0.17.4"
     "@types/pg": "npm:^8"
@@ -12239,6 +12371,18 @@ __metadata:
   version: 1.0.2
   resolution: "util-deprecate@npm:1.0.2"
   checksum: 10/474acf1146cb2701fe3b074892217553dfcf9a031280919ba1b8d651a068c9b15d863b7303cb15bd00a862b498e6cf4ad7b4a08fb134edd5a6f7641681cb54a2
+  languageName: node
+  linkType: hard
+
+"valibot@npm:^1.1.0":
+  version: 1.2.0
+  resolution: "valibot@npm:1.2.0"
+  peerDependencies:
+    typescript: ">=5"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10/5f9c15e6f5a2b8eae75332a3317e46e995a1763efe1b91e57bc5064e36f0feba734367c88013d53255bdf09fb9204bf3598d2ca0c3f468c8726095b1c3551926
   languageName: node
   linkType: hard
 
