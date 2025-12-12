@@ -134,10 +134,10 @@
               {{ formatDate(note.session_date) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              {{ note.last_name || 'N/A' }}
+              {{ note.last_name || '-' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              {{ note.first_name || 'N/A' }}
+              {{ note.first_name || '-' }}
             </td>
             <td class="px-6 py-4 text-sm text-gray-900">
               <div class="max-w-xs truncate">

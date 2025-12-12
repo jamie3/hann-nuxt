@@ -253,7 +253,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{
-                  referral.referred_at ? new Date(referral.referred_at).toLocaleDateString() : 'N/A'
+                  referral.referred_at ? new Date(referral.referred_at).toLocaleDateString() : '-'
                 }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

@@ -226,9 +226,7 @@
                 {{ startIndex + index + 1 }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{
-                  referral.updated_at ? new Date(referral.updated_at).toLocaleDateString() : 'N/A'
-                }}
+                {{ referral.updated_at ? new Date(referral.updated_at).toLocaleDateString() : '-' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <NuxtLink
@@ -247,24 +245,24 @@
                 </NuxtLink>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ referral.gender || 'N/A' }}
+                {{ referral.gender || '-' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{
                   referral.date_of_birth
                     ? new Date(referral.date_of_birth).toLocaleDateString()
-                    : 'N/A'
+                    : '-'
                 }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{ referral.age }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ referral.age_at_referral || 'N/A' }}
+                {{ referral.age_at_referral || '-' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{
-                  referral.referred_at ? new Date(referral.referred_at).toLocaleDateString() : 'N/A'
+                  referral.referred_at ? new Date(referral.referred_at).toLocaleDateString() : '-'
                 }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -292,7 +290,7 @@
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ referral.opened_at ? new Date(referral.opened_at).toLocaleDateString() : 'N/A' }}
+                {{ referral.opened_at ? new Date(referral.opened_at).toLocaleDateString() : '-' }}
               </td>
             </tr>
           </tbody>
