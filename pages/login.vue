@@ -38,6 +38,11 @@
           </p>
         </div>
 
+        <!-- Turnstile -->
+        <div>
+          <NuxtTurnstile v-model="turnstileToken" />
+        </div>
+
         <div v-if="errorMessage" class="p-3 bg-red-50 border border-red-200 rounded-md">
           <p class="text-sm text-red-600">{{ errorMessage }}</p>
         </div>
@@ -80,6 +85,9 @@ const { handleSubmit, errors, isSubmitting } = useForm({
 const { value: username } = useField<string>('username');
 const { value: password } = useField<string>('password');
 
+// Turnstile token
+const turnstileToken = ref<string>('');
+
 // Use auth composable
 const { performLogin, error: authError } = useAuth();
 
@@ -91,6 +99,7 @@ const onSubmit = handleSubmit(async (values) => {
   await performLogin({
     username: values.username,
     password: values.password,
+    turnstileToken: turnstileToken.value,
   });
 });
 </script>

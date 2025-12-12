@@ -1,6 +1,7 @@
 interface LoginCredentials {
   username: string;
   password: string;
+  turnstileToken: string;
 }
 
 interface AuthResponse {

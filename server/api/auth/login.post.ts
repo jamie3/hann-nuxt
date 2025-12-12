@@ -5,12 +5,29 @@ import { withErrorHandler } from '../../utils/error-handler';
 export default defineEventHandler(
   withErrorHandler(async (event) => {
     const body = await readBody(event);
-    const { username, password } = body;
+    const { username, password, turnstileToken } = body;
 
     if (!username || !password) {
       throw createError({
         statusCode: 400,
         message: 'Username and password are required',
+      });
+    }
+
+    if (!turnstileToken) {
+      throw createError({
+        statusCode: 422,
+        statusMessage: 'Token not provided.',
+      });
+    }
+
+    // Verify Turnstile token
+    const { success } = await verifyTurnstileToken(turnstileToken);
+
+    if (!success) {
+      throw createError({
+        statusCode: 400,
+        message: 'Failed to verify CAPTCHA. Please try again.',
       });
     }
 
