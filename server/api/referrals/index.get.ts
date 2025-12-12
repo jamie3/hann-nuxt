@@ -9,6 +9,7 @@ export default defineEventHandler(async (event) => {
   const search = (query.search as string) || '';
   const type = (query.type as string) || '';
   const status = (query.status as string) || '';
+  const assignedTo = (query.assignedTo as string) || '';
 
   const referralService = getReferralService();
   const result = await referralService.getAllReferrals(
@@ -18,7 +19,8 @@ export default defineEventHandler(async (event) => {
     sortOrder,
     search,
     type,
-    status
+    status,
+    assignedTo
   );
 
   return {

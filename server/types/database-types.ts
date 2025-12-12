@@ -3,11 +3,12 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType } from "kysely";
+import type { ColumnType } from 'kysely';
 
-export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
-  ? ColumnType<S, I | undefined, U>
-  : ColumnType<T, T | undefined, T>;
+export type Generated<T> =
+  T extends ColumnType<infer S, infer I, infer U>
+    ? ColumnType<S, I | undefined, U>
+    : ColumnType<T, T | undefined, T>;
 
 export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
 
@@ -101,6 +102,7 @@ export interface OriginalClinicalNote {
 
 export interface Referral {
   archived_at: Timestamp | null;
+  assigned_to: number | null;
   closed_at: Timestamp | null;
   created_at: Generated<Timestamp>;
   date_of_birth: Timestamp | null;

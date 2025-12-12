@@ -3,6 +3,7 @@ import {
   ReferralRow,
   ReferralInsert,
   ReferralUpdate,
+  ReferralRowWithAssignedUser,
 } from '../repository/referral-repository';
 import { FileRepository } from '../repository/file-repository';
 import { differenceInYears } from 'date-fns';
@@ -28,7 +29,7 @@ export class ReferralService {
   }
 
   // Map database row to domain model
-  private mapToReferral(row: ReferralRow): Referral {
+  private mapToReferral(row: ReferralRowWithAssignedUser): Referral {
     // Determine correct status based on dates using shared utility
     const status = determineReferralStatus(row.opened_at, row.closed_at);
 
@@ -57,6 +58,8 @@ export class ReferralService {
       referrer_prefers_contact: row.referrer_prefers_contact,
       referral_type: row.referral_type as 'professional' | 'self',
       status: status,
+      assigned_to: row.assigned_to ? row.assigned_to.toString() : null,
+      assigned_to_name: (row as any).assigned_to_name || (row as any).assigned_to_username || null,
       opened_at: row.opened_at ? row.opened_at.toISOString() : null,
       closed_at: row.closed_at ? row.closed_at.toISOString() : null,
       archived_at: null,
@@ -149,7 +152,8 @@ export class ReferralService {
     sortOrder: 'asc' | 'desc' = 'desc',
     search: string = '',
     type: string = '',
-    status: string = ''
+    status: string = '',
+    assignedTo: string = ''
   ): Promise<{ referrals: Referral[]; total: number; page: number; limit: number }> {
     const offset = (page - 1) * limit;
     const rows = await this.referralRepository.findAllRows(
@@ -159,9 +163,10 @@ export class ReferralService {
       sortOrder,
       search,
       type,
-      status
+      status,
+      assignedTo
     );
-    const total = await this.referralRepository.count(search, type, status);
+    const total = await this.referralRepository.count(search, type, status, assignedTo);
 
     return {
       referrals: rows.map((row) => this.mapToReferral(row)),
@@ -172,8 +177,15 @@ export class ReferralService {
   }
 
   async getReferralById(id: string): Promise<Referral | null> {
-    const row = await this.referralRepository.findByIdRow(id);
-    return row ? this.mapToReferral(row) : null;
+    const row = await this.referralRepository.findByIdWithAssignedUser(id);
+    if (!row) return null;
+
+    const referral = this.mapToReferral(row);
+    // Add assigned user name from join
+    if (row.assigned_to_name || row.assigned_to_username) {
+      referral.assigned_to_name = row.assigned_to_name || row.assigned_to_username;
+    }
+    return referral;
   }
 
   async getReferralsByType(type: 'professional' | 'self'): Promise<Referral[]> {
@@ -278,6 +290,9 @@ export class ReferralService {
     if (data.referrer_prefers_contact !== undefined)
       updateData.referrer_prefers_contact = data.referrer_prefers_contact ?? null;
     if (data.referral_type !== undefined) updateData.referral_type = data.referral_type;
+    if ((data as any).assigned_to !== undefined) {
+      (updateData as any).assigned_to = (data as any).assigned_to;
+    }
 
     // Update the referral
     const updatedRow = await this.referralRepository.update(id, updateData);

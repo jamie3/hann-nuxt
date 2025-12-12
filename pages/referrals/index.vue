@@ -87,6 +87,24 @@
           </select>
         </div>
 
+        <!-- Filter by Assigned To -->
+        <div>
+          <label for="assigned-filter" class="block text-sm font-medium text-gray-700 mb-1">
+            Assigned To
+          </label>
+          <select
+            id="assigned-filter"
+            v-model="assignedToFilter"
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">All Users</option>
+            <option value="unassigned">Unassigned</option>
+            <option v-for="user in users" :key="user.id" :value="user.id">
+              {{ user.name || user.username }}{{ user.id === currentUserId ? ' (me)' : '' }}
+            </option>
+          </select>
+        </div>
+
         <!-- Items per page -->
         <div>
           <label for="pageSize" class="block text-sm font-medium text-gray-700 mb-1">
@@ -218,6 +236,11 @@
               >
                 Opened Date {{ getSortIndicator('opened_at') }}
               </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Assigned To
+              </th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -291,6 +314,29 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ referral.opened_at ? new Date(referral.opened_at).toLocaleDateString() : '-' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 relative">
+                <div
+                  v-if="editingReferralId !== referral.id"
+                  @click="startEditingAssignment(referral)"
+                  class="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
+                  :title="'Click to assign'"
+                >
+                  {{ referral.assigned_to_name || '-' }}
+                </div>
+                <select
+                  v-else
+                  v-model="selectedUserId"
+                  @change="updateAssignment(referral)"
+                  @blur="cancelEditing"
+                  ref="assignmentSelect"
+                  class="w-full min-w-[200px] px-3 py-2 bg-white border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                >
+                  <option :value="null">Unassigned</option>
+                  <option v-for="user in users" :key="user.id" :value="parseInt(user.id)">
+                    {{ user.name || user.username }}
+                  </option>
+                </select>
               </td>
             </tr>
           </tbody>
@@ -407,8 +453,31 @@ const searchQuery = ref('');
 const debouncedSearch = ref('');
 const typeFilter = ref<'all' | 'professional' | 'self'>('all');
 const statusFilter = ref<'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived'>('active');
+const assignedToFilter = ref<string>('all');
 const localPage = ref(1);
 const itemsPerPage = ref(100);
+const editingReferralId = ref<string | null>(null);
+const selectedUserId = ref<number | null>(null);
+const assignmentSelect = ref<HTMLSelectElement | null>(null);
+
+// Fetch users for assignment filter
+const { users: usersList, getUsers } = useUsers();
+
+// Sort users alphabetically by display name (name or username)
+const users = computed(() => {
+  return [...usersList.value].sort((a, b) => {
+    const nameA = (a.name || a.username).toLowerCase();
+    const nameB = (b.name || b.username).toLowerCase();
+    return nameA.localeCompare(nameB);
+  });
+});
+
+// Get current user ID
+const { user } = useUserSession();
+const currentUserId = computed(() => (user.value as any)?.id || null);
+
+// Fetch users list for the assignment filter
+await getUsers();
 
 // Computed values
 const pending = computed(() => loading.value);
@@ -439,6 +508,7 @@ const fetchData = async () => {
     search: debouncedSearch.value,
     type: typeFilter.value,
     status: statusFilter.value,
+    assignedTo: assignedToFilter.value,
   });
 };
 
@@ -454,7 +524,7 @@ watch(searchQuery, (newValue) => {
 });
 
 // Watch debounced search and filters
-watch([debouncedSearch, typeFilter, statusFilter, itemsPerPage], () => {
+watch([debouncedSearch, typeFilter, statusFilter, assignedToFilter, itemsPerPage], () => {
   localPage.value = 1;
   fetchData();
 });
@@ -524,6 +594,42 @@ const previousPage = () => {
 const goToPage = (page: number) => {
   localPage.value = page;
   fetchData();
+};
+
+// Assignment editing functions
+const startEditingAssignment = (referral: any) => {
+  editingReferralId.value = referral.id;
+  selectedUserId.value = referral.assigned_to ? parseInt(referral.assigned_to) : null;
+  // Focus the select element after it renders
+  nextTick(() => {
+    if (assignmentSelect.value) {
+      assignmentSelect.value.focus();
+    }
+  });
+};
+
+const cancelEditing = () => {
+  editingReferralId.value = null;
+  selectedUserId.value = null;
+};
+
+const updateAssignment = async (referral: any) => {
+  try {
+    await $fetch(`/api/referral/${referral.id}/assign`, {
+      method: 'POST',
+      body: {
+        userId: selectedUserId.value,
+      },
+    });
+
+    // Refresh the data to show updated assignment
+    await fetchData();
+    cancelEditing();
+  } catch (error) {
+    console.error('Failed to update assignment:', error);
+    alert('Failed to update assignment. Please try again.');
+    cancelEditing();
+  }
 };
 
 // Initial fetch

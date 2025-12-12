@@ -197,6 +197,13 @@
           </div>
         </div>
 
+        <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
+          <div>
+            <span class="font-medium">Assigned To:</span>
+            {{ referral.assigned_to_name || 'Not Assigned' }}
+          </div>
+        </div>
+
         <!-- Date Information -->
         <div class="flex flex-wrap gap-4 text-sm text-gray-600">
           <div v-if="referral.referred_at">

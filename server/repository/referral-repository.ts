@@ -6,6 +6,12 @@ export interface ReferralRow extends Selectable<DB['referral']> {}
 export interface ReferralInsert extends Insertable<DB['referral']> {}
 export interface ReferralUpdate extends Updateable<DB['referral']> {}
 
+// Extended type for referral with assigned user info from JOIN
+export interface ReferralRowWithAssignedUser extends ReferralRow {
+  assigned_to_username?: string | null;
+  assigned_to_name?: string | null;
+}
+
 export class ReferralRepository extends BaseRepository<
   DB,
   'referral',
@@ -28,48 +34,63 @@ export class ReferralRepository extends BaseRepository<
     sortOrder: 'asc' | 'desc' = 'desc',
     search: string = '',
     type: string = '',
-    status: string = ''
-  ): Promise<ReferralRow[]> {
+    status: string = '',
+    assignedTo: string = ''
+  ): Promise<ReferralRowWithAssignedUser[]> {
     // Map frontend column names to database column names
     const columnMap: Record<string, string> = {
-      updated_at: 'updated_at',
-      last_name: 'last_name',
-      first_name: 'first_name',
-      date_of_birth: 'date_of_birth',
-      referred_at: 'referred_at',
-      referral_type: 'referral_type',
-      status: 'status',
-      opened_at: 'opened_at',
+      updated_at: 'referral.updated_at',
+      last_name: 'referral.last_name',
+      first_name: 'referral.first_name',
+      date_of_birth: 'referral.date_of_birth',
+      referred_at: 'referral.referred_at',
+      referral_type: 'referral.referral_type',
+      status: 'referral.status',
+      opened_at: 'referral.opened_at',
     };
 
-    const dbColumn = columnMap[sortBy] || 'updated_at';
+    const dbColumn = columnMap[sortBy] || 'referral.updated_at';
 
-    let query = this.db.selectFrom('referral').selectAll().where('is_deleted', '=', false);
+    let query = this.db
+      .selectFrom('referral')
+      .leftJoin('user', 'user.id', 'referral.assigned_to')
+      .selectAll('referral')
+      .select(['user.username as assigned_to_username', 'user.name as assigned_to_name'])
+      .where('referral.is_deleted', '=', false);
 
     // Add search filter
     if (search.trim()) {
       const searchTerm = `%${search.trim()}%`;
       query = query.where((eb) =>
         eb.or([
-          eb('first_name', 'ilike', searchTerm),
-          eb('last_name', 'ilike', searchTerm),
-          eb('email', 'ilike', searchTerm),
+          eb('referral.first_name', 'ilike', searchTerm),
+          eb('referral.last_name', 'ilike', searchTerm),
+          eb('referral.email', 'ilike', searchTerm),
         ])
       );
     }
 
     // Add type filter
     if (type && type !== 'all') {
-      query = query.where('referral_type', '=', type);
+      query = query.where('referral.referral_type', '=', type);
     }
 
     // Add status filter
     if (status && status !== 'all') {
       if (status === 'active') {
         // Exclude archived
-        query = query.where('status', '!=', 'archived');
+        query = query.where('referral.status', '!=', 'archived');
       } else {
-        query = query.where('status', '=', status);
+        query = query.where('referral.status', '=', status);
+      }
+    }
+
+    // Add assigned_to filter
+    if (assignedTo && assignedTo !== 'all') {
+      if (assignedTo === 'unassigned') {
+        query = query.where('referral.assigned_to', 'is', null);
+      } else {
+        query = query.where('referral.assigned_to', '=', parseInt(assignedTo));
       }
     }
 
@@ -80,7 +101,12 @@ export class ReferralRepository extends BaseRepository<
       .execute();
   }
 
-  async count(search: string = '', type: string = '', status: string = ''): Promise<number> {
+  async count(
+    search: string = '',
+    type: string = '',
+    status: string = '',
+    assignedTo: string = ''
+  ): Promise<number> {
     let query = this.db
       .selectFrom('referral')
       .select((eb) => eb.fn.count<number>('id').as('count'))
@@ -113,6 +139,15 @@ export class ReferralRepository extends BaseRepository<
       }
     }
 
+    // Add assigned_to filter
+    if (assignedTo && assignedTo !== 'all') {
+      if (assignedTo === 'unassigned') {
+        query = query.where('assigned_to', 'is', null);
+      } else {
+        query = query.where('assigned_to', '=', parseInt(assignedTo));
+      }
+    }
+
     const result = await query.executeTakeFirst();
 
     return result?.count ? Number(result.count) : 0;
@@ -120,6 +155,20 @@ export class ReferralRepository extends BaseRepository<
 
   async findByIdRow(id: string): Promise<ReferralRow | undefined> {
     return await this.findById(id);
+  }
+
+  /**
+   * Find referral by ID with assigned user info
+   */
+  async findByIdWithAssignedUser(id: string): Promise<ReferralRowWithAssignedUser | undefined> {
+    return await this.db
+      .selectFrom('referral')
+      .leftJoin('user', 'user.id', 'referral.assigned_to')
+      .selectAll('referral')
+      .select(['user.username as assigned_to_username', 'user.name as assigned_to_name'])
+      .where('referral.id', '=', parseInt(id))
+      .where('referral.is_deleted', '=', false)
+      .executeTakeFirst();
   }
 
   async findByType(referralType: 'professional' | 'self'): Promise<ReferralRow[]> {

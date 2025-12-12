@@ -16,6 +16,7 @@ interface ReferralFilters {
   search?: string;
   type?: 'all' | 'professional' | 'self';
   status?: 'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived';
+  assignedTo?: string;
 }
 
 export const useReferralList = () => {
@@ -40,6 +41,7 @@ export const useReferralList = () => {
           search: filters.search || '',
           type: filters.type || 'all',
           status: filters.status || 'active',
+          assignedTo: filters.assignedTo || 'all',
         },
       });
 

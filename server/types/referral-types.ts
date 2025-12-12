@@ -20,6 +20,8 @@ export interface Referral {
   referrer_prefers_contact: boolean | null;
   referral_type: 'professional' | 'self';
   status: 'closed' | 'opened' | 'new' | 'archived';
+  assigned_to: string | null;
+  assigned_to_name: string | null;
   opened_at: string | null;
   closed_at: string | null;
   archived_at: string | null;
