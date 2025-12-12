@@ -86,16 +86,24 @@ export default defineEventHandler(async (event) => {
       case 'Delivery':
         updateData.status = 'delivered';
         updateData.delivered_at = DeliveredAt ? new Date(DeliveredAt) : new Date();
+        updateData.webhook_data = { OS: body.OS, Client: body.Client, Geo: body.Geo };
         break;
 
       case 'Bounce':
-        updateData.status = 'bounced';
-        updateData.bounced_at = BouncedAt ? new Date(BouncedAt) : new Date();
-        break;
-
       case 'SpamComplaint':
-        updateData.status = 'spam_complaint';
-        updateData.spam_complaint_at = new Date();
+        updateData.status = RecordType === 'Bounce' ? 'bounced' : 'spam_complaint';
+        updateData.bounced_at = BouncedAt ? new Date(BouncedAt) : new Date();
+        if (RecordType === 'SpamComplaint') {
+          updateData.spam_complaint_at = new Date();
+        }
+        updateData.bounce_type = body.Type || null;
+        updateData.bounce_description = body.Description || null;
+        updateData.webhook_data = {
+          Inactive: body.Inactive,
+          CanActivate: body.CanActivate,
+          Subject: body.Subject,
+          Content: body.Content,
+        };
         break;
 
       case 'Open':
@@ -103,7 +111,16 @@ export default defineEventHandler(async (event) => {
         if (existingEmail.status !== 'bounced' && existingEmail.status !== 'spam_complaint') {
           updateData.status = 'opened';
         }
-        updateData.opened_at = new Date();
+        updateData.opened_at = body.ReceivedAt ? new Date(body.ReceivedAt) : new Date();
+        updateData.platform = body.Platform || null;
+        updateData.user_agent = body.UserAgent || null;
+        updateData.first_open = body.FirstOpen || false;
+        updateData.webhook_data = {
+          OS: body.OS,
+          Client: body.Client,
+          Geo: body.Geo,
+          ReadSeconds: body.ReadSeconds,
+        };
         break;
 
       case 'Click':
@@ -111,7 +128,25 @@ export default defineEventHandler(async (event) => {
         if (existingEmail.status !== 'bounced' && existingEmail.status !== 'spam_complaint') {
           updateData.status = 'clicked';
         }
-        updateData.clicked_at = new Date();
+        updateData.clicked_at = body.ReceivedAt ? new Date(body.ReceivedAt) : new Date();
+        updateData.platform = body.Platform || null;
+        updateData.user_agent = body.UserAgent || null;
+        updateData.click_location = body.ClickLocation || null;
+        updateData.original_link = body.OriginalLink || null;
+        updateData.webhook_data = {
+          OS: body.OS,
+          Client: body.Client,
+          Geo: body.Geo,
+        };
+        break;
+
+      case 'SubscriptionChange':
+        updateData.webhook_data = {
+          ChangedAt: body.ChangedAt,
+          Origin: body.Origin,
+          SuppressSending: body.SuppressSending,
+          SuppressionReason: body.SuppressionReason,
+        };
         break;
 
       default:

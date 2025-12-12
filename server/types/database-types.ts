@@ -55,6 +55,14 @@ export interface ReferralEmail {
   spam_complaint_at: Timestamp | null;
   details: string | null;
   metadata: any | null;
+  bounce_type: string | null;
+  bounce_description: string | null;
+  platform: string | null;
+  user_agent: string | null;
+  first_open: boolean | null;
+  click_location: string | null;
+  original_link: string | null;
+  webhook_data: any | null;
   created_at: Generated<Timestamp>;
   updated_at: Generated<Timestamp>;
 }
