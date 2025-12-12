@@ -201,7 +201,7 @@
                 <div class="flex justify-end gap-2">
                   <button
                     v-if="user.locked"
-                    @click="handleUnlockUser(user.id)"
+                    @click="openUnlockModal(user)"
                     class="text-green-600 hover:text-green-900"
                   >
                     Unlock
@@ -339,6 +339,13 @@
 
     <!-- Edit User Modal -->
     <EditUserModal v-model="showEditUserModal" :user="selectedUser" @updated="handleUserUpdated" />
+
+    <!-- Unlock User Modal -->
+    <UnlockUserModal
+      v-model="showUnlockUserModal"
+      :user="userToUnlock"
+      @unlocked="handleUserUnlocked"
+    />
   </div>
 </template>
 
@@ -351,7 +358,9 @@ definePageMeta({
 const activeTab = ref('users');
 const showNewUserModal = ref(false);
 const showEditUserModal = ref(false);
+const showUnlockUserModal = ref(false);
 const selectedUser = ref<User | null>(null);
+const userToUnlock = ref<User | null>(null);
 
 // Use the useUsers composable
 const { users, loading, error, getUsers } = useUsers();
@@ -381,20 +390,15 @@ const getUserInitials = (username: string): string => {
   return username.substring(0, 2).toUpperCase();
 };
 
-// Handle unlock user
-const handleUnlockUser = async (userId: string) => {
-  if (!confirm('Are you sure you want to unlock this user account?')) return;
+// Open unlock modal
+const openUnlockModal = (user: User) => {
+  userToUnlock.value = user;
+  showUnlockUserModal.value = true;
+};
 
-  try {
-    await $fetch(`/api/users/${userId}/unlock`, {
-      method: 'POST',
-    });
-
-    // Refresh the users list
-    await getUsers();
-  } catch (error: any) {
-    alert(error.data?.message || 'Failed to unlock user account');
-  }
+// Handle user unlocked - refresh list
+const handleUserUnlocked = () => {
+  getUsers();
 };
 
 // Helper function to format dates
