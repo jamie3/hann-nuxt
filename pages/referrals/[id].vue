@@ -206,7 +206,13 @@
               class="group cursor-pointer flex items-center gap-1"
               :title="'Click to assign'"
             >
-              <span>{{ referral.assigned_to_name || 'Not Assigned' }}</span>
+              <span
+                v-if="!referral.assigned_to_name"
+                class="px-2 py-1 text-xs font-medium border border-gray-300 text-gray-600 rounded"
+              >
+                unassigned
+              </span>
+              <span v-else>{{ referral.assigned_to_name }}</span>
               <svg
                 class="w-3.5 h-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
                 fill="none"

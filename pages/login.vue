@@ -39,7 +39,7 @@
         </div>
 
         <!-- Turnstile -->
-        <div>
+        <div v-if="turnstileEnabled">
           <NuxtTurnstile v-model="turnstileToken" />
         </div>
 
@@ -87,6 +87,13 @@ const { value: password } = useField<string>('password');
 
 // Turnstile token
 const turnstileToken = ref<string>('');
+
+// Check if Turnstile is enabled (enabled by default unless explicitly set to "DISABLED")
+const config = useRuntimeConfig();
+const turnstileEnabled = computed(() => {
+  const siteKey = config.public.turnstile?.siteKey || '';
+  return siteKey !== 'DISABLED' && siteKey !== '';
+});
 
 // Use auth composable
 const { performLogin, error: authError } = useAuth();

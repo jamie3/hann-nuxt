@@ -31,6 +31,9 @@ export default defineNuxtConfig({
     },
     public: {
       googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+      turnstile: {
+        siteKey: process.env.NUXT_TURNSTILE_SITE_KEY || '',
+      },
     },
   },
 });

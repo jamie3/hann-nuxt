@@ -411,7 +411,7 @@
           </div>
 
           <!-- Turnstile -->
-          <div>
+          <div v-if="turnstileEnabled">
             <NuxtTurnstile v-model="turnstileToken" />
           </div>
 
@@ -513,6 +513,13 @@ const successMessage = ref<string>('');
 
 // Turnstile token
 const turnstileToken = ref<string>('');
+
+// Check if Turnstile is enabled (enabled by default unless explicitly set to "DISABLED")
+const config = useRuntimeConfig();
+const turnstileEnabled = computed(() => {
+  const siteKey = config.public.turnstile?.siteKey || '';
+  return siteKey !== 'DISABLED' && siteKey !== '';
+});
 
 // Handle form submission
 const onSubmit = handleSubmit(async (values) => {

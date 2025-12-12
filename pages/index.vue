@@ -271,7 +271,13 @@
                   class="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
                   :title="'Click to assign'"
                 >
-                  {{ referral.assigned_to_name || '-' }}
+                  <span
+                    v-if="!referral.assigned_to_name"
+                    class="px-2 py-1 text-xs font-medium border border-gray-300 text-gray-600 rounded"
+                  >
+                    unassigned
+                  </span>
+                  <span v-else>{{ referral.assigned_to_name }}</span>
                 </div>
                 <select
                   v-else
