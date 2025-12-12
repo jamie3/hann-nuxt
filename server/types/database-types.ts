@@ -46,6 +46,7 @@ export interface ReferralEmail {
   status: Generated<string>;
   record_type: string | null;
   tag: string | null;
+  subject: string | null;
   email_content: string | null;
   file_id: number | null;
   delivered_at: Timestamp | null;

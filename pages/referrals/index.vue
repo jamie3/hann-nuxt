@@ -95,7 +95,7 @@
           <select
             id="pageSize"
             v-model.number="itemsPerPage"
-            class="max-w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="max-w-24 px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option :value="25">25</option>
             <option :value="50">50</option>

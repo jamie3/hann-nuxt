@@ -67,6 +67,7 @@ export class EmailService {
         message_id: response.MessageID,
         status: 'sent',
         tag,
+        subject: `${referralType} Referral`,
         email_content: emailContent,
         file_id: pdfFileId,
       });
@@ -104,6 +105,7 @@ export class EmailService {
           message_id: clientResponse.MessageID,
           status: 'sent',
           tag,
+          subject: `${referralType} Referral Confirmation`,
           email_content: confirmationContent,
           file_id: null, // Confirmation email doesn't include PDF
         });
