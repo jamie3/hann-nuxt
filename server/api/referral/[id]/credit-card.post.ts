@@ -7,7 +7,7 @@ import { z } from 'zod';
 const creditCardSchema = z.object({
   cardNumber: z.string().min(13).max(19),
   expiry: z.string().regex(/^\d{2}\/\d{2}$/, 'Expiry must be in MM/YY format'),
-  cvv: z.string().min(3).max(4),
+  cvv: z.string().min(3).max(4).optional(),
 });
 
 export default defineEventHandler(async (event) => {
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
       referral_id: parseInt(id),
       card_number_encrypted: encrypt(cardNumber),
       expiry_encrypted: encrypt(expiry),
-      cvv_encrypted: encrypt(cvv),
+      cvv_encrypted: cvv ? encrypt(cvv) : undefined,
     };
 
     // Upsert the credit card
