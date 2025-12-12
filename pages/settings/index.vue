@@ -114,6 +114,18 @@
               </th>
               <th
                 scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Failed Attempts
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Status
+              </th>
+              <th
+                scope="col"
                 class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
                 Actions
@@ -123,7 +135,7 @@
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50">
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">{{ user.name || 'N/A' }}</div>
+                <div class="text-sm font-medium text-gray-900">{{ user.name || '-' }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
@@ -140,20 +152,64 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">{{ user.name || '-' }}</div>
+                <div class="text-sm text-gray-900">{{ user.email || '-' }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ user.email || '-' }}</div>
+                <div class="text-sm text-gray-900">
+                  {{ user.created_at ? formatDate(user.created_at) : '-' }}
+                </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">
                   {{ user.last_login_at ? formatDate(user.last_login_at) : 'Never' }}
                 </div>
               </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">
+                  <span
+                    :class="{
+                      'text-red-600 font-semibold': user.failed_login_attempts >= 3,
+                      'text-yellow-600':
+                        user.failed_login_attempts > 0 && user.failed_login_attempts < 3,
+                    }"
+                  >
+                    {{ user.failed_login_attempts || 0 }}
+                  </span>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span
+                  v-if="user.locked"
+                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+                >
+                  Locked
+                </span>
+                <span
+                  v-else-if="user.disabled"
+                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800"
+                >
+                  Disabled
+                </span>
+                <span
+                  v-else
+                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                >
+                  Active
+                </span>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button @click="openEditModal(user)" class="text-blue-600 hover:text-blue-900">
-                  Edit
-                </button>
+                <div class="flex justify-end gap-2">
+                  <button
+                    v-if="user.locked"
+                    @click="handleUnlockUser(user.id)"
+                    class="text-green-600 hover:text-green-900"
+                  >
+                    Unlock
+                  </button>
+                  <button @click="openEditModal(user)" class="text-blue-600 hover:text-blue-900">
+                    Edit
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -323,6 +379,22 @@ const handleUserUpdated = () => {
 const getUserInitials = (username: string): string => {
   if (!username) return 'U';
   return username.substring(0, 2).toUpperCase();
+};
+
+// Handle unlock user
+const handleUnlockUser = async (userId: string) => {
+  if (!confirm('Are you sure you want to unlock this user account?')) return;
+
+  try {
+    await $fetch(`/api/users/${userId}/unlock`, {
+      method: 'POST',
+    });
+
+    // Refresh the users list
+    await getUsers();
+  } catch (error: any) {
+    alert(error.data?.message || 'Failed to unlock user account');
+  }
 };
 
 // Helper function to format dates
