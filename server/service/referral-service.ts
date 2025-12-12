@@ -123,11 +123,10 @@ export class ReferralService {
       const referralTypeFormatted =
         referral.referral_type === 'professional' ? 'Professional' : 'Self';
       await emailService.sendReferralNotification(
-        referral.id,
+        referral,
         referralTypeFormatted,
         pdfBuffer,
-        pdfFile.id,
-        referral.email
+        pdfFile.id
       );
     } catch (error) {
       logger.error('Failed to generate/email PDF', { error });

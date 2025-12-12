@@ -3,6 +3,7 @@ import { ReferralEmailRepository } from '../repository/referral-email-repository
 import { useDB } from '../utils/db';
 import { env } from '../utils/env';
 import { logger } from '../lib/logger';
+import { renderEmailTemplate } from '../utils/email-templates';
 
 export class EmailService {
   private client: postmark.ServerClient | null = null;
@@ -16,11 +17,10 @@ export class EmailService {
   }
 
   async sendReferralNotification(
-    referralId: string,
+    referral: any,
     referralType: string,
     pdfBuffer: Buffer,
-    pdfFileId: number,
-    clientEmail?: string | null
+    pdfFileId: number
   ): Promise<void> {
     if (!this.client) {
       logger.warn('Postmark client not initialized. Skipping email.');
@@ -35,13 +35,23 @@ export class EmailService {
 
     // Send email with PDF attachment to admin
     try {
-      const emailContent = `<h2>New Referral</h2><p>A new ${referralType} referral has been submitted.</p>`;
       const tag = 'referral-notification';
+      const subject = `${referralType} Referral`;
+
+      // Render email template with referral data
+      const emailContent = await renderEmailTemplate('new-referral', {
+        first_name: referral.first_name,
+        last_name: referral.last_name,
+        referral_date: referral.referred_at
+          ? new Date(referral.referred_at).toLocaleDateString()
+          : new Date().toLocaleDateString(),
+        referral_id: referral.id,
+      });
 
       const response = await this.client.sendEmail({
         From: fromEmail,
         To: toEmail,
-        Subject: `${referralType} Referral`,
+        Subject: subject,
         MessageStream: 'outbound',
         HtmlBody: emailContent,
         Attachments: [
@@ -61,13 +71,13 @@ export class EmailService {
 
       // Log the email to database
       await emailRepository.create({
-        referral_id: parseInt(referralId),
+        referral_id: parseInt(referral.id),
         from_email: fromEmail,
         recipient_email: toEmail,
         message_id: response.MessageID,
         status: 'sent',
         tag,
-        subject: `${referralType} Referral`,
+        subject,
         email_content: emailContent,
         file_id: pdfFileId,
       });
@@ -77,17 +87,19 @@ export class EmailService {
     }
 
     // Send confirmation email to client if email is provided
-    if (clientEmail) {
+    if (referral.email) {
       try {
         const confirmationContent =
           '<h2>Thank you</h2><p>We have received your referral and will contact you shortly. If you have any questions please email info@hannpsychologicalservices.com</p>';
 
         const tag = 'referral-confirmation';
 
+        const subject = `${referralType} Referral Confirmation`;
+
         const clientResponse = await this.client.sendEmail({
           From: fromEmail,
-          To: clientEmail,
-          Subject: `${referralType} Referral Confirmation`,
+          To: referral.email,
+          Subject: subject,
           MessageStream: 'outbound',
           HtmlBody: confirmationContent,
           Tag: tag,
@@ -99,13 +111,13 @@ export class EmailService {
 
         // Log the client confirmation email to database
         await emailRepository.create({
-          referral_id: parseInt(referralId),
+          referral_id: parseInt(referral.id),
           from_email: fromEmail,
-          recipient_email: clientEmail,
+          recipient_email: referral.email,
           message_id: clientResponse.MessageID,
           status: 'sent',
           tag,
-          subject: `${referralType} Referral Confirmation`,
+          subject,
           email_content: confirmationContent,
           file_id: null, // Confirmation email doesn't include PDF
         });

@@ -4204,6 +4204,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:^10.0.0":
+  version: 10.0.1
+  resolution: "commander@npm:10.0.1"
+  checksum: 10/8799faa84a30da985802e661cc9856adfaee324d4b138413013ef7f087e8d7924b144c30a1f1405475f0909f467665cd9e1ce13270a2f41b141dab0b7a58f3fb
+  languageName: node
+  linkType: hard
+
 "commander@npm:^11.1.0":
   version: 11.1.0
   resolution: "commander@npm:11.1.0"
@@ -6530,6 +6537,7 @@ __metadata:
     kysely: "npm:^0.28.8"
     kysely-codegen: "npm:^0.19.0"
     kysely-ctl: "npm:^0.19.0"
+    liquidjs: "npm:^10.24.0"
     mysql2: "npm:^3.11.5"
     nuxt: "npm:^4.2.1"
     nuxt-auth-utils: "npm:^0.5.25"
@@ -7733,6 +7741,18 @@ __metadata:
   version: 1.2.4
   resolution: "lines-and-columns@npm:1.2.4"
   checksum: 10/0c37f9f7fa212b38912b7145e1cd16a5f3cd34d782441c3e6ca653485d326f58b3caccda66efce1c5812bde4961bbde3374fae4b0d11bf1226152337f3894aa5
+  languageName: node
+  linkType: hard
+
+"liquidjs@npm:^10.24.0":
+  version: 10.24.0
+  resolution: "liquidjs@npm:10.24.0"
+  dependencies:
+    commander: "npm:^10.0.0"
+  bin:
+    liquid: bin/liquid.js
+    liquidjs: bin/liquid.js
+  checksum: 10/2ba7424a3decc9d6b9c8b937c4d8104ab45e42043279175bc116d2fc75b6ed5fbeff11552e5f53f581fc57467622081e590aba878cc20b5da41d9914ec248b70
   languageName: node
   linkType: hard
 
