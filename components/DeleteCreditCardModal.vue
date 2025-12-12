@@ -1,10 +1,10 @@
 <template>
   <div
     v-if="modelValue"
-    class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center"
     @click.self="closeModal"
   >
-    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+    <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white mx-4">
       <!-- Modal Header -->
       <div class="flex justify-between items-center pb-3 border-b">
         <h3 class="text-xl font-semibold text-gray-900">Delete Credit Card</h3>
