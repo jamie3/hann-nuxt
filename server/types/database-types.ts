@@ -101,9 +101,13 @@ export interface OriginalClinicalNote {
 }
 
 export interface Referral {
+  address_1: string | null;
+  address_2: string | null;
   archived_at: Timestamp | null;
   assigned_to: number | null;
+  city: string | null;
   closed_at: Timestamp | null;
+  country: string | null;
   created_at: Generated<Timestamp>;
   date_of_birth: Timestamp | null;
   email: string | null;
@@ -117,8 +121,10 @@ export interface Referral {
   opened_at: Timestamp | null;
   original_id: number | null;
   parents_guardians: string | null;
+  postal_zip: string | null;
   presenting_issues: string | null;
   primary_telephone: string;
+  province_state: string | null;
   public_id: Generated<string>;
   referral_type: string;
   referred_at: Generated<Timestamp | null>;

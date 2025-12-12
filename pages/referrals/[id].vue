@@ -330,8 +330,21 @@
               <dt class="text-sm font-medium text-gray-500">Email</dt>
               <dd class="mt-1 text-sm text-gray-900">{{ referral.email }}</dd>
             </div>
-            <div v-if="referral.mailing_address">
-              <dt class="text-sm font-medium text-gray-500">Mailing Address</dt>
+            <div v-if="referral.address_1" class="md:col-span-2">
+              <dt class="text-sm font-medium text-gray-500">Address</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                <div>{{ referral.address_1 }}</div>
+                <div v-if="referral.address_2">{{ referral.address_2 }}</div>
+                <div>
+                  {{ referral.city
+                  }}<span v-if="referral.province_state">, {{ referral.province_state }}</span>
+                  <span v-if="referral.postal_zip"> {{ referral.postal_zip }}</span>
+                </div>
+                <div v-if="referral.country">{{ referral.country }}</div>
+              </dd>
+            </div>
+            <div v-if="referral.mailing_address" class="md:col-span-2">
+              <dt class="text-sm font-medium text-gray-500">Mailing Address (Legacy)</dt>
               <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">
                 {{ referral.mailing_address }}
               </dd>

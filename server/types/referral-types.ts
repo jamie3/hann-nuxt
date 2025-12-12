@@ -11,6 +11,12 @@ export interface Referral {
   secondary_telephone: string | null;
   email: string | null;
   mailing_address: string | null;
+  address_1: string | null;
+  address_2: string | null;
+  city: string | null;
+  province_state: string | null;
+  country: string | null;
+  postal_zip: string | null;
   referrer_name: string | null;
   referrer_relationship: string | null;
   referrer_email: string | null;
@@ -41,6 +47,12 @@ export interface NewReferral {
   secondary_telephone?: string;
   email?: string;
   mailing_address?: string;
+  address_1?: string;
+  address_2?: string;
+  city?: string;
+  province_state?: string;
+  country?: string;
+  postal_zip?: string;
   referrer_name?: string;
   referrer_relationship?: string;
   referrer_email?: string;

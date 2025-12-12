@@ -185,11 +185,104 @@
             </select>
           </div>
 
-          <!-- Mailing Address (full width) -->
+          <!-- Address 1 -->
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Mailing Address</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Address 1</label>
             <input
-              v-model="formData.mailing_address"
+              v-model="formData.address_1"
+              type="text"
+              placeholder="Street address"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- Address 2 -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Address 2</label>
+            <input
+              v-model="formData.address_2"
+              type="text"
+              placeholder="Apartment, suite, unit, etc."
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- City -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+            <input
+              v-model="formData.city"
+              type="text"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- Country -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Country</label>
+            <select
+              v-model="formData.country"
+              class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select country</option>
+              <option
+                v-for="countryOption in COUNTRIES"
+                :key="countryOption"
+                :value="countryOption"
+              >
+                {{ countryOption }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Province/State -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              {{
+                formData.country === 'Canada'
+                  ? 'Province'
+                  : formData.country === 'United States'
+                    ? 'State'
+                    : 'Province / State'
+              }}
+            </label>
+            <select
+              v-if="formData.country === 'Canada' || formData.country === 'United States'"
+              v-model="formData.province_state"
+              class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">
+                Select {{ formData.country === 'Canada' ? 'province' : 'state' }}
+              </option>
+              <option
+                v-for="option in formData.country === 'Canada' ? CANADIAN_PROVINCES : US_STATES"
+                :key="option"
+                :value="option"
+              >
+                {{ option }}
+              </option>
+            </select>
+            <input
+              v-else
+              v-model="formData.province_state"
+              type="text"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- Postal/Zip -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              {{
+                formData.country === 'Canada'
+                  ? 'Postal Code'
+                  : formData.country === 'United States'
+                    ? 'Zip Code'
+                    : 'Postal / Zip Code'
+              }}
+            </label>
+            <input
+              v-model="formData.postal_zip"
               type="text"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -236,6 +329,7 @@
 <script setup lang="ts">
 import type { Referral } from '~/server/types/referral-types';
 import { REQUESTED_SERVICES, PAYMENT_METHODS, GENDERS } from '~/types/referral-options';
+import { COUNTRIES, CANADIAN_PROVINCES, US_STATES } from '~/types/address-options';
 
 interface Props {
   modelValue: boolean;
@@ -270,7 +364,12 @@ const formData = ref({
   referrer_relationship: '',
   referrer_email: '',
   method_of_payment: '',
-  mailing_address: '',
+  address_1: '',
+  address_2: '',
+  city: '',
+  province_state: '',
+  country: '',
+  postal_zip: '',
   presenting_issues: '',
 });
 
@@ -299,7 +398,12 @@ watch(
         referrer_relationship: newReferral.referrer_relationship || '',
         referrer_email: newReferral.referrer_email || '',
         method_of_payment: newReferral.method_of_payment || '',
-        mailing_address: newReferral.mailing_address || '',
+        address_1: newReferral.address_1 ?? '',
+        address_2: newReferral.address_2 ?? '',
+        city: newReferral.city ?? '',
+        province_state: newReferral.province_state ?? '',
+        country: newReferral.country ?? '',
+        postal_zip: newReferral.postal_zip ?? '',
         presenting_issues: newReferral.presenting_issues || '',
       };
     }

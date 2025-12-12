@@ -138,22 +138,144 @@
             </p>
           </div>
 
-          <!-- Mailing Address -->
+          <!-- Address 1 -->
           <div>
-            <label for="mailingAddress" class="block text-sm font-medium text-gray-700 mb-1">
-              Mailing Address <span class="text-red-500">*</span>
+            <label for="address1" class="block text-sm font-medium text-gray-700 mb-1">
+              Address 1 <span class="text-red-500">*</span>
             </label>
-            <textarea
-              v-model="mailingAddress"
-              id="mailingAddress"
-              rows="3"
-              placeholder="Enter your mailing address..."
+            <input
+              v-model="address1"
+              type="text"
+              id="address1"
+              placeholder="Street address"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              :class="{ 'border-red-500': errors.mailingAddress }"
-            ></textarea>
-            <p v-if="errors.mailingAddress" class="mt-1 text-sm text-red-500">
-              {{ errors.mailingAddress }}
+              :class="{ 'border-red-500': errors.address1 }"
+            />
+            <p v-if="errors.address1" class="mt-1 text-sm text-red-500">
+              {{ errors.address1 }}
             </p>
+          </div>
+
+          <!-- Address 2 -->
+          <div>
+            <label for="address2" class="block text-sm font-medium text-gray-700 mb-1">
+              Address 2
+            </label>
+            <input
+              v-model="address2"
+              type="text"
+              id="address2"
+              placeholder="Apartment, suite, unit, etc."
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- City -->
+          <div>
+            <label for="city" class="block text-sm font-medium text-gray-700 mb-1">
+              City <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="city"
+              type="text"
+              id="city"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.city }"
+            />
+            <p v-if="errors.city" class="mt-1 text-sm text-red-500">
+              {{ errors.city }}
+            </p>
+          </div>
+
+          <!-- Country -->
+          <div>
+            <label for="country" class="block text-sm font-medium text-gray-700 mb-1">
+              Country <span class="text-red-500">*</span>
+            </label>
+            <select
+              v-model="country"
+              id="country"
+              class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.country }"
+            >
+              <option value="">Select country</option>
+              <option
+                v-for="countryOption in COUNTRIES"
+                :key="countryOption"
+                :value="countryOption"
+              >
+                {{ countryOption }}
+              </option>
+            </select>
+            <p v-if="errors.country" class="mt-1 text-sm text-red-500">
+              {{ errors.country }}
+            </p>
+          </div>
+
+          <!-- Province/State and Postal/Zip on same row -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="provinceState" class="block text-sm font-medium text-gray-700 mb-1">
+                {{
+                  country === 'Canada'
+                    ? 'Province'
+                    : country === 'United States'
+                      ? 'State'
+                      : 'Province / State'
+                }}
+                <span class="text-red-500">*</span>
+              </label>
+              <select
+                v-if="country === 'Canada' || country === 'United States'"
+                v-model="provinceState"
+                id="provinceState"
+                class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :class="{ 'border-red-500': errors.provinceState }"
+              >
+                <option value="">Select {{ country === 'Canada' ? 'province' : 'state' }}</option>
+                <option
+                  v-for="option in country === 'Canada' ? CANADIAN_PROVINCES : US_STATES"
+                  :key="option"
+                  :value="option"
+                >
+                  {{ option }}
+                </option>
+              </select>
+              <input
+                v-else
+                v-model="provinceState"
+                type="text"
+                id="provinceState"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :class="{ 'border-red-500': errors.provinceState }"
+              />
+              <p v-if="errors.provinceState" class="mt-1 text-sm text-red-500">
+                {{ errors.provinceState }}
+              </p>
+            </div>
+
+            <div>
+              <label for="postalZip" class="block text-sm font-medium text-gray-700 mb-1">
+                {{
+                  country === 'Canada'
+                    ? 'Postal Code'
+                    : country === 'United States'
+                      ? 'Zip Code'
+                      : 'Postal / Zip Code'
+                }}
+                <span class="text-red-500">*</span>
+              </label>
+              <input
+                v-model="postalZip"
+                type="text"
+                id="postalZip"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :class="{ 'border-red-500': errors.postalZip }"
+              />
+              <p v-if="errors.postalZip" class="mt-1 text-sm text-red-500">
+                {{ errors.postalZip }}
+              </p>
+            </div>
           </div>
 
           <!-- Referrer Name -->
@@ -322,6 +444,7 @@ import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
 import { REQUESTED_SERVICES, GENDERS, PAYMENT_METHODS } from '~/types/referral-options';
+import { COUNTRIES, CANADIAN_PROVINCES, US_STATES } from '~/types/address-options';
 
 definePageMeta({
   layout: 'login',
@@ -338,7 +461,12 @@ const schema = toTypedSchema(
     primaryTelephone: z.string().min(1, 'Primary telephone is required'),
     secondaryTelephone: z.string().optional(),
     email: z.string().email('Invalid email address').min(1, 'Email is required'),
-    mailingAddress: z.string().min(1, 'Mailing address is required'),
+    address1: z.string().min(1, 'Address is required'),
+    address2: z.string().optional(),
+    city: z.string().min(1, 'City is required'),
+    provinceState: z.string().min(1, 'Province/State is required'),
+    country: z.string().min(1, 'Country is required'),
+    postalZip: z.string().min(1, 'Postal/Zip code is required'),
     referrerName: z.string().min(1, 'Referrer name is required'),
     referrerRelationship: z.string().min(1, 'Referrer relationship is required'),
     referrerEmail: z.string().email('Invalid email address').min(1, 'Referrer email is required'),
@@ -365,7 +493,12 @@ const { value: parentsGuardians } = useField<string>('parentsGuardians');
 const { value: primaryTelephone } = useField<string>('primaryTelephone');
 const { value: secondaryTelephone } = useField<string>('secondaryTelephone');
 const { value: email } = useField<string>('email');
-const { value: mailingAddress } = useField<string>('mailingAddress');
+const { value: address1 } = useField<string>('address1');
+const { value: address2 } = useField<string>('address2');
+const { value: city } = useField<string>('city');
+const { value: provinceState } = useField<string>('provinceState');
+const { value: country } = useField<string>('country');
+const { value: postalZip } = useField<string>('postalZip');
 const { value: referrerName } = useField<string>('referrerName');
 const { value: referrerRelationship } = useField<string>('referrerRelationship');
 const { value: referrerEmail } = useField<string>('referrerEmail');

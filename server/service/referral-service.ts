@@ -49,6 +49,12 @@ export class ReferralService {
       secondary_telephone: row.secondary_telephone,
       email: row.email,
       mailing_address: row.mailing_address,
+      address_1: row.address_1 || null,
+      address_2: row.address_2 || null,
+      city: row.city || null,
+      province_state: row.province_state || null,
+      country: row.country || null,
+      postal_zip: row.postal_zip || null,
       referrer_name: row.referrer_name,
       referrer_relationship: row.referrer_relationship,
       referrer_email: row.referrer_email,
@@ -83,6 +89,12 @@ export class ReferralService {
       secondary_telephone: referral.secondary_telephone || null,
       email: referral.email || null,
       mailing_address: referral.mailing_address || null,
+      address_1: referral.address_1 || null,
+      address_2: referral.address_2 || null,
+      city: referral.city || null,
+      province_state: referral.province_state || null,
+      country: referral.country || null,
+      postal_zip: referral.postal_zip || null,
       referrer_name: referral.referrer_name || null,
       referrer_relationship: referral.referrer_relationship || null,
       referrer_email: referral.referrer_email || null,
@@ -278,6 +290,12 @@ export class ReferralService {
     if (data.email !== undefined) updateData.email = data.email || null;
     if (data.mailing_address !== undefined)
       updateData.mailing_address = data.mailing_address || null;
+    if (data.address_1 !== undefined) updateData.address_1 = data.address_1 ?? null;
+    if (data.address_2 !== undefined) updateData.address_2 = data.address_2 ?? null;
+    if (data.city !== undefined) updateData.city = data.city ?? null;
+    if (data.province_state !== undefined) updateData.province_state = data.province_state ?? null;
+    if (data.country !== undefined) updateData.country = data.country ?? null;
+    if (data.postal_zip !== undefined) updateData.postal_zip = data.postal_zip ?? null;
     if (data.referrer_name !== undefined) updateData.referrer_name = data.referrer_name || null;
     if (data.referrer_relationship !== undefined)
       updateData.referrer_relationship = data.referrer_relationship || null;
