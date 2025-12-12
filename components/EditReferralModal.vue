@@ -206,101 +206,6 @@
           </div>
         </div>
 
-        <!-- Credit Card Section -->
-        <div class="mt-6 pt-6 border-t">
-          <div class="flex justify-between items-center mb-4">
-            <h4 class="text-lg font-medium text-gray-900">Payment Information</h4>
-            <button
-              v-if="!showCreditCardForm && !existingCreditCard"
-              type="button"
-              @click="showCreditCardForm = true"
-              class="text-sm text-blue-600 hover:text-blue-800"
-            >
-              + Add Credit Card
-            </button>
-          </div>
-
-          <!-- Existing Credit Card Display -->
-          <div v-if="existingCreditCard && !showCreditCardForm" class="bg-gray-50 rounded-lg p-4">
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="text-sm font-medium text-gray-700">Card Number</p>
-                <p class="text-base text-gray-900">{{ existingCreditCard.card_number_masked }}</p>
-                <p class="text-sm text-gray-500 mt-2">Expiry: {{ existingCreditCard.expiry }}</p>
-              </div>
-              <div class="flex gap-2">
-                <button
-                  type="button"
-                  @click="handleEditCreditCard"
-                  class="text-sm text-blue-600 hover:text-blue-800"
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  @click="handleDeleteCreditCard"
-                  class="text-sm text-red-600 hover:text-red-800"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Credit Card Form -->
-          <div v-if="showCreditCardForm" class="bg-blue-50 rounded-lg p-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Card Number *</label>
-                <input
-                  v-model="creditCardData.cardNumber"
-                  type="text"
-                  placeholder="1234 5678 9012 3456"
-                  maxlength="19"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Expiry (MM/YY) *</label>
-                <input
-                  v-model="creditCardData.expiry"
-                  type="text"
-                  placeholder="12/25"
-                  maxlength="5"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">CVV *</label>
-                <input
-                  v-model="creditCardData.cvv"
-                  type="text"
-                  placeholder="123"
-                  maxlength="4"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-            <div class="flex justify-end gap-2 mt-4">
-              <button
-                type="button"
-                @click="cancelCreditCardForm"
-                class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                @click="handleSaveCreditCard"
-                :disabled="isSavingCard"
-                class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-              >
-                {{ isSavingCard ? 'Saving...' : 'Save Card' }}
-              </button>
-            </div>
-          </div>
-        </div>
-
         <!-- Error Message -->
         <div v-if="errorMessage" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
           <p class="text-sm text-red-600">{{ errorMessage }}</p>
@@ -369,20 +274,10 @@ const formData = ref({
   presenting_issues: '',
 });
 
-// Credit card state
-const showCreditCardForm = ref(false);
-const isSavingCard = ref(false);
-const existingCreditCard = ref<any>(null);
-const creditCardData = ref({
-  cardNumber: '',
-  expiry: '',
-  cvv: '',
-});
-
 // Watch for referral changes and populate form
 watch(
   () => props.referral,
-  async (newReferral) => {
+  (newReferral) => {
     if (newReferral) {
       formData.value = {
         first_name: newReferral.first_name,
@@ -407,34 +302,14 @@ watch(
         mailing_address: newReferral.mailing_address || '',
         presenting_issues: newReferral.presenting_issues || '',
       };
-
-      // Load existing credit card if available
-      await loadCreditCard(newReferral.id);
     }
   },
   { immediate: true }
 );
 
-// Load existing credit card
-const loadCreditCard = async (referralId: string) => {
-  try {
-    const response = await $fetch(`/api/referral/${referralId}/credit-card`);
-    if (response.creditCard) {
-      existingCreditCard.value = response.creditCard;
-    } else {
-      existingCreditCard.value = null;
-    }
-  } catch (error) {
-    console.error('Failed to load credit card:', error);
-    existingCreditCard.value = null;
-  }
-};
-
 const closeModal = () => {
   emit('update:modelValue', false);
   errorMessage.value = '';
-  showCreditCardForm.value = false;
-  creditCardData.value = { cardNumber: '', expiry: '', cvv: '' };
 };
 
 const handleSubmit = async () => {
@@ -453,72 +328,5 @@ const handleSubmit = async () => {
   } finally {
     isSubmitting.value = false;
   }
-};
-
-// Credit card functions
-const handleSaveCreditCard = async () => {
-  if (!props.referral) return;
-
-  // Validate credit card data
-  if (
-    !creditCardData.value.cardNumber ||
-    !creditCardData.value.expiry ||
-    !creditCardData.value.cvv
-  ) {
-    errorMessage.value = 'Please fill in all credit card fields';
-    return;
-  }
-
-  isSavingCard.value = true;
-  errorMessage.value = '';
-
-  try {
-    await $fetch(`/api/referral/${props.referral.id}/credit-card`, {
-      method: 'POST',
-      body: creditCardData.value,
-    });
-
-    // Reload credit card data
-    await loadCreditCard(props.referral.id);
-
-    // Reset form and hide it
-    creditCardData.value = { cardNumber: '', expiry: '', cvv: '' };
-    showCreditCardForm.value = false;
-  } catch (error: any) {
-    errorMessage.value = error.data?.message || 'Failed to save credit card';
-  } finally {
-    isSavingCard.value = false;
-  }
-};
-
-const handleEditCreditCard = () => {
-  if (existingCreditCard.value) {
-    creditCardData.value = {
-      cardNumber: existingCreditCard.value.card_number,
-      expiry: existingCreditCard.value.expiry,
-      cvv: existingCreditCard.value.cvv,
-    };
-  }
-  showCreditCardForm.value = true;
-};
-
-const handleDeleteCreditCard = async () => {
-  if (!props.referral || !confirm('Are you sure you want to delete this credit card?')) return;
-
-  try {
-    await $fetch(`/api/referral/${props.referral.id}/credit-card`, {
-      method: 'DELETE',
-    });
-
-    existingCreditCard.value = null;
-  } catch (error: any) {
-    errorMessage.value = error.data?.message || 'Failed to delete credit card';
-  }
-};
-
-const cancelCreditCardForm = () => {
-  showCreditCardForm.value = false;
-  creditCardData.value = { cardNumber: '', expiry: '', cvv: '' };
-  errorMessage.value = '';
 };
 </script>
