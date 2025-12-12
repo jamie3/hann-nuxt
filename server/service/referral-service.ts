@@ -27,6 +27,26 @@ export class ReferralService {
 
   // Map database row to domain model
   private mapToReferral(row: ReferralRow): Referral {
+    // Determine correct status based on dates (ensures data consistency)
+    let status: 'closed' | 'opened' | 'new' | 'archived' = row.status as
+      | 'closed'
+      | 'opened'
+      | 'new'
+      | 'archived';
+
+    // Fix inconsistent status: if closed_at exists, status should be 'closed'
+    if (row.closed_at) {
+      status = 'closed';
+    }
+    // If opened_at exists but no closed_at, status should be 'opened'
+    else if (row.opened_at) {
+      status = 'opened';
+    }
+    // If neither opened_at nor closed_at exist, status should be 'new'
+    else if (!row.opened_at && !row.closed_at) {
+      status = 'new';
+    }
+
     return {
       id: row.id.toString(),
       first_name: row.first_name,
@@ -51,7 +71,7 @@ export class ReferralService {
       method_of_payment: row.method_of_payment,
       referrer_prefers_contact: row.referrer_prefers_contact,
       referral_type: row.referral_type as 'professional' | 'self',
-      status: row.status as 'closed' | 'opened' | 'new' | 'archived',
+      status: status,
       opened_at: row.opened_at ? row.opened_at.toISOString() : null,
       closed_at: row.closed_at ? row.closed_at.toISOString() : null,
       archived_at: null,
