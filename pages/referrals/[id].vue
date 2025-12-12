@@ -63,113 +63,137 @@
               </span>
             </div>
           </div>
-          <div class="flex items-center gap-3">
-            <!-- Edit Button -->
+          <div class="relative">
+            <!-- Actions Dropdown Button -->
             <button
-              @click="openEditModal"
-              :disabled="referral.status === 'closed'"
-              class="px-4 py-2 border-2 border-blue-600 text-blue-600 text-sm font-medium rounded-md hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              :title="
-                referral.status === 'closed' ? 'Cannot edit closed referrals' : 'Edit Referral'
-              "
+              @click="showActionsMenu = !showActionsMenu"
+              class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 flex items-center gap-2"
             >
+              <span>Actions</span>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  d="M19 9l-7 7-7-7"
                 ></path>
               </svg>
-              Edit Referral
             </button>
 
-            <!-- Download PDF Button -->
-            <a
-              :href="`/api/referral/${id}/pdf`"
-              download
-              class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 flex items-center gap-2"
-              title="Download Referral PDF"
+            <!-- Dropdown Menu -->
+            <div
+              v-if="showActionsMenu"
+              class="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                ></path>
-              </svg>
-              Download Referral PDF
-            </a>
+              <div class="py-1">
+                <!-- Edit -->
+                <button
+                  @click="handleMenuAction(openEditModal)"
+                  :disabled="referral.status === 'closed'"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    ></path>
+                  </svg>
+                  Edit Referral
+                </button>
 
-            <!-- Email PDF Button -->
-            <button
-              @click="openEmailPDFModal"
-              class="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 flex items-center gap-2"
-              title="Email Referral PDF"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                ></path>
-              </svg>
-              Email Referral PDF
-            </button>
+                <!-- Open (when new or closed) -->
+                <button
+                  v-if="referral.status === 'new' || referral.status === 'closed'"
+                  @click="handleMenuAction(handleOpenReferral)"
+                  :disabled="isUpdating"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  Open Referral
+                </button>
 
-            <!-- Delete Button -->
-            <button
-              @click="openDeleteModal"
-              class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 flex items-center gap-2"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                ></path>
-              </svg>
-              Delete Referral
-            </button>
+                <!-- Close (when new or opened) -->
+                <button
+                  v-if="referral.status === 'new' || referral.status === 'opened'"
+                  @click="handleMenuAction(handleCloseReferral)"
+                  :disabled="isUpdating"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    ></path>
+                  </svg>
+                  Close Referral
+                </button>
 
-            <!-- Open Button (visible when status is 'new' or 'closed') -->
-            <button
-              v-if="referral.status === 'new' || referral.status === 'closed'"
-              @click="handleOpenReferral"
-              :disabled="isUpdating"
-              class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"
-                ></path>
-              </svg>
-              {{ isUpdating ? 'Opening...' : 'Open Referral' }}
-            </button>
+                <div class="border-t border-gray-100"></div>
 
-            <!-- Close Button (visible when status is 'new' or 'opened') -->
-            <button
-              v-if="referral.status === 'new' || referral.status === 'opened'"
-              @click="handleCloseReferral"
-              :disabled="isUpdating"
-              class="px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                ></path>
-              </svg>
-              {{ isUpdating ? 'Closing...' : 'Close Referral' }}
-            </button>
+                <!-- Download PDF -->
+                <a
+                  :href="`/api/referral/${id}/pdf`"
+                  download
+                  @click="showActionsMenu = false"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 block"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    ></path>
+                  </svg>
+                  Download PDF
+                </a>
+
+                <!-- Email PDF -->
+                <button
+                  @click="handleMenuAction(openEmailPDFModal)"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  Email PDF
+                </button>
+
+                <div class="border-t border-gray-100"></div>
+
+                <!-- Delete -->
+                <button
+                  @click="handleMenuAction(openDeleteModal)"
+                  class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    ></path>
+                  </svg>
+                  Delete Referral
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -287,6 +311,112 @@
               <dd class="mt-1 text-sm text-gray-900">{{ referral.method_of_payment }}</dd>
             </div>
           </dl>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="bg-white shadow-sm rounded-lg p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Payment Information</h2>
+            <div class="flex gap-2">
+              <button
+                v-if="creditCard"
+                @click="toggleCardVisibility"
+                class="p-2 text-gray-600 hover:text-gray-800"
+                title="Toggle card visibility"
+              >
+                <svg
+                  v-if="showFullCard"
+                  class="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                  ></path>
+                </svg>
+                <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  ></path>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  ></path>
+                </svg>
+              </button>
+              <button
+                v-if="creditCard"
+                @click="openEditCardModal"
+                class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800"
+              >
+                Edit
+              </button>
+              <button
+                v-if="!creditCard"
+                @click="openEditCardModal"
+                class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800"
+              >
+                + Add Card
+              </button>
+            </div>
+          </div>
+
+          <!-- Credit Card Display -->
+          <div v-if="creditCardLoading" class="text-center py-4">
+            <div
+              class="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
+            ></div>
+            <p class="mt-2 text-sm text-gray-600">Loading payment info...</p>
+          </div>
+
+          <div v-else-if="creditCard" class="space-y-3">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Card Number</dt>
+              <dd class="mt-1 text-sm text-gray-900 font-mono">
+                {{ showFullCard ? creditCard.card_number : creditCard.card_number_masked }}
+              </dd>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Expiry</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  {{ showFullCard ? creditCard.expiry : '••/••' }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">CVV</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  {{ showFullCard ? creditCard.cvv : '•••' }}
+                </dd>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="text-center py-4 text-gray-500">
+            <svg
+              class="mx-auto h-10 w-10 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+              ></path>
+            </svg>
+            <p class="mt-2 text-sm">No credit card on file</p>
+          </div>
         </div>
 
         <!-- Presenting Issues -->
@@ -522,6 +652,14 @@
       :defaultEmail="referral?.email || ''"
       @sent="handleEmailPDFSent"
     />
+
+    <!-- Edit Credit Card Modal -->
+    <EditCreditCardModal
+      v-model="showEditCardModal"
+      :referralId="id"
+      :existingCard="creditCard"
+      @saved="handleCreditCardSaved"
+    />
   </div>
 </template>
 
@@ -571,6 +709,23 @@ const showNewNoteModal = ref(false);
 
 // Email PDF modal state
 const showEmailPDFModal = ref(false);
+
+// Credit card modal state
+const showEditCardModal = ref(false);
+
+// Credit card state
+const creditCard = ref<any>(null);
+const creditCardLoading = ref(false);
+const showFullCard = ref(false);
+
+// Actions menu state
+const showActionsMenu = ref(false);
+
+// Handle menu action (closes menu and executes action)
+const handleMenuAction = (action: () => void) => {
+  showActionsMenu.value = false;
+  action();
+};
 
 // Open edit modal
 const openEditModal = () => {
@@ -743,4 +898,38 @@ const toggleAllNotes = () => {
     });
   }
 };
+
+// Credit card functions
+const loadCreditCard = async () => {
+  if (!id) return;
+
+  creditCardLoading.value = true;
+  try {
+    const response = await $fetch(`/api/referral/${id}/credit-card`);
+    if (response.creditCard) {
+      creditCard.value = response.creditCard;
+    }
+  } catch (error) {
+    console.error('Failed to load credit card:', error);
+  } finally {
+    creditCardLoading.value = false;
+  }
+};
+
+const toggleCardVisibility = () => {
+  showFullCard.value = !showFullCard.value;
+};
+
+const openEditCardModal = () => {
+  showEditCardModal.value = true;
+};
+
+const handleCreditCardSaved = async () => {
+  await loadCreditCard();
+};
+
+// Load credit card on mount
+if (id) {
+  loadCreditCard();
+}
 </script>
