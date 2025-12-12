@@ -416,7 +416,10 @@ const onSubmit = handleSubmit(async (values) => {
   try {
     await $fetch('/api/referral/self', {
       method: 'POST',
-      body: values,
+      body: {
+        ...values,
+        turnstileToken: turnstileToken.value,
+      },
     });
 
     // Navigate to success page

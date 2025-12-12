@@ -4,6 +4,18 @@ import type { NewReferral } from '../../types/referral-types';
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
+  // Verify Turnstile token if provided
+  if (body.turnstileToken) {
+    const { success } = await verifyTurnstileToken(body.turnstileToken);
+
+    if (!success) {
+      throw createError({
+        statusCode: 400,
+        message: 'Failed to verify CAPTCHA. Please try again.',
+      });
+    }
+  }
+
   // Validate required fields for self referral
   if (
     !body.firstName ||
