@@ -3,14 +3,25 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType } from 'kysely';
+import type { ColumnType } from "kysely";
 
-export type Generated<T> =
-  T extends ColumnType<infer S, infer I, infer U>
-    ? ColumnType<S, I | undefined, U>
-    : ColumnType<T, T | undefined, T>;
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
 
 export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+
+export type Json = JsonValue;
+
+export type JsonArray = JsonValue[];
+
+export type JsonObject = {
+  [x: string]: JsonValue | undefined;
+};
+
+export type JsonPrimitive = boolean | number | string | null;
+
+export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
@@ -28,43 +39,12 @@ export interface ClinicalNote {
 }
 
 export interface CreditCard {
-  id: Generated<number>;
-  referral_id: number;
   card_number_encrypted: string;
-  expiry_encrypted: string;
-  cvv_encrypted: string;
   created_at: Generated<Timestamp>;
-  updated_at: Generated<Timestamp>;
-}
-
-export interface ReferralEmail {
+  cvv_encrypted: string;
+  expiry_encrypted: string;
   id: Generated<number>;
   referral_id: number;
-  from_email: string;
-  recipient_email: string;
-  message_id: string | null;
-  status: Generated<string>;
-  record_type: string | null;
-  tag: string | null;
-  subject: string | null;
-  email_content: string | null;
-  file_id: number | null;
-  delivered_at: Timestamp | null;
-  bounced_at: Timestamp | null;
-  opened_at: Timestamp | null;
-  clicked_at: Timestamp | null;
-  spam_complaint_at: Timestamp | null;
-  details: string | null;
-  metadata: any | null;
-  bounce_type: string | null;
-  bounce_description: string | null;
-  platform: string | null;
-  user_agent: string | null;
-  first_open: boolean | null;
-  click_location: string | null;
-  original_link: string | null;
-  webhook_data: any | null;
-  created_at: Generated<Timestamp>;
   updated_at: Generated<Timestamp>;
 }
 
@@ -148,6 +128,37 @@ export interface Referral {
   secondary_telephone: string | null;
   status: Generated<string>;
   updated_at: Generated<Timestamp>;
+}
+
+export interface ReferralEmail {
+  bounce_description: string | null;
+  bounce_type: string | null;
+  bounced_at: Timestamp | null;
+  click_location: string | null;
+  clicked_at: Timestamp | null;
+  created_at: Generated<Timestamp>;
+  delivered_at: Timestamp | null;
+  details: string | null;
+  email_content: string | null;
+  file_id: number | null;
+  first_open: boolean | null;
+  from_email: string;
+  id: Generated<number>;
+  message_id: string | null;
+  metadata: Json | null;
+  opened_at: Timestamp | null;
+  original_link: string | null;
+  platform: string | null;
+  recipient_email: string;
+  record_type: string | null;
+  referral_id: number;
+  spam_complaint_at: Timestamp | null;
+  status: Generated<string>;
+  subject: string | null;
+  tag: string | null;
+  updated_at: Generated<Timestamp>;
+  user_agent: string | null;
+  webhook_data: Json | null;
 }
 
 export interface User {
