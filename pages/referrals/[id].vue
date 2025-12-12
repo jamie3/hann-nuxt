@@ -755,6 +755,13 @@
       :existingCard="creditCard"
       @saved="handleCreditCardSaved"
     />
+
+    <!-- Delete Credit Card Modal -->
+    <DeleteCreditCardModal
+      v-model="showDeleteCardModal"
+      :referralId="id"
+      @deleted="handleCreditCardDeleted"
+    />
   </div>
 </template>
 
@@ -827,6 +834,7 @@ const showEmailPDFModal = ref(false);
 
 // Credit card modal state
 const showEditCardModal = ref(false);
+const showDeleteCardModal = ref(false);
 
 // Credit card state
 const creditCard = ref<any>(null);
@@ -1043,21 +1051,14 @@ const handleCreditCardSaved = async () => {
   await loadCreditCard();
 };
 
-const handleDeleteCreditCard = async () => {
-  if (!confirm('Are you sure you want to delete this credit card?')) return;
+const handleDeleteCreditCard = () => {
+  showDeleteCardModal.value = true;
+};
 
-  try {
-    await $fetch(`/api/referral/${id}/credit-card`, {
-      method: 'DELETE',
-    });
-
-    // Clear the credit card data
-    creditCard.value = null;
-    showFullCard.value = false;
-  } catch (error: any) {
-    console.error('Failed to delete credit card:', error);
-    alert(error.data?.message || 'Failed to delete credit card');
-  }
+const handleCreditCardDeleted = () => {
+  // Clear the credit card data
+  creditCard.value = null;
+  showFullCard.value = false;
 };
 
 // Load credit card on mount
