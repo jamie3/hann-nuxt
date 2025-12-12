@@ -223,7 +223,7 @@
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="(referral, index) in referrals" :key="referral.id" class="hover:bg-gray-50">
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ startIndex + index + 1 }}
+                {{ referral.id }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ referral.updated_at ? new Date(referral.updated_at).toLocaleDateString() : '-' }}
