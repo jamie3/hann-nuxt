@@ -449,6 +449,13 @@
                 Edit
               </button>
               <button
+                v-if="creditCard"
+                @click="handleDeleteCreditCard"
+                class="px-3 py-1 text-sm text-red-600 hover:text-red-800"
+              >
+                Delete
+              </button>
+              <button
                 v-if="!creditCard"
                 @click="openEditCardModal"
                 class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800"
@@ -1034,6 +1041,23 @@ const openEditCardModal = () => {
 
 const handleCreditCardSaved = async () => {
   await loadCreditCard();
+};
+
+const handleDeleteCreditCard = async () => {
+  if (!confirm('Are you sure you want to delete this credit card?')) return;
+
+  try {
+    await $fetch(`/api/referral/${id}/credit-card`, {
+      method: 'DELETE',
+    });
+
+    // Clear the credit card data
+    creditCard.value = null;
+    showFullCard.value = false;
+  } catch (error: any) {
+    console.error('Failed to delete credit card:', error);
+    alert(error.data?.message || 'Failed to delete credit card');
+  }
 };
 
 // Load credit card on mount
