@@ -2,36 +2,8 @@
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
 
-    <!-- Tabs -->
-    <div class="border-b border-gray-200 mb-6">
-      <nav class="-mb-px flex space-x-8">
-        <button
-          @click="activeTab = 'users'"
-          :class="[
-            activeTab === 'users'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
-          ]"
-        >
-          Users
-        </button>
-        <button
-          @click="activeTab = 'email'"
-          :class="[
-            activeTab === 'email'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
-          ]"
-        >
-          Email Settings
-        </button>
-      </nav>
-    </div>
-
-    <!-- Users Tab -->
-    <div v-if="activeTab === 'users'" class="bg-white shadow-sm rounded-lg p-6">
+    <!-- Users Section -->
+    <div class="bg-white shadow-sm rounded-lg p-6">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-xl font-semibold text-gray-900">Users</h2>
         <div class="flex gap-3">
@@ -126,6 +98,12 @@
               </th>
               <th
                 scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Enabled
+              </th>
+              <th
+                scope="col"
                 class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
                 Actions
@@ -197,6 +175,21 @@
                   Active
                 </span>
               </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <button
+                  @click="toggleUserDisabled(user)"
+                  :disabled="togglingUserId === user.id"
+                  class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  :class="user.disabled ? 'bg-gray-200' : 'bg-blue-600'"
+                  role="switch"
+                  :aria-checked="!user.disabled"
+                >
+                  <span
+                    class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                    :class="user.disabled ? 'translate-x-0' : 'translate-x-5'"
+                  ></span>
+                </button>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex justify-end gap-2">
                   <button
@@ -236,104 +229,6 @@
       </div>
     </div>
 
-    <!-- Email Settings Tab -->
-    <div v-else-if="activeTab === 'email'" class="bg-white shadow-sm rounded-lg p-6">
-      <h2 class="text-xl font-semibold text-gray-900 mb-6">Email Settings</h2>
-
-      <!-- Email Settings Form -->
-      <form class="space-y-6">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- SMTP Host -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">SMTP Host</label>
-            <input
-              type="text"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              placeholder="smtp.example.com"
-            />
-          </div>
-
-          <!-- SMTP Port -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">SMTP Port</label>
-            <input
-              type="number"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              placeholder="587"
-            />
-          </div>
-
-          <!-- SMTP Username -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">SMTP Username</label>
-            <input
-              type="text"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              placeholder="username@example.com"
-            />
-          </div>
-
-          <!-- SMTP Password -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">SMTP Password</label>
-            <input
-              type="password"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <!-- From Email -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">From Email</label>
-            <input
-              type="email"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              placeholder="noreply@example.com"
-            />
-          </div>
-
-          <!-- From Name -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">From Name</label>
-            <input
-              type="text"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Hann Psychological Services"
-            />
-          </div>
-        </div>
-
-        <!-- Use TLS -->
-        <div class="flex items-center">
-          <input
-            type="checkbox"
-            id="use-tls"
-            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          />
-          <label for="use-tls" class="ml-2 block text-sm text-gray-700">
-            Use TLS/SSL encryption
-          </label>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-          <button
-            type="button"
-            class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Test Connection
-          </button>
-          <button
-            type="submit"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Save Settings
-          </button>
-        </div>
-      </form>
-    </div>
-
     <!-- New User Modal -->
     <NewUserModal v-model="showNewUserModal" @created="handleUserCreated" />
 
@@ -355,12 +250,12 @@ definePageMeta({
   layout: 'default',
 });
 
-const activeTab = ref('users');
 const showNewUserModal = ref(false);
 const showEditUserModal = ref(false);
 const showUnlockUserModal = ref(false);
 const selectedUser = ref<User | null>(null);
 const userToUnlock = ref<User | null>(null);
+const togglingUserId = ref<string | null>(null);
 
 // Use the useUsers composable
 const { users, loading, error, getUsers } = useUsers();
@@ -399,6 +294,27 @@ const openUnlockModal = (user: User) => {
 // Handle user unlocked - refresh list
 const handleUserUnlocked = () => {
   getUsers();
+};
+
+// Toggle user disabled status
+const toggleUserDisabled = async (user: User) => {
+  if (togglingUserId.value) return; // Prevent multiple simultaneous toggles
+
+  togglingUserId.value = user.id;
+
+  try {
+    await $fetch(`/api/users/${user.id}/toggle-disabled`, {
+      method: 'POST',
+    });
+
+    // Refresh the users list to show updated status
+    await getUsers();
+  } catch (error: any) {
+    console.error('Failed to toggle user disabled status:', error);
+    alert(error.data?.message || 'Failed to toggle user status. Please try again.');
+  } finally {
+    togglingUserId.value = null;
+  }
 };
 
 // Helper function to format dates
