@@ -6,18 +6,8 @@
   >
     <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white mx-4">
       <!-- Modal Header -->
-      <div class="flex justify-between items-center pb-3 border-b">
+      <div class="pb-3 border-b">
         <h3 class="text-xl font-semibold text-gray-900">Delete Credit Card</h3>
-        <button @click="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            ></path>
-          </svg>
-        </button>
       </div>
 
       <!-- Modal Body -->
