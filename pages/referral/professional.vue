@@ -123,13 +123,19 @@
 
           <!-- Email -->
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+              Email <span class="text-red-500">*</span>
+            </label>
             <input
               v-model="email"
               type="email"
               id="email"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.email }"
             />
+            <p v-if="errors.email" class="mt-1 text-sm text-red-500">
+              {{ errors.email }}
+            </p>
           </div>
 
           <!-- Mailing Address -->
@@ -331,7 +337,7 @@ const schema = toTypedSchema(
     parentsGuardians: z.string().optional(),
     primaryTelephone: z.string().min(1, 'Primary telephone is required'),
     secondaryTelephone: z.string().optional(),
-    email: z.string().email('Invalid email address').optional().or(z.literal('')),
+    email: z.string().email('Invalid email address').min(1, 'Email is required'),
     mailingAddress: z.string().min(1, 'Mailing address is required'),
     referrerName: z.string().min(1, 'Referrer name is required'),
     referrerRelationship: z.string().min(1, 'Referrer relationship is required'),
