@@ -224,6 +224,11 @@
               >
                 Requested Service
               </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Assigned To
+              </th>
               <th class="relative px-6 py-3">
                 <span class="sr-only">Actions</span>
               </th>
@@ -258,6 +263,29 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ referral.requested_service }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 relative">
+                <div
+                  v-if="editingReferralId !== referral.id"
+                  @click="startEditingAssignment(referral)"
+                  class="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
+                  :title="'Click to assign'"
+                >
+                  {{ referral.assigned_to_name || '-' }}
+                </div>
+                <select
+                  v-else
+                  v-model="selectedUserId"
+                  @change="updateAssignment(referral)"
+                  @blur="cancelEditing"
+                  ref="assignmentSelect"
+                  class="w-full min-w-[200px] px-3 py-2 bg-white border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                >
+                  <option :value="null">Unassigned</option>
+                  <option v-for="user in users" :key="user.id" :value="parseInt(user.id)">
+                    {{ user.name || user.username }}
+                  </option>
+                </select>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <NuxtLink
@@ -346,6 +374,68 @@ await getReferrals({
 });
 
 const newReferrals = computed(() => referrals.value);
+
+// Fetch users for assignment
+const { users: usersList, getUsers } = useUsers();
+
+// Sort users alphabetically by display name (name or username)
+const users = computed(() => {
+  return [...usersList.value].sort((a, b) => {
+    const nameA = (a.name || a.username).toLowerCase();
+    const nameB = (b.name || b.username).toLowerCase();
+    return nameA.localeCompare(nameB);
+  });
+});
+
+// Fetch users list for the assignment dropdown
+await getUsers();
+
+// Assignment editing state
+const editingReferralId = ref<string | null>(null);
+const selectedUserId = ref<number | null>(null);
+const assignmentSelect = ref<HTMLSelectElement | null>(null);
+
+// Assignment editing functions
+const startEditingAssignment = (referral: any) => {
+  editingReferralId.value = referral.id;
+  selectedUserId.value = referral.assigned_to ? parseInt(referral.assigned_to) : null;
+  // Focus the select element after it renders
+  nextTick(() => {
+    if (assignmentSelect.value) {
+      assignmentSelect.value.focus();
+    }
+  });
+};
+
+const cancelEditing = () => {
+  editingReferralId.value = null;
+  selectedUserId.value = null;
+};
+
+const updateAssignment = async (referral: any) => {
+  try {
+    await $fetch(`/api/referral/${referral.id}/assign`, {
+      method: 'POST',
+      body: {
+        userId: selectedUserId.value,
+      },
+    });
+
+    // Refresh the data to show updated assignment
+    await getReferrals({
+      page: 1,
+      limit: 10,
+      sortBy: 'referred_at',
+      sortOrder: 'desc',
+      status: 'new',
+    });
+    cancelEditing();
+  } catch (error) {
+    console.error('Failed to update assignment:', error);
+    alert('Failed to update assignment. Please try again.');
+    cancelEditing();
+  }
+};
 
 useHead({
   title: 'Dashboard - Hann Psychological Services',
