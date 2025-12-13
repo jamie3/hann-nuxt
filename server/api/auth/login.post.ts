@@ -1,6 +1,7 @@
 import { UserRepository } from '../../repository/user-repository';
 import { UserService } from '../../service/user-service';
 import { withErrorHandler } from '../../utils/error-handler';
+import { env } from '../../utils/env';
 
 export default defineEventHandler(
   withErrorHandler(async (event) => {
@@ -14,21 +15,24 @@ export default defineEventHandler(
       });
     }
 
-    if (!turnstileToken) {
-      throw createError({
-        statusCode: 422,
-        statusMessage: 'Token not provided.',
-      });
-    }
+    // Only check Turnstile if it's enabled
+    if (env.NUXT_TURNSTILE_ENABLED) {
+      if (!turnstileToken) {
+        throw createError({
+          statusCode: 422,
+          statusMessage: 'Token not provided.',
+        });
+      }
 
-    // Verify Turnstile token
-    const { success } = await verifyTurnstileToken(turnstileToken);
+      // Verify Turnstile token
+      const { success } = await verifyTurnstileToken(turnstileToken);
 
-    if (!success) {
-      throw createError({
-        statusCode: 400,
-        message: 'Failed to verify CAPTCHA. Please try again.',
-      });
+      if (!success) {
+        throw createError({
+          statusCode: 400,
+          message: 'Failed to verify CAPTCHA. Please try again.',
+        });
+      }
     }
 
     const db = useDB();

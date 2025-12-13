@@ -16,6 +16,11 @@ const envSchema = z.object({
 
   // Security
   ENCRYPTION_KEY: z.string().optional(),
+  NUXT_TURNSTILE_ENABLED: z
+    .string()
+    .optional()
+    .default('true')
+    .transform((val) => val === 'true'),
 
   // Environment
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -28,6 +33,7 @@ export const env = envSchema.parse({
   EMAIL_FROM: process.env.EMAIL_FROM,
   EMAIL_TO: process.env.EMAIL_TO,
   ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
+  NUXT_TURNSTILE_ENABLED: process.env.NUXT_TURNSTILE_ENABLED,
   NODE_ENV: process.env.NODE_ENV,
 });
 
