@@ -35,7 +35,9 @@ export class ReferralRepository extends BaseRepository<
     search: string = '',
     type: string = '',
     status: string = '',
-    assignedTo: string = ''
+    assignedTo: string = '',
+    startDate?: string | null,
+    endDate?: string | null
   ): Promise<ReferralRowWithAssignedUser[]> {
     // Map frontend column names to database column names
     const columnMap: Record<string, string> = {
@@ -94,6 +96,14 @@ export class ReferralRepository extends BaseRepository<
       }
     }
 
+    // Add date range filter (based on referred_at field)
+    if (startDate) {
+      query = query.where('referral.referred_at', '>=', new Date(startDate));
+    }
+    if (endDate) {
+      query = query.where('referral.referred_at', '<=', new Date(endDate));
+    }
+
     return await query
       .orderBy(dbColumn as any, sortOrder)
       .limit(limit)
@@ -105,7 +115,9 @@ export class ReferralRepository extends BaseRepository<
     search: string = '',
     type: string = '',
     status: string = '',
-    assignedTo: string = ''
+    assignedTo: string = '',
+    startDate?: string | null,
+    endDate?: string | null
   ): Promise<number> {
     let query = this.db
       .selectFrom('referral')
@@ -146,6 +158,14 @@ export class ReferralRepository extends BaseRepository<
       } else {
         query = query.where('assigned_to', '=', parseInt(assignedTo));
       }
+    }
+
+    // Add date range filter (based on referred_at field)
+    if (startDate) {
+      query = query.where('referred_at', '>=', new Date(startDate));
+    }
+    if (endDate) {
+      query = query.where('referred_at', '<=', new Date(endDate));
     }
 
     const result = await query.executeTakeFirst();

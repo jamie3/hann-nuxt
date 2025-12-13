@@ -179,7 +179,7 @@
     <div class="bg-white shadow-sm rounded-lg overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex justify-between items-center">
-          <h2 class="text-xl font-semibold text-gray-900">New Referrals</h2>
+          <h2 class="text-xl font-semibold text-gray-900">New Referrals (Last 30 days)</h2>
           <NuxtLink to="/referrals" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
             View All →
           </NuxtLink>
@@ -330,6 +330,7 @@
 
 <script setup lang="ts">
 import type { Referral } from '~/server/types/referral-types';
+import { subDays } from 'date-fns';
 
 definePageMeta({
   layout: 'default',
@@ -370,13 +371,17 @@ const {
   getReferrals,
 } = useReferralList();
 
-// Fetch new referrals on mount
+// Calculate date 30 days ago using date-fns
+const startDate = subDays(new Date(), 30).toISOString();
+
+// Fetch new referrals from the last 30 days
 await getReferrals({
   page: 1,
   limit: 10,
   sortBy: 'referred_at',
   sortOrder: 'desc',
   status: 'new',
+  startDate: startDate,
 });
 
 const newReferrals = computed(() => referrals.value);
@@ -427,6 +432,9 @@ const updateAssignment = async (referral: any) => {
       },
     });
 
+    // Calculate date 30 days ago using date-fns
+    const startDate = subDays(new Date(), 30).toISOString();
+
     // Refresh the data to show updated assignment
     await getReferrals({
       page: 1,
@@ -434,6 +442,7 @@ const updateAssignment = async (referral: any) => {
       sortBy: 'referred_at',
       sortOrder: 'desc',
       status: 'new',
+      startDate: startDate,
     });
     cancelEditing();
   } catch (error) {

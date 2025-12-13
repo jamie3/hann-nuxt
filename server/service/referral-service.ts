@@ -165,7 +165,9 @@ export class ReferralService {
     search: string = '',
     type: string = '',
     status: string = '',
-    assignedTo: string = ''
+    assignedTo: string = '',
+    startDate?: string | null,
+    endDate?: string | null
   ): Promise<{ referrals: Referral[]; total: number; page: number; limit: number }> {
     const offset = (page - 1) * limit;
     const rows = await this.referralRepository.findAllRows(
@@ -176,9 +178,18 @@ export class ReferralService {
       search,
       type,
       status,
-      assignedTo
+      assignedTo,
+      startDate,
+      endDate
     );
-    const total = await this.referralRepository.count(search, type, status, assignedTo);
+    const total = await this.referralRepository.count(
+      search,
+      type,
+      status,
+      assignedTo,
+      startDate,
+      endDate
+    );
 
     return {
       referrals: rows.map((row) => this.mapToReferral(row)),
@@ -195,7 +206,7 @@ export class ReferralService {
     const referral = this.mapToReferral(row);
     // Add assigned user name from join
     if (row.assigned_to_name || row.assigned_to_username) {
-      referral.assigned_to_name = row.assigned_to_name || row.assigned_to_username;
+      referral.assigned_to_name = row.assigned_to_name || row.assigned_to_username || null;
     }
     return referral;
   }

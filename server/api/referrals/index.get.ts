@@ -11,6 +11,11 @@ export default defineEventHandler(async (event) => {
   const status = (query.status as string) || '';
   const assignedTo = (query.assignedTo as string) || '';
 
+  // Only parse date if it exists and is not "null" string
+  const startDate =
+    query.startDate && query.startDate !== 'null' ? (query.startDate as string) : null;
+  const endDate = query.endDate && query.endDate !== 'null' ? (query.endDate as string) : null;
+
   const referralService = getReferralService();
   const result = await referralService.getAllReferrals(
     page,
@@ -20,7 +25,9 @@ export default defineEventHandler(async (event) => {
     search,
     type,
     status,
-    assignedTo
+    assignedTo,
+    startDate,
+    endDate
   );
 
   return {

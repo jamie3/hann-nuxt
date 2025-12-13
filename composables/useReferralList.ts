@@ -17,6 +17,8 @@ interface ReferralFilters {
   type?: 'all' | 'professional' | 'self';
   status?: 'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived';
   assignedTo?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const useReferralList = () => {
@@ -32,17 +34,28 @@ export const useReferralList = () => {
     error.value = null;
 
     try {
+      // Build query object, only including date filters if provided
+      const query: any = {
+        page: filters.page || 1,
+        limit: filters.limit || 100,
+        sortBy: filters.sortBy || 'updated_at',
+        sortOrder: filters.sortOrder || 'desc',
+        search: filters.search || '',
+        type: filters.type || 'all',
+        status: filters.status || 'active',
+        assignedTo: filters.assignedTo || 'all',
+      };
+
+      // Only add date filters if they are provided
+      if (filters.startDate) {
+        query.startDate = filters.startDate;
+      }
+      if (filters.endDate) {
+        query.endDate = filters.endDate;
+      }
+
       const response = await $fetch<ReferralsResponse>('/api/referrals', {
-        query: {
-          page: filters.page || 1,
-          limit: filters.limit || 100,
-          sortBy: filters.sortBy || 'updated_at',
-          sortOrder: filters.sortOrder || 'desc',
-          search: filters.search || '',
-          type: filters.type || 'all',
-          status: filters.status || 'active',
-          assignedTo: filters.assignedTo || 'all',
-        },
+        query,
       });
 
       if (response && response.referrals) {
