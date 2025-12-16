@@ -43,7 +43,6 @@ export default defineEventHandler(async (event) => {
     primary_telephone: body.primaryTelephone,
     secondary_telephone: body.secondaryTelephone,
     email: body.email,
-    mailing_address: body.mailingAddress,
     address_1: body.address1,
     address_2: body.address2,
     city: body.city,

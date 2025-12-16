@@ -349,12 +349,6 @@
                 <div v-if="referral.country">{{ referral.country }}</div>
               </dd>
             </div>
-            <div v-if="referral.mailing_address" class="md:col-span-2">
-              <dt class="text-sm font-medium text-gray-500">Mailing Address (Legacy)</dt>
-              <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">
-                {{ referral.mailing_address }}
-              </dd>
-            </div>
           </dl>
         </div>
 

@@ -48,7 +48,6 @@ export class ReferralService {
       primary_telephone: row.primary_telephone,
       secondary_telephone: row.secondary_telephone,
       email: row.email,
-      mailing_address: row.mailing_address,
       address_1: row.address_1 || null,
       address_2: row.address_2 || null,
       city: row.city || null,
@@ -88,7 +87,6 @@ export class ReferralService {
       primary_telephone: referral.primary_telephone,
       secondary_telephone: referral.secondary_telephone || null,
       email: referral.email || null,
-      mailing_address: referral.mailing_address || null,
       address_1: referral.address_1 || null,
       address_2: referral.address_2 || null,
       city: referral.city || null,
@@ -299,8 +297,6 @@ export class ReferralService {
     if (data.secondary_telephone !== undefined)
       updateData.secondary_telephone = data.secondary_telephone || null;
     if (data.email !== undefined) updateData.email = data.email || null;
-    if (data.mailing_address !== undefined)
-      updateData.mailing_address = data.mailing_address || null;
     if (data.address_1 !== undefined) updateData.address_1 = data.address_1 ?? null;
     if (data.address_2 !== undefined) updateData.address_2 = data.address_2 ?? null;
     if (data.city !== undefined) updateData.city = data.city ?? null;

@@ -3,12 +3,11 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType } from 'kysely';
+import type { ColumnType } from "kysely";
 
-export type Generated<T> =
-  T extends ColumnType<infer S, infer I, infer U>
-    ? ColumnType<S, I | undefined, U>
-    : ColumnType<T, T | undefined, T>;
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
 
 export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
 
@@ -42,7 +41,7 @@ export interface ClinicalNote {
 export interface CreditCard {
   card_number_encrypted: string;
   created_at: Generated<Timestamp>;
-  cvv_encrypted: string;
+  cvv_encrypted: string | null;
   expiry_encrypted: string;
   id: Generated<number>;
   referral_id: number;
@@ -116,7 +115,6 @@ export interface Referral {
   id: Generated<number>;
   is_deleted: Generated<boolean>;
   last_name: string;
-  mailing_address: string | null;
   method_of_payment: string | null;
   opened_at: Timestamp | null;
   original_id: number | null;
@@ -185,6 +183,14 @@ export interface User {
   username: string;
 }
 
+export interface UserRole {
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  role: string;
+  updated_at: Generated<Timestamp>;
+  user_id: number;
+}
+
 export interface DB {
   clinical_note: ClinicalNote;
   credit_card: CreditCard;
@@ -194,4 +200,5 @@ export interface DB {
   referral: Referral;
   referral_email: ReferralEmail;
   user: User;
+  user_role: UserRole;
 }
