@@ -226,6 +226,14 @@ export class PDFService {
         }
       }
 
+      // Add footer with website URL
+      doc.moveDown(2);
+      doc.fontSize(10);
+      doc.font('Helvetica');
+      doc.text('www.hannpsychologicalservices.com', {
+        align: 'center',
+      });
+
       doc.end();
     });
   }
