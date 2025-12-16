@@ -78,6 +78,7 @@
 
 <script setup lang="ts">
 import type { ClinicalNote } from '~/server/types/clinical-note-types';
+import { utcToLocalDateString, localDateStringToUTC } from '~/utils/dateTimeUtils';
 
 interface Props {
   modelValue: boolean;
@@ -105,7 +106,7 @@ watch(
   (note) => {
     if (note) {
       formData.value = {
-        sessionDate: new Date(note.session_date).toISOString().split('T')[0],
+        sessionDate: utcToLocalDateString(note.session_date),
         content: note.content,
       };
     }
@@ -128,7 +129,7 @@ const handleSubmit = async () => {
     await $fetch(`/api/clinical-notes/${props.clinicalNote.id}/update`, {
       method: 'POST',
       body: {
-        sessionDate: formData.value.sessionDate,
+        sessionDate: localDateStringToUTC(formData.value.sessionDate),
         content: formData.value.content,
       },
     });

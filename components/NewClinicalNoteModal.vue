@@ -94,6 +94,8 @@
 </template>
 
 <script setup lang="ts">
+import { localDateStringToUTC } from '~/utils/dateTimeUtils';
+
 interface Props {
   modelValue: boolean;
   referralId?: string;
@@ -176,7 +178,7 @@ const handleSubmit = async () => {
   try {
     await createClinicalNote({
       referralId,
-      sessionDate: formData.value.sessionDate,
+      sessionDate: localDateStringToUTC(formData.value.sessionDate),
       content: formData.value.content,
     });
 

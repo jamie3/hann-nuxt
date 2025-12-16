@@ -445,6 +445,7 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
 import { REQUESTED_SERVICES, GENDERS, PAYMENT_METHODS } from '~/types/referral-options';
 import { COUNTRIES, CANADIAN_PROVINCES, US_STATES } from '~/types/address-options';
+import { localDateStringToUTC } from '~/utils/dateTimeUtils';
 
 definePageMeta({
   layout: 'login',
@@ -528,6 +529,7 @@ const onSubmit = handleSubmit(async (values) => {
       method: 'POST',
       body: {
         ...values,
+        dateOfBirth: localDateStringToUTC(values.dateOfBirth),
         turnstileToken: turnstileToken.value,
       },
     });
