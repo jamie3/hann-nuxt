@@ -880,9 +880,19 @@ const executeBulkClose = async () => {
   isBulkActionProcessing.value = true;
   const errors: string[] = [];
   let successCount = 0;
+  let skippedCount = 0;
 
   // Process each selected referral
   for (const referralId of Array.from(selectedReferrals.value)) {
+    // Find the referral to check its status
+    const referral = referrals.value.find((r) => r.id === referralId);
+
+    // Skip if already closed
+    if (referral?.status === 'closed') {
+      skippedCount++;
+      continue;
+    }
+
     try {
       await closeReferral(referralId);
       successCount++;
@@ -890,6 +900,13 @@ const executeBulkClose = async () => {
       console.error(`Failed to close referral ${referralId}:`, err);
       errors.push(`${referralId}: ${err.data?.message || 'Failed to close'}`);
     }
+  }
+
+  // Add skipped info to errors if any were skipped
+  if (skippedCount > 0) {
+    errors.unshift(
+      `${skippedCount} referral${skippedCount > 1 ? 's were' : ' was'} already closed (skipped)`
+    );
   }
 
   // Set results to show in modal
