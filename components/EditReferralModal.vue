@@ -330,6 +330,7 @@
 import type { Referral } from '~/server/types/referral-types';
 import { REQUESTED_SERVICES, PAYMENT_METHODS, GENDERS } from '~/types/referral-options';
 import { COUNTRIES, CANADIAN_PROVINCES, US_STATES } from '~/types/address-options';
+import { utcToLocalDateString, localDateStringToUTC } from '~/utils/dateTimeUtils';
 
 interface Props {
   modelValue: boolean;
@@ -381,13 +382,9 @@ watch(
       formData.value = {
         first_name: newReferral.first_name,
         last_name: newReferral.last_name,
-        date_of_birth: newReferral.date_of_birth
-          ? new Date(newReferral.date_of_birth).toISOString().split('T')[0]
-          : '',
+        date_of_birth: utcToLocalDateString(newReferral.date_of_birth),
         gender: newReferral.gender || '',
-        referred_at: newReferral.referred_at
-          ? new Date(newReferral.referred_at).toISOString().split('T')[0]
-          : '',
+        referred_at: utcToLocalDateString(newReferral.referred_at),
         primary_telephone: newReferral.primary_telephone,
         secondary_telephone: newReferral.secondary_telephone || '',
         email: newReferral.email || '',
@@ -423,7 +420,18 @@ const handleSubmit = async () => {
   errorMessage.value = '';
 
   try {
-    await updateReferral(props.referral.id, formData.value);
+    // Convert local date strings back to UTC before sending to API
+    const dataToSubmit = {
+      ...formData.value,
+      date_of_birth: formData.value.date_of_birth
+        ? localDateStringToUTC(formData.value.date_of_birth)
+        : null,
+      referred_at: formData.value.referred_at
+        ? localDateStringToUTC(formData.value.referred_at)
+        : null,
+    };
+
+    await updateReferral(props.referral.id, dataToSubmit);
 
     emit('updated');
     closeModal();
