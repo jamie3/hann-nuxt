@@ -738,7 +738,7 @@
     <!-- Email PDF Modal -->
     <EmailReferralPDFModal
       v-model="showEmailPDFModal"
-      :defaultEmail="referral?.email || ''"
+      :defaultEmail="'info@hannpsychologicalservices.com'"
       @sent="handleEmailPDFSent"
     />
 
