@@ -34,18 +34,23 @@ export class PDFService {
       }
 
       // Calculate age
-      const dob = new Date(referral.date_of_birth);
-      const age = Math.floor(
-        (new Date().getTime() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25)
-      );
+      let age = 'N/A';
+      if (referral.date_of_birth) {
+        const dob = new Date(referral.date_of_birth);
+        age = Math.floor(
+          (new Date().getTime() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25)
+        ).toString();
+      }
 
       if (isProfessional) {
         doc.text('Professional Referral Form (Referral Information)');
         doc.text('  ');
         doc.text(`Client's Name: ${referral.first_name} ${referral.last_name}`);
         doc.text('  ');
-        doc.text(`Date of Birth: ${formatDate(referral.date_of_birth)}`);
-        doc.text('  ');
+        if (referral.date_of_birth) {
+          doc.text(`Date of Birth: ${formatDate(referral.date_of_birth)}`);
+          doc.text('  ');
+        }
         doc.text(`Chronological Age: ${age}`);
         doc.text('  ');
         if (referral.parents_guardians) {
@@ -80,7 +85,34 @@ export class PDFService {
           doc.text(`Method of Payment: ${referral.method_of_payment}`);
           doc.text('  ');
         }
-        if (referral.mailing_address) {
+        // Display address information
+        const hasAddress =
+          referral.address_1 ||
+          referral.city ||
+          referral.province_state ||
+          referral.country ||
+          referral.postal_zip;
+        const hasLegacyAddress = referral.mailing_address;
+
+        if (hasAddress) {
+          doc.text('Mailing Address:');
+          if (referral.address_1) {
+            doc.text(referral.address_1);
+          }
+          if (referral.address_2) {
+            doc.text(referral.address_2);
+          }
+          const cityStateZip = [referral.city, referral.province_state, referral.postal_zip]
+            .filter(Boolean)
+            .join(', ');
+          if (cityStateZip) {
+            doc.text(cityStateZip);
+          }
+          if (referral.country) {
+            doc.text(referral.country);
+          }
+          doc.text('  ');
+        } else if (hasLegacyAddress && referral.mailing_address) {
           doc.text('Mailing Address:');
           const addressLines = referral.mailing_address.split('\n');
           addressLines.forEach((line) => {
@@ -125,8 +157,10 @@ export class PDFService {
         doc.text('  ');
         doc.text(`Client's Name: ${referral.first_name} ${referral.last_name}`);
         doc.text('  ');
-        doc.text(`Date of Birth: ${formatDate(referral.date_of_birth)}`);
-        doc.text('  ');
+        if (referral.date_of_birth) {
+          doc.text(`Date of Birth: ${formatDate(referral.date_of_birth)}`);
+          doc.text('  ');
+        }
         if (referral.parents_guardians) {
           doc.text(`Parents (Guardians) Names: ${referral.parents_guardians}`);
           doc.text('  ');
@@ -141,7 +175,34 @@ export class PDFService {
           doc.text(`Email: ${referral.email}`);
           doc.text('  ');
         }
-        if (referral.mailing_address) {
+        // Display address information
+        const hasAddress =
+          referral.address_1 ||
+          referral.city ||
+          referral.province_state ||
+          referral.country ||
+          referral.postal_zip;
+        const hasLegacyAddress = referral.mailing_address;
+
+        if (hasAddress) {
+          doc.text('Mailing Address:');
+          if (referral.address_1) {
+            doc.text(referral.address_1);
+          }
+          if (referral.address_2) {
+            doc.text(referral.address_2);
+          }
+          const cityStateZip = [referral.city, referral.province_state, referral.postal_zip]
+            .filter(Boolean)
+            .join(', ');
+          if (cityStateZip) {
+            doc.text(cityStateZip);
+          }
+          if (referral.country) {
+            doc.text(referral.country);
+          }
+          doc.text('  ');
+        } else if (hasLegacyAddress && referral.mailing_address) {
           doc.text('Mailing Address:');
           const addressLines = referral.mailing_address.split('\n');
           addressLines.forEach((line) => {
