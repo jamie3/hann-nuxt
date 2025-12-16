@@ -141,9 +141,41 @@
         </button>
       </div>
 
-      <!-- Results Count -->
-      <div class="mt-3 text-sm text-gray-600">
-        Showing {{ totalRecords }} referral{{ totalRecords !== 1 ? 's' : '' }}
+      <!-- Results Count and Bulk Actions -->
+      <div class="mt-3 flex items-center justify-between">
+        <div class="text-sm text-gray-600">
+          Showing {{ totalRecords }} referral{{ totalRecords !== 1 ? 's' : '' }}
+          <span v-if="selectedReferrals.size > 0" class="ml-2 font-medium text-blue-600">
+            ({{ selectedReferrals.size }} selected)
+          </span>
+        </div>
+
+        <!-- Bulk Actions Menu -->
+        <div v-if="selectedReferrals.size > 0" class="flex items-center gap-2">
+          <button
+            @click="handleBulkClose"
+            :disabled="isBulkActionProcessing"
+            class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              ></path>
+            </svg>
+            {{
+              isBulkActionProcessing ? 'Closing...' : `Close Selected (${selectedReferrals.size})`
+            }}
+          </button>
+          <button
+            @click="selectedReferrals.clear()"
+            class="px-3 py-2 text-gray-600 hover:text-gray-800 text-sm"
+          >
+            Clear Selection
+          </button>
+        </div>
       </div>
     </div>
 
@@ -166,6 +198,15 @@
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
+              <th class="px-6 py-3 text-left">
+                <input
+                  type="checkbox"
+                  :checked="allSelected"
+                  @change="toggleSelectAll"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                  title="Select all"
+                />
+              </th>
               <th
                 @click="handleSort('id')"
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
@@ -245,6 +286,14 @@
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="(referral, index) in referrals" :key="referral.id" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <input
+                  type="checkbox"
+                  :checked="selectedReferrals.has(referral.id)"
+                  @change="toggleSelection(referral.id)"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                />
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ referral.id }}
               </td>
@@ -435,6 +484,144 @@
         <p class="text-gray-500">No referrals found.</p>
       </div>
     </div>
+
+    <!-- Bulk Close Confirmation Modal -->
+    <div
+      v-if="showBulkCloseModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+      @click.self="closeBulkCloseModal"
+    >
+      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+          <!-- Confirmation State -->
+          <div v-if="!bulkCloseResults">
+            <div class="flex items-center gap-3 mb-4">
+              <div
+                class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100"
+              >
+                <svg
+                  class="h-6 w-6 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  ></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-gray-900">Close Multiple Referrals</h3>
+              </div>
+            </div>
+            <div class="mt-2 px-1">
+              <p class="text-sm text-gray-500">
+                Are you sure you want to close
+                <span class="font-semibold">{{ selectedReferrals.size }}</span>
+                referral{{ selectedReferrals.size > 1 ? 's' : '' }}?
+              </p>
+              <p class="text-sm text-gray-500 mt-2">This action will mark them as closed.</p>
+            </div>
+            <div class="flex gap-3 mt-6">
+              <button
+                @click="closeBulkCloseModal"
+                :disabled="isBulkActionProcessing"
+                class="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                @click="executeBulkClose"
+                :disabled="isBulkActionProcessing"
+                class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ isBulkActionProcessing ? 'Closing...' : 'Close Referrals' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Results State -->
+          <div v-else>
+            <div class="flex items-center gap-3 mb-4">
+              <div
+                class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full"
+                :class="bulkCloseResults.successCount > 0 ? 'bg-green-100' : 'bg-red-100'"
+              >
+                <svg
+                  v-if="bulkCloseResults.successCount > 0"
+                  class="h-6 w-6 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                <svg
+                  v-else
+                  class="h-6 w-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-gray-900">
+                  {{
+                    bulkCloseResults.successCount > 0
+                      ? 'Referrals Closed'
+                      : 'Failed to Close Referrals'
+                  }}
+                </h3>
+              </div>
+            </div>
+            <div class="mt-2 px-1">
+              <p v-if="bulkCloseResults.successCount > 0" class="text-sm text-green-600 mb-2">
+                Successfully closed {{ bulkCloseResults.successCount }} referral{{
+                  bulkCloseResults.successCount > 1 ? 's' : ''
+                }}
+              </p>
+              <div v-if="bulkCloseResults.errors.length > 0" class="mt-3">
+                <p class="text-sm font-medium text-red-600 mb-2">
+                  Failed to close {{ bulkCloseResults.errors.length }} referral{{
+                    bulkCloseResults.errors.length > 1 ? 's' : ''
+                  }}:
+                </p>
+                <div class="max-h-40 overflow-y-auto bg-red-50 rounded p-2">
+                  <ul class="text-xs text-red-700 space-y-1">
+                    <li v-for="(error, idx) in bulkCloseResults.errors" :key="idx">
+                      {{ error }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="mt-6">
+              <button
+                @click="closeBulkCloseModal"
+                class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -452,6 +639,9 @@ const {
   getReferrals,
 } = useReferralList();
 
+// Use the referral composable for bulk actions
+const { closeReferral } = useReferral();
+
 // Initialize state
 const sortBy = ref('updated_at');
 const sortOrder = ref<'asc' | 'desc'>('desc');
@@ -465,6 +655,12 @@ const itemsPerPage = ref(100);
 const editingReferralId = ref<string | null>(null);
 const selectedUserId = ref<number | null>(null);
 const assignmentSelect = ref<HTMLSelectElement | null>(null);
+
+// Selection state
+const selectedReferrals = ref<Set<string>>(new Set());
+const isBulkActionProcessing = ref(false);
+const showBulkCloseModal = ref(false);
+const bulkCloseResults = ref<{ successCount: number; errors: string[] } | null>(null);
 
 // Fetch users for assignment filter
 const { users: usersList, getUsers } = useUsers();
@@ -636,6 +832,74 @@ const updateAssignment = async (referral: any) => {
     alert('Failed to update assignment. Please try again.');
     cancelEditing();
   }
+};
+
+// Selection functions
+const toggleSelection = (referralId: string) => {
+  if (selectedReferrals.value.has(referralId)) {
+    selectedReferrals.value.delete(referralId);
+  } else {
+    selectedReferrals.value.add(referralId);
+  }
+};
+
+const allSelected = computed(() => {
+  return (
+    referrals.value.length > 0 && referrals.value.every((r) => selectedReferrals.value.has(r.id))
+  );
+});
+
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    // Deselect all
+    selectedReferrals.value.clear();
+  } else {
+    // Select all current page referrals
+    referrals.value.forEach((r) => selectedReferrals.value.add(r.id));
+  }
+};
+
+// Clear selections when page changes
+watch([localPage, debouncedSearch, typeFilter, statusFilter, assignedToFilter], () => {
+  selectedReferrals.value.clear();
+});
+
+// Bulk close functions
+const handleBulkClose = () => {
+  if (selectedReferrals.value.size === 0) return;
+  bulkCloseResults.value = null;
+  showBulkCloseModal.value = true;
+};
+
+const closeBulkCloseModal = () => {
+  showBulkCloseModal.value = false;
+  bulkCloseResults.value = null;
+};
+
+const executeBulkClose = async () => {
+  isBulkActionProcessing.value = true;
+  const errors: string[] = [];
+  let successCount = 0;
+
+  // Process each selected referral
+  for (const referralId of Array.from(selectedReferrals.value)) {
+    try {
+      await closeReferral(referralId);
+      successCount++;
+    } catch (err: any) {
+      console.error(`Failed to close referral ${referralId}:`, err);
+      errors.push(`${referralId}: ${err.data?.message || 'Failed to close'}`);
+    }
+  }
+
+  // Set results to show in modal
+  bulkCloseResults.value = { successCount, errors };
+
+  // Clear selections and refresh data
+  selectedReferrals.value.clear();
+  await fetchData();
+
+  isBulkActionProcessing.value = false;
 };
 
 // Initial fetch
