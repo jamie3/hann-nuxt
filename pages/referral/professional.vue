@@ -138,22 +138,18 @@
             </p>
           </div>
 
-          <!-- Address 1 -->
+          <!-- Address 1 with Google Places Autocomplete -->
           <div>
-            <label for="address1" class="block text-sm font-medium text-gray-700 mb-1">
-              Address 1 <span class="text-red-500">*</span>
-            </label>
-            <input
+            <GooglePlacesAutocomplete
               v-model="address1"
-              type="text"
-              id="address1"
-              placeholder="Street address"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              :class="{ 'border-red-500': errors.address1 }"
+              label="Address 1"
+              placeholder="Start typing your address..."
+              input-id="address1"
+              :required="true"
+              :has-error="!!errors.address1"
+              :error-message="errors.address1"
+              @place-selected="handlePlaceSelected"
             />
-            <p v-if="errors.address1" class="mt-1 text-sm text-red-500">
-              {{ errors.address1 }}
-            </p>
           </div>
 
           <!-- Address 2 -->
@@ -518,6 +514,37 @@ const turnstileToken = ref<string>('');
 // Check if Turnstile is enabled
 const config = useRuntimeConfig();
 const turnstileEnabled = computed(() => config.public.turnstile?.enabled || false);
+
+// Handle place selection from Google Places Autocomplete
+const handlePlaceSelected = (addressComponents: any) => {
+  // Populate address1 with street number and route
+  const streetAddress = [addressComponents.street_number, addressComponents.route]
+    .filter(Boolean)
+    .join(' ');
+  if (streetAddress) {
+    address1.value = streetAddress;
+  }
+
+  // Populate city
+  if (addressComponents.city) {
+    city.value = addressComponents.city;
+  }
+
+  // Populate province/state
+  if (addressComponents.province_state) {
+    provinceState.value = addressComponents.province_state;
+  }
+
+  // Populate country
+  if (addressComponents.country) {
+    country.value = addressComponents.country;
+  }
+
+  // Populate postal/zip code
+  if (addressComponents.postal_code) {
+    postalZip.value = addressComponents.postal_code;
+  }
+};
 
 // Handle form submission
 const onSubmit = handleSubmit(async (values) => {

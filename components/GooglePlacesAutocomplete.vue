@@ -51,7 +51,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'place-selected']);
 
 const autocompleteInput = ref<HTMLInputElement | null>(null);
 let autocomplete: any = null;
@@ -94,7 +94,42 @@ const initAutocomplete = () => {
 
     if (place.formatted_address) {
       emit('update:modelValue', place.formatted_address);
+
+      // Parse address components
+      const addressComponents = parseAddressComponents(place.address_components || []);
+      emit('place-selected', addressComponents);
     }
   });
+};
+
+const parseAddressComponents = (components: any[]) => {
+  const result: any = {
+    street_number: '',
+    route: '',
+    city: '',
+    province_state: '',
+    country: '',
+    postal_code: '',
+  };
+
+  components.forEach((component) => {
+    const types = component.types;
+
+    if (types.includes('street_number')) {
+      result.street_number = component.long_name;
+    } else if (types.includes('route')) {
+      result.route = component.long_name;
+    } else if (types.includes('locality')) {
+      result.city = component.long_name;
+    } else if (types.includes('administrative_area_level_1')) {
+      result.province_state = component.long_name;
+    } else if (types.includes('country')) {
+      result.country = component.long_name;
+    } else if (types.includes('postal_code')) {
+      result.postal_code = component.long_name;
+    }
+  });
+
+  return result;
 };
 </script>
