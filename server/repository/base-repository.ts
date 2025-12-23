@@ -24,12 +24,18 @@ export abstract class BaseRepository<
   }
 
   async update(id: string | number, data: UpdateType): Promise<SelectType> {
+    // Automatically set updated_at timestamp
+    const dataWithTimestamp = {
+      ...(data as any),
+      updated_at: new Date(),
+    };
+
     return (await this.db
       .updateTable(this.tableName)
-      .set(data as any)
+      .set(dataWithTimestamp as any)
       .where('id' as any, '=', id)
       .returningAll()
-      .executeTakeFirstOrThrow()) as Promise<SelectType>;
+      .executeTakeFirstOrThrow()) as SelectType;
   }
 
   async findAll(): Promise<SelectType[]> {
@@ -52,7 +58,7 @@ export abstract class BaseRepository<
   async delete(id: string | number): Promise<void> {
     await this.db
       .updateTable(this.tableName)
-      .set({ is_deleted: true } as any)
+      .set({ is_deleted: true, updated_at: new Date() } as any)
       .where('id' as any, '=', id)
       .execute();
   }

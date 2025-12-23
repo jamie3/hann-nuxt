@@ -210,4 +210,69 @@ export class ReferralRepository extends BaseRepository<
       .orderBy('created_at', 'desc')
       .execute();
   }
+
+  /**
+   * Get statistics counts directly from database
+   * Much more efficient than fetching all rows and counting in application
+   */
+  async getStats(): Promise<{
+    totalProfessional: number;
+    totalSelf: number;
+    totalNew: number;
+    totalOpened: number;
+    totalClosed: number;
+    totalArchived: number;
+  }> {
+    // Count by referral type
+    const typeCounts = await this.db
+      .selectFrom('referral')
+      .select(['referral_type', (eb) => eb.fn.count<number>('id').as('count')])
+      .where('is_deleted', '=', false)
+      .groupBy('referral_type')
+      .execute();
+
+    // Count by status
+    const statusCounts = await this.db
+      .selectFrom('referral')
+      .select(['status', (eb) => eb.fn.count<number>('id').as('count')])
+      .where('is_deleted', '=', false)
+      .groupBy('status')
+      .execute();
+
+    // Map results to stats object
+    const stats = {
+      totalProfessional: 0,
+      totalSelf: 0,
+      totalNew: 0,
+      totalOpened: 0,
+      totalClosed: 0,
+      totalArchived: 0,
+    };
+
+    // Process type counts
+    typeCounts.forEach((row) => {
+      const count = Number(row.count);
+      if (row.referral_type === 'professional') {
+        stats.totalProfessional = count;
+      } else if (row.referral_type === 'self') {
+        stats.totalSelf = count;
+      }
+    });
+
+    // Process status counts
+    statusCounts.forEach((row) => {
+      const count = Number(row.count);
+      if (row.status === 'new') {
+        stats.totalNew = count;
+      } else if (row.status === 'opened') {
+        stats.totalOpened = count;
+      } else if (row.status === 'closed') {
+        stats.totalClosed = count;
+      } else if (row.status === 'archived') {
+        stats.totalArchived = count;
+      }
+    });
+
+    return stats;
+  }
 }
