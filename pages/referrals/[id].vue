@@ -513,7 +513,16 @@
           v-if="referral.presenting_issues"
           class="bg-white shadow-sm rounded-lg p-6 lg:col-span-3"
         >
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Presenting Issues or Concerns</h2>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Presenting Issues or Concerns</h2>
+            <button
+              v-if="referral.status !== 'closed'"
+              @click="openPresentingIssuesModal"
+              class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Edit
+            </button>
+          </div>
           <p class="text-sm text-gray-900 whitespace-pre-line">
             {{ referral.presenting_issues }}
           </p>
@@ -756,6 +765,13 @@
       :referralId="id"
       @deleted="handleCreditCardDeleted"
     />
+
+    <!-- Edit Presenting Issues Modal -->
+    <EditPresentingIssuesModal
+      v-model="showPresentingIssuesModal"
+      :referral="referral"
+      @updated="handlePresentingIssuesUpdated"
+    />
   </div>
 </template>
 
@@ -826,6 +842,9 @@ const showNewNoteModal = ref(false);
 // Email PDF modal state
 const showEmailPDFModal = ref(false);
 
+// Presenting issues modal state
+const showPresentingIssuesModal = ref(false);
+
 // Credit card modal state
 const showEditCardModal = ref(false);
 const showDeleteCardModal = ref(false);
@@ -864,6 +883,11 @@ const openEmailPDFModal = () => {
   showEmailPDFModal.value = true;
 };
 
+// Open presenting issues modal
+const openPresentingIssuesModal = () => {
+  showPresentingIssuesModal.value = true;
+};
+
 // Handle referral deleted
 const handleReferralDeleted = () => {
   // Redirect to referrals list after successful deletion
@@ -872,6 +896,11 @@ const handleReferralDeleted = () => {
 
 // Handle referral updated
 const handleReferralUpdated = () => {
+  getReferral(id);
+};
+
+// Handle presenting issues updated
+const handlePresentingIssuesUpdated = () => {
   getReferral(id);
 };
 
