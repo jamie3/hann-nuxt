@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
       referral_id: parseInt(id),
       card_number_encrypted: encrypt(cardNumber),
       expiry_encrypted: encrypt(expiry),
-      cvv_encrypted: cvv ? encrypt(cvv) : undefined,
+      cvv_encrypted: cvv ? encrypt(cvv) : null,
     };
 
     // Upsert the credit card

@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
       card_number: decrypt(creditCard.card_number_encrypted),
       card_number_masked: maskCardNumber(decrypt(creditCard.card_number_encrypted)),
       expiry: decrypt(creditCard.expiry_encrypted),
-      cvv: decrypt(creditCard.cvv_encrypted),
+      cvv: creditCard.cvv_encrypted ? decrypt(creditCard.cvv_encrypted) : null,
       created_at: creditCard.created_at.toISOString(),
       updated_at: creditCard.updated_at.toISOString(),
     };
