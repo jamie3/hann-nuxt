@@ -7,10 +7,18 @@ import * as readline from 'readline';
 import * as path from 'path';
 import { readFileSync } from 'fs';
 
-// Parse command line arguments for environment
+// Parse command line arguments for environment, columns, and tables
 const args = process.argv.slice(2);
 const envIndex = args.indexOf('--env');
 const envName = envIndex !== -1 && args[envIndex + 1] ? args[envIndex + 1] : null;
+
+const columnsIndex = args.indexOf('--columns');
+const columnsArg = columnsIndex !== -1 && args[columnsIndex + 1] ? args[columnsIndex + 1] : null;
+const targetColumns = columnsArg ? columnsArg.split(',').map((col) => col.trim()) : null;
+
+const tablesIndex = args.indexOf('--tables');
+const tablesArg = tablesIndex !== -1 && args[tablesIndex + 1] ? args[tablesIndex + 1] : null;
+const targetTables = tablesArg ? tablesArg.split(',').map((table) => table.trim()) : null;
 
 // Load environment variables from specified file
 if (envName) {
@@ -155,9 +163,17 @@ function parseDate(dateValue: string | Date | null): Date | null {
   return null;
 }
 
-function determineStatus(closed: number, archived: number): string {
+function determineStatus(
+  closed: number,
+  archived: number,
+  openedAt: Date | null,
+  closedAt: Date | null,
+  archivedAt: Date | null
+): string {
   if (archived) return 'archived';
   if (closed) return 'closed';
+  // Set status to 'new' if all date fields are null
+  if (!openedAt && !closedAt && !archivedAt) return 'new';
   return 'opened';
 }
 
@@ -183,6 +199,10 @@ async function migrateReferrals(): Promise<void> {
 
       // Transform MySQL data to PostgreSQL schema (date_of_birth can be null)
       const createdAtDate = parseDate(client.referral_date) || new Date();
+      const openedAt = parseDate(client.file_opened);
+      const closedAt = parseDate(client.file_closed);
+      const archivedAt = client.archived ? parseDate(client.last_updated) : null;
+
       const referralData = {
         id: client.id, // Preserve MySQL ID as primary key
         original_id: client.id,
@@ -193,7 +213,12 @@ async function migrateReferrals(): Promise<void> {
         primary_telephone: client.phone || '',
         secondary_telephone: client.phone_2 || null,
         email: client.email || null,
-        mailing_address: client.address || null,
+        address_1: client.address || null,
+        address_2: null,
+        city: null,
+        province_state: null,
+        country: null,
+        postal_zip: null,
         referrer_name: client.referrer_name || null,
         referrer_relationship: client.referrer_relationship || null,
         referrer_email: client.referrer_email || null,
@@ -202,14 +227,14 @@ async function migrateReferrals(): Promise<void> {
         method_of_payment: null,
         referrer_prefers_contact: false,
         referral_type: (client.referral_type?.toLowerCase() || 'self') as 'self' | 'professional',
-        status: determineStatus(client.closed, client.archived) as
+        status: determineStatus(client.closed, client.archived, openedAt, closedAt, archivedAt) as
           | 'new'
           | 'open'
           | 'closed'
           | 'archived',
-        opened_at: parseDate(client.file_opened),
-        closed_at: parseDate(client.file_closed),
-        archived_at: client.archived ? parseDate(client.last_updated) : null,
+        opened_at: openedAt,
+        closed_at: closedAt,
+        archived_at: archivedAt,
         referred_at: parseDate(client.referral_date) || new Date(),
         is_deleted: Boolean(client.deleted),
         created_at: createdAtDate,
@@ -220,7 +245,7 @@ async function migrateReferrals(): Promise<void> {
         // Check if record with this original_id already exists (READ-ONLY check)
         const existing = await pgDb
           .selectFrom('referral')
-          .select('id')
+          .select(['id', 'updated_at'])
           .where('original_id', '=', client.id)
           .executeTakeFirst();
 
@@ -229,9 +254,25 @@ async function migrateReferrals(): Promise<void> {
 
         if (existing) {
           // Update existing record (NO DELETION - only updates fields)
+          let updateData: any;
+
+          if (targetColumns) {
+            // Only update specified columns
+            updateData = {};
+            for (const col of targetColumns) {
+              if (col in referralData) {
+                updateData[col] = referralData[col as keyof typeof referralData];
+              }
+            }
+          } else {
+            // Update all columns except updated_at (preserve existing timestamp)
+            const { updated_at, ...allData } = referralData;
+            updateData = allData;
+          }
+
           await pgDb
             .updateTable('referral')
-            .set(referralData)
+            .set(updateData)
             .where('id', '=', existing.id)
             .execute();
 
@@ -333,15 +374,31 @@ async function migrateClinicalNotes(): Promise<void> {
         // Check if record with this original_id already exists (READ-ONLY check)
         const existing = await pgDb
           .selectFrom('clinical_note')
-          .select('id')
+          .select(['id', 'updated_at'])
           .where('original_id', '=', note.id)
           .executeTakeFirst();
 
         if (existing) {
           // Update existing record (NO DELETION - only updates fields)
+          let updateData: any;
+
+          if (targetColumns) {
+            // Only update specified columns
+            updateData = {};
+            for (const col of targetColumns) {
+              if (col in noteData) {
+                updateData[col] = noteData[col as keyof typeof noteData];
+              }
+            }
+          } else {
+            // Update all columns except updated_at (preserve existing timestamp)
+            const { updated_at, ...allData } = noteData;
+            updateData = allData;
+          }
+
           await pgDb
             .updateTable('clinical_note')
-            .set(noteData)
+            .set(updateData)
             .where('id', '=', existing.id)
             .execute();
 
@@ -398,6 +455,21 @@ async function main() {
     console.log(`  Port: ${process.env.DATABASE_PORT || '5432'}`);
     console.log(`  Database: ${process.env.DATABASE_NAME || 'hann'}`);
     console.log(`  User: ${process.env.DATABASE_USER || 'postgres'}`);
+
+    if (targetTables) {
+      console.log('');
+      console.log(`Table Filter:`);
+      console.log(`  Tables: ${targetTables.join(', ')}`);
+      console.log(`  Note: Only these tables will be migrated`);
+    }
+
+    if (targetColumns) {
+      console.log('');
+      console.log(`Update Filter:`);
+      console.log(`  Columns: ${targetColumns.join(', ')}`);
+      console.log(`  Note: Only these columns will be updated for existing records`);
+    }
+
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     // Prompt for confirmation
@@ -436,11 +508,23 @@ async function main() {
     console.log('');
     rl.close();
 
+    // Determine which tables to migrate
+    const shouldMigrateReferrals = !targetTables || targetTables.includes('referral');
+    const shouldMigrateClinicalNotes = !targetTables || targetTables.includes('clinical_note');
+
     // Migrate referrals first (needed for ID mapping)
-    await migrateReferrals();
+    if (shouldMigrateReferrals) {
+      await migrateReferrals();
+    } else {
+      console.log('⏭️  Skipping referral migration (not in --tables filter)\n');
+    }
 
     // Then migrate clinical notes
-    await migrateClinicalNotes();
+    if (shouldMigrateClinicalNotes) {
+      await migrateClinicalNotes();
+    } else {
+      console.log('⏭️  Skipping clinical notes migration (not in --tables filter)\n');
+    }
 
     console.log('\n🎉 Migration complete!\n');
 
