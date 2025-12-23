@@ -10,7 +10,6 @@ import { differenceInYears } from 'date-fns';
 import type { Referral, NewReferral } from '../types/referral-types';
 import { pdfService } from './pdf-service';
 import { emailService } from './email-service';
-import { determineReferralStatus } from '../utils/referral-status';
 import { logger } from '../lib/logger';
 
 export class ReferralService {
@@ -30,8 +29,8 @@ export class ReferralService {
 
   // Map database row to domain model
   private mapToReferral(row: ReferralRowWithAssignedUser): Referral {
-    // Determine correct status based on dates using shared utility
-    const status = determineReferralStatus(row.opened_at, row.closed_at);
+    // Use the status directly from the database
+    const status = row.status as 'new' | 'opened' | 'closed' | 'archived';
 
     return {
       id: row.id.toString(),
