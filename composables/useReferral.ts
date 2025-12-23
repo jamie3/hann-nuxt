@@ -58,6 +58,21 @@ export const useReferral = () => {
     }
   };
 
+  const archiveReferral = async (id: string) => {
+    try {
+      const response = await $fetch<ReferralResponse>(`/api/referral/${id}/archive`, {
+        method: 'POST',
+      });
+
+      if (response.success && response.referral) {
+        referral.value = response.referral;
+      }
+      return response;
+    } catch (err: any) {
+      throw err;
+    }
+  };
+
   const updateReferral = async (id: string, data: any) => {
     try {
       const response = await $fetch<ReferralResponse>(`/api/referral/${id}/update`, {
@@ -81,6 +96,7 @@ export const useReferral = () => {
     getReferral,
     openReferral,
     closeReferral,
+    archiveReferral,
     updateReferral,
   };
 };

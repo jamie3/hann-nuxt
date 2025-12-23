@@ -139,6 +139,24 @@
                   Close Referral
                 </button>
 
+                <!-- Archive (when not archived) -->
+                <button
+                  v-if="referral.status !== 'archived'"
+                  @click="handleMenuAction(handleArchiveReferral)"
+                  :disabled="isUpdating"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                    ></path>
+                  </svg>
+                  Archive Referral
+                </button>
+
                 <div class="border-t border-gray-100"></div>
 
                 <!-- Download PDF -->
@@ -744,11 +762,7 @@
     />
 
     <!-- Email PDF Modal -->
-    <EmailReferralPDFModal
-      v-model="showEmailPDFModal"
-      :defaultEmail="'info@hannpsychologicalservices.com'"
-      @sent="handleEmailPDFSent"
-    />
+    <EmailReferralPDFModal v-model="showEmailPDFModal" @sent="handleEmailPDFSent" />
 
     <!-- Edit Credit Card Modal -->
     <EditCreditCardModal
@@ -771,6 +785,51 @@
       :referral="referral"
       @updated="handlePresentingIssuesUpdated"
     />
+
+    <!-- Email Error Modal -->
+    <div
+      v-if="showEmailErrorModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+      @click.self="showEmailErrorModal = false"
+    >
+      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+          <div class="flex items-center gap-3 mb-4">
+            <div
+              class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100"
+            >
+              <svg
+                class="h-6 w-6 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-medium text-gray-900">Email Failed</h3>
+            </div>
+          </div>
+          <div class="mt-2 px-1">
+            <p class="text-sm text-gray-700">{{ emailErrorMessage }}</p>
+          </div>
+          <div class="mt-6">
+            <button
+              @click="showEmailErrorModal = false"
+              class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -785,7 +844,8 @@ const route = useRoute();
 const id = route.params.id as string;
 
 // Use the referral composable
-const { referral, loading, error, getReferral, openReferral, closeReferral } = useReferral();
+const { referral, loading, error, getReferral, openReferral, closeReferral, archiveReferral } =
+  useReferral();
 
 // Use the files composable
 const {
@@ -960,6 +1020,23 @@ const handleCloseReferral = async () => {
   }
 };
 
+// Handle archiving referral
+const handleArchiveReferral = async () => {
+  if (!id || isUpdating.value) return;
+
+  if (!confirm('Are you sure you want to archive this referral?')) return;
+
+  isUpdating.value = true;
+  try {
+    await archiveReferral(id);
+  } catch (err: any) {
+    console.error('Failed to archive referral:', err);
+    alert(err.data?.message || 'Failed to archive referral');
+  } finally {
+    isUpdating.value = false;
+  }
+};
+
 // Handle file selection
 const handleFileSelect = async (event: Event) => {
   const target = event.target as HTMLInputElement;
@@ -994,6 +1071,10 @@ const handleDelete = async (fileId: string) => {
   }
 };
 
+// Email error modal state
+const showEmailErrorModal = ref(false);
+const emailErrorMessage = ref('');
+
 // Handle email PDF sent from modal
 const handleEmailPDFSent = async (email: string) => {
   if (!id || isEmailing.value) return;
@@ -1008,7 +1089,8 @@ const handleEmailPDFSent = async (email: string) => {
     alert('Referral PDF has been emailed successfully!');
   } catch (err: any) {
     console.error('Failed to email PDF:', err);
-    alert(err.data?.message || 'Failed to email PDF');
+    emailErrorMessage.value = err.data?.message || err.statusMessage || 'Failed to email PDF';
+    showEmailErrorModal.value = true;
   } finally {
     isEmailing.value = false;
   }
