@@ -516,7 +516,6 @@
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900">Presenting Issues or Concerns</h2>
             <button
-              v-if="referral.status !== 'closed'"
               @click="openPresentingIssuesModal"
               class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
             >

@@ -271,8 +271,14 @@ export class ReferralService {
       throw new Error(`Referral with id ${id} not found`);
     }
 
-    // Validate that status is not 'closed'
-    if (row.status === 'closed') {
+    // Check if this is just an assignment or presenting_issues update
+    const allowedFieldsOnClosed = ['assigned_to', 'presenting_issues'];
+    const isAllowedUpdateOnClosed = Object.keys(data).every((key) =>
+      allowedFieldsOnClosed.includes(key)
+    );
+
+    // Validate that status is not 'closed' (except for allowed field updates)
+    if (row.status === 'closed' && !isAllowedUpdateOnClosed) {
       throw new Error('Cannot update a closed referral');
     }
 
