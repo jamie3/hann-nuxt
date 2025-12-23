@@ -265,9 +265,8 @@ async function migrateReferrals(): Promise<void> {
               }
             }
           } else {
-            // Update all columns except updated_at (preserve existing timestamp)
-            const { updated_at, ...allData } = referralData;
-            updateData = allData;
+            // Update all columns including updated_at from MySQL last_updated
+            updateData = referralData;
           }
 
           await pgDb
