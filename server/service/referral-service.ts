@@ -264,6 +264,23 @@ export class ReferralService {
     return this.mapToReferral(updatedRow);
   }
 
+  async archiveReferral(id: string): Promise<Referral> {
+    const row = await this.referralRepository.findByIdRow(id);
+
+    if (!row) {
+      throw new Error(`Referral with id ${id} not found`);
+    }
+
+    // Can archive from any status
+    // Update the referral to archived status
+    const updatedRow = await this.referralRepository.update(id, {
+      status: 'archived',
+      archived_at: new Date(),
+    });
+
+    return this.mapToReferral(updatedRow);
+  }
+
   async updateReferral(id: string, data: Partial<NewReferral>): Promise<Referral> {
     const row = await this.referralRepository.findByIdRow(id);
 
