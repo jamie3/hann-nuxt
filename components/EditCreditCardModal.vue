@@ -35,6 +35,7 @@
             placeholder="1234 5678 9012 3456"
             maxlength="19"
             required
+            @input="formatCardNumber"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -62,6 +63,7 @@
               type="text"
               placeholder="123"
               maxlength="4"
+              @input="formatCVV"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -137,7 +139,18 @@ watch(
   { immediate: true }
 );
 
-// Format expiry as MM/YY
+// Format card number - allow only digits and add spaces
+const formatCardNumber = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  // Remove all non-digit characters
+  let value = input.value.replace(/\D/g, '');
+
+  // Add spaces every 4 digits
+  const parts = value.match(/.{1,4}/g);
+  formData.value.cardNumber = parts ? parts.join(' ') : value;
+};
+
+// Format expiry as MM/YY - allow only digits
 const formatExpiry = (event: Event) => {
   const input = event.target as HTMLInputElement;
   let value = input.value.replace(/\D/g, '');
@@ -147,6 +160,13 @@ const formatExpiry = (event: Event) => {
   }
 
   formData.value.expiry = value;
+};
+
+// Format CVV - allow only digits
+const formatCVV = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  // Remove all non-digit characters
+  formData.value.cvv = input.value.replace(/\D/g, '');
 };
 
 const closeModal = () => {
