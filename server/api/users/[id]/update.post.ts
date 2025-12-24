@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const body = await readBody(event);
-    const { name, email, password } = body;
+    const { name, username, email, password } = body;
 
     const userService = getUserService();
 
@@ -22,6 +22,16 @@ export default defineEventHandler(async (event) => {
 
     if (name !== undefined) {
       updateData.name = name;
+    }
+
+    if (username !== undefined) {
+      if (username.length < 3) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: 'Username must be at least 3 characters',
+        });
+      }
+      updateData.username = username;
     }
 
     if (email !== undefined) {
@@ -69,10 +79,23 @@ export default defineEventHandler(async (event) => {
 
     // Check for unique constraint violations
     if (error.message?.includes('unique') || error.code === '23505') {
-      throw createError({
-        statusCode: 409,
-        statusMessage: 'Email already exists',
-      });
+      const errorMessage = error.message?.toLowerCase() || '';
+      if (errorMessage.includes('username')) {
+        throw createError({
+          statusCode: 409,
+          statusMessage: 'Username already exists',
+        });
+      } else if (errorMessage.includes('email')) {
+        throw createError({
+          statusCode: 409,
+          statusMessage: 'Email already exists',
+        });
+      } else {
+        throw createError({
+          statusCode: 409,
+          statusMessage: 'A user with these details already exists',
+        });
+      }
     }
 
     throw createError({

@@ -49,10 +49,12 @@
               v-model="username"
               type="text"
               id="username"
-              disabled
-              class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="{ 'border-red-500': errors.username }"
             />
-            <p class="mt-1 text-xs text-gray-500">Username cannot be changed</p>
+            <p v-if="errors.username" class="mt-1 text-sm text-red-500">
+              {{ errors.username }}
+            </p>
           </div>
 
           <!-- Email Address -->
@@ -195,6 +197,7 @@ const onSubmit = handleSubmit(async (values) => {
   try {
     const updateData: any = {
       name: values.name,
+      username: values.username,
       email: values.email,
     };
 
