@@ -98,12 +98,19 @@ const { performLogin, error: authError } = useAuth();
 // Error message from API
 const errorMessage = computed(() => authError.value);
 
+// Get redirect parameter from query string
+const route = useRoute();
+const redirectTo = computed(() => (route.query.redirect as string) || '/');
+
 // Handle form submission
 const onSubmit = handleSubmit(async (values) => {
-  await performLogin({
-    username: values.username,
-    password: values.password,
-    turnstileToken: turnstileToken.value,
-  });
+  await performLogin(
+    {
+      username: values.username,
+      password: values.password,
+      turnstileToken: turnstileToken.value,
+    },
+    redirectTo.value
+  );
 });
 </script>

@@ -55,7 +55,7 @@ export const useAuth = () => {
     }
   };
 
-  const performLogin = async (credentials: LoginCredentials) => {
+  const performLogin = async (credentials: LoginCredentials, redirectTo?: string) => {
     const result = await login(credentials);
 
     if (result.success) {
@@ -63,8 +63,8 @@ export const useAuth = () => {
       const { fetch: fetchSession } = useUserSession();
       await fetchSession();
 
-      // Redirect to dashboard after successful login
-      await navigateTo('/');
+      // Redirect to the original URL or dashboard after successful login
+      await navigateTo(redirectTo || '/');
     }
 
     return result;

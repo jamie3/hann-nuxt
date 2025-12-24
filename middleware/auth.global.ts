@@ -15,7 +15,11 @@ export default defineNuxtRouteMiddleware((to) => {
 
   // If user is not logged in and trying to access a protected route
   if (!loggedIn.value && !isPublicRoute) {
-    return navigateTo('/login');
+    // Save the original URL to redirect back after login
+    return navigateTo({
+      path: '/login',
+      query: { redirect: to.fullPath },
+    });
   }
 
   // If user is logged in and trying to access login page, redirect to home
