@@ -837,6 +837,18 @@
       title="Email Sent"
       message="Referral PDF has been emailed successfully!"
     />
+
+    <!-- Archive Confirm Modal -->
+    <ConfirmModal
+      v-model="showArchiveConfirmModal"
+      title="Archive Referral"
+      message="Are you sure you want to archive this referral?"
+      variant="warning"
+      confirm-text="Archive"
+      :loading="isUpdating"
+      loading-text="Archiving..."
+      @confirm="confirmArchive"
+    />
   </div>
 </template>
 
@@ -1028,14 +1040,18 @@ const handleCloseReferral = async () => {
 };
 
 // Handle archiving referral
-const handleArchiveReferral = async () => {
-  if (!id || isUpdating.value) return;
+const handleArchiveReferral = () => {
+  showArchiveConfirmModal.value = true;
+};
 
-  if (!confirm('Are you sure you want to archive this referral?')) return;
+// Confirm archive
+const confirmArchive = async () => {
+  if (!id || isUpdating.value) return;
 
   isUpdating.value = true;
   try {
     await archiveReferral(id);
+    showArchiveConfirmModal.value = false;
   } catch (err: any) {
     console.error('Failed to archive referral:', err);
     alert(err.data?.message || 'Failed to archive referral');
@@ -1082,6 +1098,9 @@ const handleDelete = async (fileId: string) => {
 const showEmailErrorModal = ref(false);
 const showEmailSuccessModal = ref(false);
 const emailErrorMessage = ref('');
+
+// Archive confirm modal state
+const showArchiveConfirmModal = ref(false);
 
 // Handle email PDF sent from modal
 const handleEmailPDFSent = async (email: string) => {
