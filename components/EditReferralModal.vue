@@ -185,14 +185,14 @@
             </select>
           </div>
 
-          <!-- Address 1 -->
+          <!-- Address 1 with Google Places Autocomplete -->
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Address 1</label>
-            <input
+            <GooglePlacesAutocomplete
               v-model="formData.address_1"
-              type="text"
-              placeholder="Street address"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              label="Address 1"
+              placeholder="Start typing your address..."
+              input-id="edit-address-autocomplete"
+              @place-selected="handlePlaceSelected"
             />
           </div>
 
@@ -399,6 +399,32 @@ watch(
 const closeModal = () => {
   emit('update:modelValue', false);
   errorMessage.value = '';
+};
+
+// Handle Google Places autocomplete selection
+const handlePlaceSelected = (addressComponents: any) => {
+  // Build address line 1 from street number and route
+  const streetAddress = [addressComponents.street_number, addressComponents.route]
+    .filter(Boolean)
+    .join(' ');
+
+  if (streetAddress) {
+    formData.value.address_1 = streetAddress;
+  }
+
+  // Populate other fields
+  if (addressComponents.city) {
+    formData.value.city = addressComponents.city;
+  }
+  if (addressComponents.province_state) {
+    formData.value.province_state = addressComponents.province_state;
+  }
+  if (addressComponents.country) {
+    formData.value.country = addressComponents.country;
+  }
+  if (addressComponents.postal_code) {
+    formData.value.postal_zip = addressComponents.postal_code;
+  }
 };
 
 const handleSubmit = async () => {
