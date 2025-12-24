@@ -51,16 +51,7 @@
               </span>
 
               <!-- Status Badge -->
-              <span
-                class="px-3 py-1 text-sm font-semibold rounded-full"
-                :class="{
-                  'bg-yellow-100 text-yellow-800': referral.status === 'new',
-                  'bg-blue-100 text-blue-800': referral.status === 'opened',
-                  'bg-gray-100 text-gray-800': referral.status === 'closed',
-                }"
-              >
-                {{ referral.status }}
-              </span>
+              <StatusBadge :status="referral.status" />
             </div>
           </div>
           <div class="relative">
