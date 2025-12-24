@@ -41,7 +41,8 @@ export default defineEventHandler(
     // Send email with PDF to the specified email
     const referralTypeFormatted =
       referral.referral_type === 'professional' ? 'Professional' : 'Self';
-    await emailService.sendReferralNotification(referralTypeFormatted, pdfBuffer, emailTo);
+
+    await emailService.resendReferralPDF(referral, referralTypeFormatted, pdfBuffer, emailTo);
 
     return {
       success: true,
