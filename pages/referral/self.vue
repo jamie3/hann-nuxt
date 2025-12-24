@@ -353,25 +353,25 @@ definePageMeta({
   layout: 'login',
 });
 
-// Define validation schema
+// Define validation schema with automatic trimming
 const schema = toTypedSchema(
   z.object({
-    firstName: z.string().min(1, 'First name is required'),
-    lastName: z.string().min(1, 'Last name is required'),
+    firstName: z.string().trim().min(1, 'First name is required'),
+    lastName: z.string().trim().min(1, 'Last name is required'),
     dateOfBirth: z.string().min(1, 'Date of birth is required'),
     gender: z.string().min(1, 'Gender is required'),
-    parentsGuardians: z.string().optional(),
-    primaryTelephone: z.string().min(1, 'Primary telephone is required'),
-    secondaryTelephone: z.string().optional(),
-    email: z.string().email('Invalid email address').min(1, 'Email is required'),
-    address1: z.string().min(1, 'Address is required'),
-    address2: z.string().optional(),
-    city: z.string().min(1, 'City is required'),
-    provinceState: z.string().min(1, 'Province/State is required'),
+    parentsGuardians: z.string().trim().optional(),
+    primaryTelephone: z.string().trim().min(1, 'Primary telephone is required'),
+    secondaryTelephone: z.string().trim().optional(),
+    email: z.string().trim().email('Invalid email address').min(1, 'Email is required'),
+    address1: z.string().trim().min(1, 'Address is required'),
+    address2: z.string().trim().optional(),
+    city: z.string().trim().min(1, 'City is required'),
+    provinceState: z.string().trim().min(1, 'Province/State is required'),
     country: z.string().min(1, 'Country is required'),
-    postalZip: z.string().min(1, 'Postal/Zip code is required'),
+    postalZip: z.string().trim().min(1, 'Postal/Zip code is required'),
     requestedService: z.string().min(1, 'Requested service is required'),
-    presentingIssues: z.string().min(1, 'Presenting issues or concerns is required'),
+    presentingIssues: z.string().trim().min(1, 'Presenting issues or concerns is required'),
   })
 );
 
