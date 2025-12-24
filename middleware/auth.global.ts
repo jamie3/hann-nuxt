@@ -8,6 +8,7 @@ export default defineNuxtRouteMiddleware((to) => {
     '/referral/self',
     '/referral/professional',
     '/referral/success',
+    '/health',
   ];
 
   // Check if the current route is public
