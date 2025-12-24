@@ -149,7 +149,7 @@ export class EmailService {
     try {
       const tag = 'referral-resend';
       // Use a simple hardcoded subject for now to debug
-      const subject = 'Referral Information';
+      const subject = `${referralType} Referral`;
 
       // Validate parameters
       logger.info('Preparing to resend referral PDF', {

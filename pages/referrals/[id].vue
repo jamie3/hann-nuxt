@@ -830,6 +830,13 @@
         </div>
       </div>
     </div>
+
+    <!-- Email Success Modal -->
+    <SuccessModal
+      v-model="showEmailSuccessModal"
+      title="Email Sent"
+      message="Referral PDF has been emailed successfully!"
+    />
   </div>
 </template>
 
@@ -1071,8 +1078,9 @@ const handleDelete = async (fileId: string) => {
   }
 };
 
-// Email error modal state
+// Email modal state
 const showEmailErrorModal = ref(false);
+const showEmailSuccessModal = ref(false);
 const emailErrorMessage = ref('');
 
 // Handle email PDF sent from modal
@@ -1086,7 +1094,7 @@ const handleEmailPDFSent = async (email: string) => {
       body: { email },
     });
 
-    alert('Referral PDF has been emailed successfully!');
+    showEmailSuccessModal.value = true;
   } catch (err: any) {
     console.error('Failed to email PDF:', err);
     emailErrorMessage.value = err.data?.message || err.statusMessage || 'Failed to email PDF';
