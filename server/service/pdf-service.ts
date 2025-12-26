@@ -4,6 +4,30 @@ import { ClinicalNote } from '../types/clinical-note-types';
 import { formatDate } from '../../utils/dateTimeUtils';
 
 export class PDFService {
+  // Helper function to clean text for PDF output
+  private cleanTextForPDF(text: string): string {
+    return (
+      text
+        // Remove specific problematic characters
+        .replace(/Ð/g, '') // Latin Capital Letter Eth
+        .replace(/ð/g, '') // Latin Small Letter Eth
+        // Normalize Unicode to decomposed form and remove combining marks
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        // Replace smart quotes and punctuation
+        .replace(/[\u2018\u2019]/g, "'") // smart single quotes
+        .replace(/[\u201C\u201D]/g, '"') // smart double quotes
+        .replace(/\u2013/g, '-') // en dash
+        .replace(/\u2014/g, '--') // em dash
+        .replace(/\u2026/g, '...') // ellipsis
+        .replace(/\u2022/g, '*') // bullet
+        .replace(/[\u2018-\u201F]/g, "'") // various quotes
+        .replace(/[\u0060\u00B4]/g, "'") // backtick and acute accent
+        // Replace other problematic characters
+        .replace(/[^\x20-\x7E\n\r\t]/g, '') // keep only printable ASCII + newline/tab
+        .trim()
+    );
+  }
   generateReferralPDF(referral: Referral): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument();
@@ -449,16 +473,8 @@ export class PDFService {
           doc.fontSize(11);
           doc.font('Helvetica');
 
-          // Add content with proper text handling
-          // Replace problematic characters and handle encoding
-          const cleanContent = note.content
-            .replace(/\u2013/g, '-') // en dash
-            .replace(/\u2014/g, '--') // em dash
-            .replace(/\u2018/g, "'") // left single quote
-            .replace(/\u2019/g, "'") // right single quote
-            .replace(/\u201C/g, '"') // left double quote
-            .replace(/\u201D/g, '"') // right double quote
-            .replace(/\u2026/g, '...'); // ellipsis
+          // Clean the content for PDF output
+          const cleanContent = this.cleanTextForPDF(note.content);
 
           // Split content by newlines and add each line
           const contentLines = cleanContent.split('\n');
