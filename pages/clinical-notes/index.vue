@@ -394,14 +394,16 @@ const goToPage = (page: number) => {
   fetchData();
 };
 
-// Fetch clinical notes immediately
-await fetchData();
-
 // Handle note created - refresh and reset to first page
 const handleNoteCreated = () => {
   localPage.value = 1;
   fetchData();
 };
+
+// Fetch data after component is mounted
+onMounted(async () => {
+  await fetchData();
+});
 
 // Set page meta
 useHead({

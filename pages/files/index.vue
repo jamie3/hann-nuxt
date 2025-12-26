@@ -233,22 +233,17 @@
 
 <script setup lang="ts">
 import { formatDate } from '~/utils/dateTimeUtils';
-import type { FileMetadata } from '~/server/types/file-types';
 
 definePageMeta({
   layout: 'default',
 });
 
-interface FilesResponse {
-  success: boolean;
-  files: FileMetadata[];
-}
-
 const { downloadFile, formatFileSize, deleteFile } = useFiles();
 
-const files = ref<FileMetadata[]>([]);
-const loading = ref(true);
-const error = ref<string | null>(null);
+// Use the file list composable
+const { files: filesList, loading, error, getFiles } = useFileList();
+
+const files = computed(() => filesList.value);
 
 // Pagination state
 const currentPage = ref(1);
@@ -302,31 +297,15 @@ const goToPage = (page: number) => {
 
 // Fetch all files
 const fetchFiles = async () => {
-  loading.value = true;
-  error.value = null;
-
-  try {
-    const { data, error: fetchError } = await useFetch<FilesResponse>('/api/files');
-
-    if (fetchError.value) {
-      error.value = fetchError.value.message || 'Failed to load files';
-      files.value = [];
-    } else if (data.value) {
-      files.value = data.value.files;
-    }
-  } catch (err: any) {
-    error.value = err.message || 'An error occurred';
-    files.value = [];
-  } finally {
-    loading.value = false;
-  }
-
+  await getFiles();
   // Reset to first page after fetching
   currentPage.value = 1;
 };
 
-// Initial fetch
-await fetchFiles();
+// Fetch data after component is mounted
+onMounted(async () => {
+  await fetchFiles();
+});
 
 // Handle file download
 const handleDownload = (fileId: string, fileName: string) => {

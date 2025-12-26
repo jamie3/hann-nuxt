@@ -205,8 +205,16 @@ definePageMeta({
   layout: 'default',
 });
 
-// Fetch emails
-const { data, error, pending, refresh } = await useFetch('/api/emails');
+// Use the email list composable
+const { data, loading, error, getEmails } = useEmailList();
+
+// Create computed for pending to maintain template compatibility
+const pending = computed(() => loading.value);
+
+// Refresh function
+const refresh = () => {
+  getEmails();
+};
 
 // Search functionality
 const searchQuery = ref('');
@@ -220,6 +228,11 @@ const filteredEmails = computed(() => {
 
   const query = searchQuery.value.toLowerCase().trim();
   return data.value.emails.filter((email) => email.recipient_email.toLowerCase().includes(query));
+});
+
+// Fetch data after component is mounted
+onMounted(async () => {
+  await getEmails();
 });
 
 useHead({

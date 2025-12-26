@@ -669,9 +669,6 @@ const users = computed(() => {
 const { user } = useUserSession();
 const currentUserId = computed(() => (user.value as any)?.id || null);
 
-// Fetch users list for the assignment filter
-await getUsers();
-
 // Computed values
 const pending = computed(() => loading.value);
 const error = computed(() => composableError.value);
@@ -910,8 +907,10 @@ const executeBulkClose = async () => {
   isBulkActionProcessing.value = false;
 };
 
-// Initial fetch
-await fetchData();
+// Fetch data after component is mounted
+onMounted(async () => {
+  await Promise.all([fetchData(), getUsers()]);
+});
 
 // Set page meta
 useHead({
