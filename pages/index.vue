@@ -5,11 +5,27 @@
       <p class="mt-2 text-sm text-gray-600">Overview of your referral system</p>
     </div>
 
+    <!-- Stats Cards Loading State -->
+    <div v-if="statsLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div
+        v-for="i in 6"
+        :key="i"
+        class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-gray-300"
+      >
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <div class="h-4 bg-gray-200 rounded w-3/4 mb-2 animate-pulse"></div>
+            <div class="h-8 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Stats Cards -->
-    <div
-      v-if="!statsLoading && !statsError"
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
-    >
+    <div v-else-if="!statsError" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
       <!-- Total Professional Referrals -->
       <div class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-blue-500">
         <div class="flex items-center">
@@ -329,24 +345,11 @@
 </template>
 
 <script setup lang="ts">
-import type { Referral } from '~/server/types/referral-types';
 import { subDays } from 'date-fns';
 
 definePageMeta({
   layout: 'default',
 });
-
-interface StatsResponse {
-  success: boolean;
-  stats: {
-    totalProfessional: number;
-    totalSelf: number;
-    totalOpened: number;
-    totalClosed: number;
-    totalArchived: number;
-    totalNew: number;
-  };
-}
 
 // Get current user
 const { user } = useUserSession();
@@ -354,15 +357,6 @@ const userName = computed(() => {
   // Use full name if available, otherwise fall back to username, then 'Guest'
   return (user.value as any)?.name || (user.value as any)?.username || 'Guest';
 });
-
-// Fetch statistics
-const {
-  data: statsData,
-  error: statsError,
-  pending: statsLoading,
-} = await useFetch<StatsResponse>('/api/referrals/stats');
-
-const stats = computed(() => statsData.value?.stats);
 
 // Fetch new referrals using the composable
 const {
@@ -372,19 +366,10 @@ const {
   getReferrals,
 } = useReferralList();
 
-// Calculate date 30 days ago using date-fns
-const startDate = subDays(new Date(), 30).toISOString();
+// Fetch stats using the stats composable
+const { statsData, statsLoading, statsError, getStats } = useReferralStats();
 
-// Fetch new referrals from the last 30 days
-await getReferrals({
-  page: 1,
-  limit: 10,
-  sortBy: 'referred_at',
-  sortOrder: 'desc',
-  status: 'new',
-  startDate: startDate,
-});
-
+const stats = computed(() => statsData.value);
 const newReferrals = computed(() => referrals.value);
 
 // Fetch users for assignment
@@ -399,8 +384,25 @@ const users = computed(() => {
   });
 });
 
-// Fetch users list for the assignment dropdown
-await getUsers();
+// Fetch data after component is mounted
+onMounted(async () => {
+  // Calculate date 30 days ago using date-fns
+  const startDate = subDays(new Date(), 30).toISOString();
+
+  // Fetch all data in parallel
+  await Promise.all([
+    getStats(),
+    getReferrals({
+      page: 1,
+      limit: 10,
+      sortBy: 'referred_at',
+      sortOrder: 'desc',
+      status: 'new',
+      startDate: startDate,
+    }),
+    getUsers(),
+  ]);
+});
 
 // Assignment editing state
 const editingReferralId = ref<string | null>(null);
