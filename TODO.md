@@ -19,6 +19,7 @@ Things to do during the migration
 - Age at Referral is showing 0 years for https://clients.hannwellness.com/referrals/2538
 - Referral PDF is missing address
 - Fix this error Dec 24 13:18:23 2025-12-24 13:18:23 [[33mwarn[39m]: Unauthorized API access attempt {"service":"hann-nuxt","url":"/api/\_auth/session","sourceIp":""}
+- Logout results in Logout Failed error
 
 # New Features
 
@@ -62,6 +63,8 @@ Things to do during the migration
 - User Roles
 - Dark Mode
 - Referrals page make the drop downs more colourful (eg. badges, icons)
+- Maintain State of Referral page in Local storage?
+- Referral page query parameters mapped to the state of the page.
 
 Nice to Have
 
