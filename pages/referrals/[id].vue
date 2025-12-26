@@ -186,7 +186,7 @@
                   Download Clinical File PDF
                 </a>
 
-                <!-- Email PDF -->
+                <!-- Email Referral PDF -->
                 <button
                   @click="handleMenuAction(openEmailPDFModal)"
                   class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
@@ -199,7 +199,7 @@
                       d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                     ></path>
                   </svg>
-                  Email PDF
+                  Email Referral PDF
                 </button>
 
                 <div class="border-t border-gray-100"></div>

@@ -424,12 +424,6 @@ export class PDFService {
 
       // Add Clinical Notes section if there are any notes
       if (clinicalNotes.length > 0) {
-        doc.addPage();
-        doc.fontSize(14);
-        doc.font('Helvetica-Bold');
-        doc.text('Clinical Notes', { align: 'center' });
-        doc.moveDown();
-
         // Sort clinical notes by session date (chronological order)
         const sortedNotes = [...clinicalNotes].sort((a, b) => {
           const dateA = new Date(a.session_date).getTime();
@@ -437,26 +431,38 @@ export class PDFService {
           return dateA - dateB;
         });
 
-        // Add each clinical note
-        sortedNotes.forEach((note, index) => {
-          if (index > 0) {
-            doc.moveDown(2);
-            // Add a horizontal line between notes
-            doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-            doc.moveDown();
-          }
+        // Add each clinical note on its own page
+        sortedNotes.forEach((note) => {
+          // Start a new page for each clinical note
+          doc.addPage();
+
+          doc.fontSize(14);
+          doc.font('Helvetica-Bold');
+          doc.text('Clinical Note', { align: 'center' });
+          doc.moveDown();
 
           doc.fontSize(12);
           doc.font('Helvetica-Bold');
           doc.text(`Session Date: ${formatDate(note.session_date)}`);
-          doc.moveDown(0.5);
+          doc.moveDown();
 
           doc.fontSize(11);
           doc.font('Helvetica');
 
+          // Add content with proper text handling
+          // Replace problematic characters and handle encoding
+          const cleanContent = note.content
+            .replace(/\u2013/g, '-') // en dash
+            .replace(/\u2014/g, '--') // em dash
+            .replace(/\u2018/g, "'") // left single quote
+            .replace(/\u2019/g, "'") // right single quote
+            .replace(/\u201C/g, '"') // left double quote
+            .replace(/\u201D/g, '"') // right double quote
+            .replace(/\u2026/g, '...'); // ellipsis
+
           // Split content by newlines and add each line
-          const contentLines = note.content.split('\n');
-          contentLines.forEach((line) => {
+          const contentLines = cleanContent.split('\n');
+          contentLines.forEach((line: string) => {
             doc.text(line || ' ', { align: 'left' });
           });
         });
