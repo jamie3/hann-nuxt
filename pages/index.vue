@@ -350,9 +350,10 @@ interface StatsResponse {
 
 // Get current user
 const { user } = useUserSession();
-const userName = computed(
-  () => (user.value as any)?.name || (user.value as any)?.username || 'Guest'
-);
+const userName = computed(() => {
+  // Use full name if available, otherwise fall back to username, then 'Guest'
+  return (user.value as any)?.name || (user.value as any)?.username || 'Guest';
+});
 
 // Fetch statistics
 const {
