@@ -78,6 +78,7 @@ export class ReferralService {
     return {
       first_name: referral.first_name,
       last_name: referral.last_name,
+      gender: referral.gender,
       date_of_birth:
         typeof referral.date_of_birth === 'string'
           ? new Date(referral.date_of_birth)
