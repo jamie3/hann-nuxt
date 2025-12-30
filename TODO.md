@@ -52,6 +52,7 @@ Things to do during the migration
 - (Completed) Add Google Maps to Edit Referral
 - (In Progress) History of emails sent
 - Whitelist cloudflare IPs
+- Clinical Note should track which user created it. Print this in the PDF and the clinical note card.
 - Track open / closes (see existing DB)
 - Print all the Clinical Notes in PDF a cronilogical order
 - When clicking "View Referral" in email and not logged in it should have a redirectTo url
