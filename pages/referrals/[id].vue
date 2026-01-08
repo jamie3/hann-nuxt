@@ -371,37 +371,9 @@
                 <div>
                   {{ referral.city
                   }}<span v-if="referral.province_state">, {{ referral.province_state }}</span>
-                  <span v-if="referral.postal_zip"> {{ referral.postal_zip }}</span>
                 </div>
+                <div v-if="referral.postal_zip">{{ referral.postal_zip }}</div>
                 <div v-if="referral.country">{{ referral.country }}</div>
-              </dd>
-            </div>
-          </dl>
-        </div>
-
-        <!-- Referrer Information (Professional Only) -->
-        <div
-          v-if="referral.referral_type === 'professional'"
-          class="bg-white shadow-sm rounded-lg p-6"
-        >
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Referrer Information</h2>
-          <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div v-if="referral.referrer_name">
-              <dt class="text-sm font-medium text-gray-500">Referrer Name</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_name }}</dd>
-            </div>
-            <div v-if="referral.referrer_relationship">
-              <dt class="text-sm font-medium text-gray-500">Relationship</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_relationship }}</dd>
-            </div>
-            <div v-if="referral.referrer_email">
-              <dt class="text-sm font-medium text-gray-500">Referrer Email</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_email }}</dd>
-            </div>
-            <div v-if="referral.referrer_prefers_contact !== null">
-              <dt class="text-sm font-medium text-gray-500">Prefers Pre-Contact</dt>
-              <dd class="mt-1 text-sm text-gray-900">
-                {{ referral.referrer_prefers_contact ? 'Yes' : 'No' }}
               </dd>
             </div>
           </dl>
@@ -533,6 +505,34 @@
             </svg>
             <p class="mt-2 text-sm">No credit card on file</p>
           </div>
+        </div>
+
+        <!-- Referrer Information (Professional Only) -->
+        <div
+          v-if="referral.referral_type === 'professional'"
+          class="bg-white shadow-sm rounded-lg p-6"
+        >
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Referrer Information</h2>
+          <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div v-if="referral.referrer_name">
+              <dt class="text-sm font-medium text-gray-500">Referrer Name</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_name }}</dd>
+            </div>
+            <div v-if="referral.referrer_relationship">
+              <dt class="text-sm font-medium text-gray-500">Relationship</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_relationship }}</dd>
+            </div>
+            <div v-if="referral.referrer_email">
+              <dt class="text-sm font-medium text-gray-500">Referrer Email</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_email }}</dd>
+            </div>
+            <div v-if="referral.referrer_prefers_contact !== null">
+              <dt class="text-sm font-medium text-gray-500">Prefers Pre-Contact</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                {{ referral.referrer_prefers_contact ? 'Yes' : 'No' }}
+              </dd>
+            </div>
+          </dl>
         </div>
 
         <!-- Presenting Issues -->
