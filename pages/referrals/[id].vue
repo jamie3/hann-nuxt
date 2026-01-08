@@ -317,7 +317,7 @@
       </div>
 
       <!-- Main Content -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Personal Information -->
         <div class="bg-white shadow-sm rounded-lg p-6">
           <h2 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h2>
@@ -374,6 +374,34 @@
                 </div>
                 <div v-if="referral.postal_zip">{{ referral.postal_zip }}</div>
                 <div v-if="referral.country">{{ referral.country }}</div>
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Referrer Information (Professional Only) -->
+        <div
+          v-if="referral.referral_type === 'professional'"
+          class="bg-white shadow-sm rounded-lg p-6 lg:col-span-2"
+        >
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Referrer Information</h2>
+          <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div v-if="referral.referrer_name">
+              <dt class="text-sm font-medium text-gray-500">Referrer Name</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_name }}</dd>
+            </div>
+            <div v-if="referral.referrer_relationship">
+              <dt class="text-sm font-medium text-gray-500">Relationship</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_relationship }}</dd>
+            </div>
+            <div v-if="referral.referrer_email">
+              <dt class="text-sm font-medium text-gray-500">Referrer Email</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_email }}</dd>
+            </div>
+            <div v-if="referral.referrer_prefers_contact !== null">
+              <dt class="text-sm font-medium text-gray-500">Prefers Pre-Contact</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                {{ referral.referrer_prefers_contact ? 'Yes' : 'No' }}
               </dd>
             </div>
           </dl>
@@ -507,38 +535,10 @@
           </div>
         </div>
 
-        <!-- Referrer Information (Professional Only) -->
-        <div
-          v-if="referral.referral_type === 'professional'"
-          class="bg-white shadow-sm rounded-lg p-6"
-        >
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Referrer Information</h2>
-          <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div v-if="referral.referrer_name">
-              <dt class="text-sm font-medium text-gray-500">Referrer Name</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_name }}</dd>
-            </div>
-            <div v-if="referral.referrer_relationship">
-              <dt class="text-sm font-medium text-gray-500">Relationship</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_relationship }}</dd>
-            </div>
-            <div v-if="referral.referrer_email">
-              <dt class="text-sm font-medium text-gray-500">Referrer Email</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_email }}</dd>
-            </div>
-            <div v-if="referral.referrer_prefers_contact !== null">
-              <dt class="text-sm font-medium text-gray-500">Prefers Pre-Contact</dt>
-              <dd class="mt-1 text-sm text-gray-900">
-                {{ referral.referrer_prefers_contact ? 'Yes' : 'No' }}
-              </dd>
-            </div>
-          </dl>
-        </div>
-
         <!-- Presenting Issues -->
         <div
           v-if="referral.presenting_issues"
-          class="bg-white shadow-sm rounded-lg p-6 lg:col-span-3"
+          class="bg-white shadow-sm rounded-lg p-6 lg:col-span-2"
         >
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900">Presenting Issues or Concerns</h2>
@@ -555,7 +555,7 @@
         </div>
 
         <!-- Clinical Notes -->
-        <div class="bg-white shadow-sm rounded-lg p-6 lg:col-span-3">
+        <div class="bg-white shadow-sm rounded-lg p-6 lg:col-span-2">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900">Clinical Notes</h2>
             <div class="flex gap-2">
@@ -644,7 +644,7 @@
         </div>
 
         <!-- Files -->
-        <div class="bg-white shadow-sm rounded-lg p-6 lg:col-span-3">
+        <div class="bg-white shadow-sm rounded-lg p-6 lg:col-span-2">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900">Files</h2>
             <label
