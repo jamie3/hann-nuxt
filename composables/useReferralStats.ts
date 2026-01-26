@@ -3,10 +3,11 @@ interface StatsResponse {
   stats: {
     totalProfessional: number;
     totalSelf: number;
+    totalUnassigned: number;
+    totalNew: number;
     totalOpened: number;
     totalClosed: number;
     totalArchived: number;
-    totalNew: number;
   };
 }
 

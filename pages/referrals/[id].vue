@@ -204,6 +204,24 @@
 
                 <div class="border-t border-gray-100"></div>
 
+                <!-- Merge -->
+                <button
+                  @click="handleMenuAction(openMergeModal)"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                    ></path>
+                  </svg>
+                  Merge Referral
+                </button>
+
+                <div class="border-t border-gray-100"></div>
+
                 <!-- Delete -->
                 <button
                   @click="handleMenuAction(openDeleteModal)"
@@ -795,6 +813,13 @@
       @updated="handlePresentingIssuesUpdated"
     />
 
+    <!-- Merge Referral Modal -->
+    <MergeReferralModal
+      v-model="showMergeModal"
+      :currentReferral="referral"
+      @merged="handleReferralMerged"
+    />
+
     <!-- Email Error Modal -->
     <div
       v-if="showEmailErrorModal"
@@ -932,6 +957,9 @@ const showEmailPDFModal = ref(false);
 // Presenting issues modal state
 const showPresentingIssuesModal = ref(false);
 
+// Merge modal state
+const showMergeModal = ref(false);
+
 // Credit card modal state
 const showEditCardModal = ref(false);
 const showDeleteCardModal = ref(false);
@@ -973,6 +1001,20 @@ const openEmailPDFModal = () => {
 // Open presenting issues modal
 const openPresentingIssuesModal = () => {
   showPresentingIssuesModal.value = true;
+};
+
+// Open merge modal
+const openMergeModal = () => {
+  showMergeModal.value = true;
+};
+
+// Handle referral merged
+const handleReferralMerged = async () => {
+  // Reload the referral and its related data
+  await getReferral(id);
+  await getFilesByReferralId(id);
+  await getClinicalNotesByReferralId(id);
+  await loadCreditCard();
 };
 
 // Handle referral deleted

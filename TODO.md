@@ -66,6 +66,8 @@ Things to do during the migration
 - Referrals page make the drop downs more colourful (eg. badges, icons)
 - Maintain State of Referral page in Local storage?
 - Referral page query parameters mapped to the state of the page.
+- Merge Referral
+- New Referral Type
 
 Nice to Have
 

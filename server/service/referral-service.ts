@@ -30,7 +30,7 @@ export class ReferralService {
   // Map database row to domain model
   private mapToReferral(row: ReferralRowWithAssignedUser): Referral {
     // Use the status directly from the database
-    const status = row.status as 'new' | 'opened' | 'closed' | 'archived';
+    const status = row.status as 'unassigned' | 'new' | 'opened' | 'closed' | 'archived';
 
     return {
       id: row.id.toString(),
@@ -341,6 +341,9 @@ export class ReferralService {
     if ((data as any).assigned_to !== undefined) {
       (updateData as any).assigned_to = (data as any).assigned_to;
     }
+    if ((data as any).status !== undefined) {
+      (updateData as any).status = (data as any).status;
+    }
 
     // Update the referral
     const updatedRow = await this.referralRepository.update(id, updateData);
@@ -359,5 +362,42 @@ export class ReferralService {
     await this.referralRepository.update(id, {
       is_deleted: true,
     });
+  }
+
+  async mergeReferrals(primaryId: string, secondaryId: string): Promise<Referral> {
+    // Validate both referrals exist
+    const primaryRow = await this.referralRepository.findByIdRow(primaryId);
+    const secondaryRow = await this.referralRepository.findByIdRow(secondaryId);
+
+    if (!primaryRow) {
+      throw new Error(`Primary referral with id ${primaryId} not found`);
+    }
+
+    if (!secondaryRow) {
+      throw new Error(`Secondary referral with id ${secondaryId} not found`);
+    }
+
+    if (primaryId === secondaryId) {
+      throw new Error('Cannot merge a referral with itself');
+    }
+
+    try {
+      // Move all related data using repository method
+      await this.referralRepository.mergeReferralData(parseInt(primaryId), parseInt(secondaryId));
+
+      // Archive the secondary referral
+      await this.referralRepository.update(secondaryId, {
+        status: 'archived',
+        archived_at: new Date(),
+        is_deleted: true,
+      });
+
+      // Return the updated primary referral
+      const updatedRow = await this.referralRepository.findByIdWithAssignedUser(primaryId);
+      return this.mapToReferral(updatedRow!);
+    } catch (error) {
+      logger.error('Failed to merge referrals', { error, primaryId, secondaryId });
+      throw new Error('Failed to merge referrals. Please try again.');
+    }
   }
 }

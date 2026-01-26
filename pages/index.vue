@@ -82,6 +82,35 @@
         </div>
       </div>
 
+      <!-- Total Unassigned -->
+      <div class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-orange-500">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg
+              class="h-8 w-8 text-orange-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+              ></path>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Unassigned</dt>
+              <dd class="text-3xl font-semibold text-gray-900">
+                {{ stats?.totalUnassigned || 0 }}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+
       <!-- Total New -->
       <div class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-yellow-500">
         <div class="flex items-center">
@@ -191,11 +220,11 @@
       </div>
     </div>
 
-    <!-- New Referrals List -->
+    <!-- Unassigned Referrals List -->
     <div class="bg-white shadow-sm rounded-lg overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex justify-between items-center">
-          <h2 class="text-xl font-semibold text-gray-900">New Referrals (Last 30 days)</h2>
+          <h2 class="text-xl font-semibold text-gray-900">Unassigned Referrals (Last 30 days)</h2>
           <NuxtLink to="/referrals" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
             View All →
           </NuxtLink>
@@ -207,7 +236,7 @@
         <div
           class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
         ></div>
-        <p class="mt-4 text-gray-600">Loading new referrals...</p>
+        <p class="mt-4 text-gray-600">Loading unassigned referrals...</p>
       </div>
 
       <!-- Error State -->
@@ -337,8 +366,8 @@
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
           ></path>
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No new referrals</h3>
-        <p class="mt-1 text-sm text-gray-500">There are currently no new referrals.</p>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No unassigned referrals</h3>
+        <p class="mt-1 text-sm text-gray-500">There are currently no unassigned referrals.</p>
       </div>
     </div>
   </div>
@@ -397,7 +426,7 @@ onMounted(async () => {
       limit: 10,
       sortBy: 'referred_at',
       sortOrder: 'desc',
-      status: 'new',
+      status: 'unassigned',
       startDate: startDate,
     }),
     getUsers(),
@@ -444,7 +473,7 @@ const updateAssignment = async (referral: any) => {
       limit: 10,
       sortBy: 'referred_at',
       sortOrder: 'desc',
-      status: 'new',
+      status: 'unassigned',
       startDate: startDate,
     });
     cancelEditing();

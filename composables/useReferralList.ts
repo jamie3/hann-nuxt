@@ -15,7 +15,7 @@ interface ReferralFilters {
   sortOrder?: 'asc' | 'desc';
   search?: string;
   type?: 'all' | 'professional' | 'self';
-  status?: 'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived';
+  status?: 'active' | 'all' | 'unassigned' | 'new' | 'opened' | 'closed' | 'archived';
   assignedTo?: string;
   startDate?: string;
   endDate?: string;

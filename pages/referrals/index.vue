@@ -80,6 +80,7 @@
           >
             <option value="active">Active (No Archived)</option>
             <option value="all">All Statuses</option>
+            <option value="unassigned">Unassigned</option>
             <option value="new">New</option>
             <option value="opened">Opened</option>
             <option value="closed">Closed</option>

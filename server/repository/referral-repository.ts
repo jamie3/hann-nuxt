@@ -218,6 +218,7 @@ export class ReferralRepository extends BaseRepository<
   async getStats(): Promise<{
     totalProfessional: number;
     totalSelf: number;
+    totalUnassigned: number;
     totalNew: number;
     totalOpened: number;
     totalClosed: number;
@@ -243,6 +244,7 @@ export class ReferralRepository extends BaseRepository<
     const stats = {
       totalProfessional: 0,
       totalSelf: 0,
+      totalUnassigned: 0,
       totalNew: 0,
       totalOpened: 0,
       totalClosed: 0,
@@ -262,7 +264,9 @@ export class ReferralRepository extends BaseRepository<
     // Process status counts
     statusCounts.forEach((row) => {
       const count = Number(row.count);
-      if (row.status === 'new') {
+      if (row.status === 'unassigned') {
+        stats.totalUnassigned = count;
+      } else if (row.status === 'new') {
         stats.totalNew = count;
       } else if (row.status === 'opened') {
         stats.totalOpened = count;
@@ -274,5 +278,53 @@ export class ReferralRepository extends BaseRepository<
     });
 
     return stats;
+  }
+
+  /**
+   * Merge data from secondary referral into primary referral
+   * Moves all related data (clinical notes, files, emails, credit card) to primary
+   */
+  async mergeReferralData(primaryId: number, secondaryId: number): Promise<void> {
+    // Move clinical notes from secondary to primary
+    await this.db
+      .updateTable('clinical_note')
+      .set({ referral_id: primaryId })
+      .where('referral_id', '=', secondaryId)
+      .where('is_deleted', '=', false)
+      .execute();
+
+    // Move files from secondary to primary
+    await this.db
+      .updateTable('file')
+      .set({ referral_id: primaryId })
+      .where('referral_id', '=', secondaryId)
+      .where('is_deleted', '=', false)
+      .execute();
+
+    // Move referral emails from secondary to primary
+    await this.db
+      .updateTable('referral_email')
+      .set({ referral_id: primaryId })
+      .where('referral_id', '=', secondaryId)
+      .execute();
+
+    // Handle credit card - check if primary already has one
+    const primaryCreditCard = await this.db
+      .selectFrom('credit_card')
+      .selectAll()
+      .where('referral_id', '=', primaryId)
+      .executeTakeFirst();
+
+    if (primaryCreditCard) {
+      // Primary has a credit card, delete secondary's
+      await this.db.deleteFrom('credit_card').where('referral_id', '=', secondaryId).execute();
+    } else {
+      // Primary doesn't have a credit card, move secondary's to primary
+      await this.db
+        .updateTable('credit_card')
+        .set({ referral_id: primaryId })
+        .where('referral_id', '=', secondaryId)
+        .execute();
+    }
   }
 }

@@ -24,7 +24,7 @@ export interface Referral {
   method_of_payment: string | null;
   referrer_prefers_contact: boolean | null;
   referral_type: 'professional' | 'self';
-  status: 'closed' | 'opened' | 'new' | 'archived';
+  status: 'unassigned' | 'new' | 'opened' | 'closed' | 'archived';
   assigned_to: string | null;
   assigned_to_name: string | null;
   opened_at: string | null;

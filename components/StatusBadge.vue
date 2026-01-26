@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  status: 'new' | 'opened' | 'closed' | 'archived';
+  status: 'unassigned' | 'new' | 'opened' | 'closed' | 'archived';
   size?: 'sm' | 'md';
 }>();
 
@@ -15,6 +15,9 @@ const badgeClass = computed(() => {
 
   let colorClass = '';
   switch (props.status) {
+    case 'unassigned':
+      colorClass = 'bg-orange-100 text-orange-800';
+      break;
     case 'new':
       colorClass = 'bg-yellow-100 text-yellow-800';
       break;
