@@ -226,10 +226,10 @@ export class ReferralService {
       throw new Error(`Referral with id ${id} not found`);
     }
 
-    // Validate that status is 'new' or 'closed'
-    if (row.status !== 'new' && row.status !== 'closed') {
+    // Validate that status is 'new', 'unassigned', or 'closed'
+    if (row.status !== 'new' && row.status !== 'unassigned' && row.status !== 'closed') {
       throw new Error(
-        `Cannot open referral with status '${row.status}'. Referral must be 'new' or 'closed' to be opened.`
+        `Cannot open referral with status '${row.status}'. Referral must be 'new', 'unassigned', or 'closed' to be opened.`
       );
     }
 

@@ -38,21 +38,9 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Determine if we need to update the status
-    // When assigning: if status is 'unassigned', change to 'new'
-    // When unassigning: if status is 'new', change to 'unassigned'
-    const updateData: any = { assigned_to: userId };
-
-    if (userId !== null && currentReferral.status === 'unassigned') {
-      // Assigning to an unassigned referral -> change status to 'new'
-      updateData.status = 'new';
-    } else if (userId === null && currentReferral.status === 'new') {
-      // Unassigning from a new referral -> change status to 'unassigned'
-      updateData.status = 'unassigned';
-    }
-
-    // Update the referral with the new assignment and possibly new status
-    const referral = await referralService.updateReferral(id, updateData);
+    // Update the referral with the new assignment
+    // Status changes should be handled manually by the user
+    const referral = await referralService.updateReferral(id, { assigned_to: userId } as any);
 
     return {
       success: true,

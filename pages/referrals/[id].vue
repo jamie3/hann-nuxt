@@ -94,9 +94,31 @@
                   Edit Referral
                 </button>
 
-                <!-- Open (when new or closed) -->
+                <!-- Set to Unassigned (when new) -->
                 <button
-                  v-if="referral.status === 'new' || referral.status === 'closed'"
+                  v-if="referral.status === 'new'"
+                  @click="handleMenuAction(handleSetUnassigned)"
+                  :disabled="isUpdating"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                  </svg>
+                  Set to Unassigned
+                </button>
+
+                <!-- Open (when new, unassigned, or closed) -->
+                <button
+                  v-if="
+                    referral.status === 'new' ||
+                    referral.status === 'unassigned' ||
+                    referral.status === 'closed'
+                  "
                   @click="handleMenuAction(handleOpenReferral)"
                   :disabled="isUpdating"
                   class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 disabled:opacity-50"
@@ -1085,6 +1107,29 @@ const handleCloseReferral = async () => {
   } catch (err: any) {
     console.error('Failed to close referral:', err);
     alert(err.data?.message || 'Failed to close referral');
+  } finally {
+    isUpdating.value = false;
+  }
+};
+
+// Handle setting referral to unassigned
+const handleSetUnassigned = async () => {
+  if (!id || isUpdating.value) return;
+
+  isUpdating.value = true;
+  try {
+    await $fetch(`/api/referral/${id}/update`, {
+      method: 'POST',
+      body: {
+        status: 'unassigned',
+      },
+    });
+
+    // Refresh the referral data
+    await getReferral(id);
+  } catch (err: any) {
+    console.error('Failed to set referral to unassigned:', err);
+    alert(err.data?.message || 'Failed to set referral to unassigned');
   } finally {
     isUpdating.value = false;
   }
