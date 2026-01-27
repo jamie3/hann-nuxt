@@ -2,13 +2,13 @@ import { useIdle } from '@vueuse/core';
 
 /**
  * Composable to handle automatic logout after period of inactivity
- * @param timeoutMs - Idle timeout in milliseconds (default: 30 minutes)
+ * @param timeoutMs - Idle timeout in milliseconds (default: 8 hours)
  */
-export const useIdleTimeout = (timeoutMs: number = 30 * 60 * 1000) => {
+export const useIdleTimeout = (timeoutMs: number = 8 * 60 * 60 * 1000) => {
   const { loggedIn, clear } = useUserSession();
   const router = useRouter();
 
-  // Track idle state - user is considered idle after 30 minutes of no activity
+  // Track idle state - user is considered idle after the specified timeout period
   const { idle } = useIdle(timeoutMs, {
     initialState: false,
   });
@@ -17,7 +17,7 @@ export const useIdleTimeout = (timeoutMs: number = 30 * 60 * 1000) => {
   watch(idle, async (isIdle) => {
     // Only logout if user is logged in and becomes idle
     if (isIdle && loggedIn.value) {
-      console.log('User has been inactive for 30 minutes. Logging out...');
+      console.log('User has been inactive. Logging out due to inactivity...');
 
       // Clear the session
       await clear();
