@@ -77,6 +77,10 @@ export class ClinicalNoteService {
       update.author_id = note.author_id;
     }
 
+    if (note.is_deleted !== undefined) {
+      update.is_deleted = note.is_deleted;
+    }
+
     return update;
   }
 

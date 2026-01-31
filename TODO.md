@@ -50,6 +50,8 @@ Things to do during the migration
 - (Completed) Multi-select and close many referrals
 - (Completed) Archive referral
 - (Completed) Add Google Maps to Edit Referral
+- (Completed) Merge Referral
+- (Completed) New Referral Type
 - (In Progress) History of emails sent
 - Whitelist cloudflare IPs
 - Clinical Note should track which user created it. Print this in the PDF and the clinical note card.
@@ -66,8 +68,6 @@ Things to do during the migration
 - Referrals page make the drop downs more colourful (eg. badges, icons)
 - Maintain State of Referral page in Local storage?
 - Referral page query parameters mapped to the state of the page.
-- Merge Referral
-- New Referral Type
 
 Nice to Have
 
@@ -80,8 +80,6 @@ Nice to Have
 
 clients -> hann-web-lb-6253567.ca-central-1.elb.amazonaws.com
 
-DELETE
-
-hann-client.pages.dev
+DELETE hann-client.pages.dev
 
 DELETE auth0
