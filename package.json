@@ -11,6 +11,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "create-user": "tsx scripts/create-user.ts",
+    "change-password": "tsx scripts/change-password.ts",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:migrate:down": "tsx scripts/migrate-down.ts",
     "db:import-mysql": "tsx scripts/migrate-mysql-to-postgres.ts --",
