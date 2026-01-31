@@ -78,11 +78,10 @@
             v-model="statusFilter"
             class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="active">Active (No Archived)</option>
-            <option value="all">All Statuses</option>
-            <option value="unassigned">Unassigned</option>
+            <option value="all">All</option>
             <option value="new">New</option>
-            <option value="opened">Opened</option>
+            <option value="unassigned">Unassigned</option>
+            <option value="opened">Open</option>
             <option value="closed">Closed</option>
             <option value="archived">Archived</option>
           </select>
@@ -640,7 +639,7 @@ const sortOrder = ref<'asc' | 'desc'>('desc');
 const searchQuery = ref('');
 const debouncedSearch = ref('');
 const typeFilter = ref<'all' | 'professional' | 'self'>('all');
-const statusFilter = ref<'active' | 'all' | 'new' | 'opened' | 'closed' | 'archived'>('active');
+const statusFilter = ref<'all' | 'new' | 'unassigned' | 'opened' | 'closed' | 'archived'>('all');
 const assignedToFilter = ref<string>('all');
 const localPage = ref(1);
 const itemsPerPage = ref(100);
