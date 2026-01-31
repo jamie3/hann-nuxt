@@ -1,6 +1,95 @@
-# MySQL Connection Scripts
+# Scripts
 
-This directory contains scripts for connecting to the MySQL RDS database through an EC2 SSH tunnel (bastion host).
+This directory contains utility scripts for database management, user management, and MySQL connections.
+
+## User Management Scripts
+
+### `create-user.ts`
+
+Creates a new user account in the database.
+
+**Usage:**
+
+```bash
+yarn create-user
+```
+
+**Features:**
+
+- Interactive prompts for username and password
+- Hashes passwords using bcrypt (10 rounds)
+- Supports multiple environments (development, test, production)
+- SSL support for test and production environments
+
+**Example:**
+
+```bash
+yarn create-user
+# Enter username: john.doe
+# Enter password: ********
+
+✓ User created successfully:
+  ID: 1
+  Username: john.doe
+  Created at: 2026-01-31T13:30:00.000Z
+```
+
+**For different environments:**
+
+```bash
+yarn create-user --env production
+yarn create-user --env test
+```
+
+### `change-password.ts`
+
+Changes the password for an existing user account.
+
+**Usage:**
+
+```bash
+yarn change-password
+```
+
+**Features:**
+
+- Interactive prompts for username and new password
+- Hidden password input (displays asterisks)
+- Password confirmation
+- Minimum password length validation (6 characters)
+- Automatically resets failed login attempts to 0
+- Unlocks the account if it was locked
+- Hashes passwords using bcrypt (10 rounds)
+- Supports multiple environments (development, test, production)
+- SSL support for test and production environments
+
+**Example:**
+
+```bash
+yarn change-password
+# Enter username: john.doe
+# Found user: john.doe (ID: 1)
+# Enter new password: ********
+# Confirm new password: ********
+
+✓ Password changed successfully
+  - Password updated
+  - Failed login attempts reset to 0
+  - Account unlocked (if it was locked)
+```
+
+**For different environments:**
+
+```bash
+yarn change-password --env production
+yarn change-password --env test
+```
+
+---
+
+## MySQL Connection Scripts
+
+This section contains scripts for connecting to the MySQL RDS database through an EC2 SSH tunnel (bastion host).
 
 ## Overview
 
