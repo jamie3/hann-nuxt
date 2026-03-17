@@ -83,7 +83,15 @@ export class ReferralRepository extends BaseRepository<
         // Exclude archived
         query = query.where('referral.status', '!=', 'archived');
       } else {
-        query = query.where('referral.status', '=', status);
+        const statusList = status
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (statusList.length === 1) {
+          query = query.where('referral.status', '=', statusList[0]);
+        } else if (statusList.length > 1) {
+          query = query.where('referral.status', 'in', statusList);
+        }
       }
     }
 
@@ -147,7 +155,15 @@ export class ReferralRepository extends BaseRepository<
         // Exclude archived
         query = query.where('status', '!=', 'archived');
       } else {
-        query = query.where('status', '=', status);
+        const statusList = status
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (statusList.length === 1) {
+          query = query.where('status', '=', statusList[0]);
+        } else if (statusList.length > 1) {
+          query = query.where('status', 'in', statusList);
+        }
       }
     }
 

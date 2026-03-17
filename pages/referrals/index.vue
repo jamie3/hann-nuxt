@@ -14,7 +14,7 @@
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
-              stroke-width="2"
+              strasswoke-width="2"
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
             ></path>
           </svg>
@@ -69,22 +69,69 @@
         </div>
 
         <!-- Filter by Status -->
-        <div>
-          <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">
-            Status
-          </label>
-          <select
-            id="status-filter"
-            v-model="statusFilter"
-            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <button
+            type="button"
+            @click="showStatusDropdown = !showStatusDropdown"
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center justify-between min-w-[160px]"
           >
-            <option value="all">All</option>
-            <option value="new">New</option>
-            <option value="unassigned">Unassigned</option>
-            <option value="opened">Open</option>
-            <option value="closed">Closed</option>
-            <option value="archived">Archived</option>
-          </select>
+            <span :class="statusFilter.length === 0 ? 'text-gray-500' : 'text-gray-900'">
+              {{ statusFilterLabel }}
+            </span>
+            <svg
+              class="w-4 h-4 text-gray-400 ml-2 flex-shrink-0 transition-transform"
+              :class="showStatusDropdown ? 'rotate-180' : ''"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          <!-- Click-outside backdrop -->
+          <div
+            v-if="showStatusDropdown"
+            class="fixed inset-0 z-10"
+            @click="showStatusDropdown = false"
+          ></div>
+
+          <!-- Dropdown panel -->
+          <div
+            v-if="showStatusDropdown"
+            class="absolute z-20 mt-1 w-48 bg-white border border-gray-300 rounded-md shadow-lg"
+          >
+            <div class="py-1">
+              <label class="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="checkbox"
+                  :checked="statusFilter.length === 0"
+                  @change="statusFilter = []"
+                  class="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                />
+                <span class="ml-2 text-sm text-gray-700">All</span>
+              </label>
+              <label
+                v-for="option in statusOptions"
+                :key="option.value"
+                class="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  :checked="statusFilter.includes(option.value)"
+                  @change="toggleStatusOption(option.value)"
+                  class="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                />
+                <span class="ml-2 text-sm text-gray-700">{{ option.label }}</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- Filter by Assigned To -->
@@ -167,6 +214,42 @@
             </svg>
             {{
               isBulkActionProcessing ? 'Closing...' : `Close Selected (${selectedReferrals.size})`
+            }}
+          </button>
+          <button
+            @click="handleBulkArchive"
+            :disabled="isBulkActionProcessing"
+            class="px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-md hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+              ></path>
+            </svg>
+            {{
+              isBulkActionProcessing
+                ? 'Archiving...'
+                : `Archive Selected (${selectedReferrals.size})`
+            }}
+          </button>
+          <button
+            @click="handleBulkDelete"
+            :disabled="isBulkActionProcessing"
+            class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              ></path>
+            </svg>
+            {{
+              isBulkActionProcessing ? 'Deleting...' : `Delete Selected (${selectedReferrals.size})`
             }}
           </button>
           <button
@@ -476,6 +559,293 @@
       </div>
     </div>
 
+    <!-- Bulk Archive Confirmation Modal -->
+    <div
+      v-if="showBulkArchiveModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+      @click.self="closeBulkArchiveModal"
+    >
+      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+          <!-- Confirmation State -->
+          <div v-if="!bulkArchiveResults">
+            <div class="flex items-center gap-3 mb-4">
+              <div
+                class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100"
+              >
+                <svg
+                  class="h-6 w-6 text-yellow-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                  ></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-gray-900">Archive Multiple Referrals</h3>
+              </div>
+            </div>
+            <div class="mt-2 px-1">
+              <p class="text-sm text-gray-500">
+                Are you sure you want to archive
+                <span class="font-semibold">{{ selectedReferrals.size }}</span>
+                referral{{ selectedReferrals.size > 1 ? 's' : '' }}?
+              </p>
+              <p class="text-sm text-gray-500 mt-2">This action will mark them as archived.</p>
+            </div>
+            <div class="flex gap-3 mt-6">
+              <button
+                @click="closeBulkArchiveModal"
+                :disabled="isBulkActionProcessing"
+                class="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                @click="executeBulkArchive"
+                :disabled="isBulkActionProcessing"
+                class="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ isBulkActionProcessing ? 'Archiving...' : 'Archive Referrals' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Results State -->
+          <div v-else>
+            <div class="flex items-center gap-3 mb-4">
+              <div
+                class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full"
+                :class="bulkArchiveResults.successCount > 0 ? 'bg-green-100' : 'bg-red-100'"
+              >
+                <svg
+                  v-if="bulkArchiveResults.successCount > 0"
+                  class="h-6 w-6 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                <svg
+                  v-else
+                  class="h-6 w-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-gray-900">
+                  {{
+                    bulkArchiveResults.successCount > 0
+                      ? 'Referrals Archived'
+                      : 'Failed to Archive Referrals'
+                  }}
+                </h3>
+              </div>
+            </div>
+            <div class="mt-2 px-1">
+              <p v-if="bulkArchiveResults.successCount > 0" class="text-sm text-green-600 mb-2">
+                Successfully archived {{ bulkArchiveResults.successCount }} referral{{
+                  bulkArchiveResults.successCount > 1 ? 's' : ''
+                }}
+              </p>
+              <div v-if="bulkArchiveResults.errors.length > 0" class="mt-3">
+                <p class="text-sm font-medium text-red-600 mb-2">
+                  Failed to archive {{ bulkArchiveResults.errors.length }} referral{{
+                    bulkArchiveResults.errors.length > 1 ? 's' : ''
+                  }}:
+                </p>
+                <div class="max-h-40 overflow-y-auto bg-red-50 rounded p-2">
+                  <ul class="text-xs text-red-700 space-y-1">
+                    <li v-for="(archiveError, idx) in bulkArchiveResults.errors" :key="idx">
+                      {{ archiveError }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="mt-6">
+              <button
+                @click="closeBulkArchiveModal"
+                class="w-full px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Delete Confirmation Modal -->
+    <div
+      v-if="showBulkDeleteModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+      @click.self="closeBulkDeleteModal"
+    >
+      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+          <!-- Confirmation State -->
+          <div v-if="!bulkDeleteResults">
+            <div class="flex items-center gap-3 mb-4">
+              <div
+                class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100"
+              >
+                <svg
+                  class="h-6 w-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  ></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-gray-900">Delete Multiple Referrals</h3>
+              </div>
+            </div>
+            <div class="mt-2 px-1">
+              <p class="text-sm text-gray-500">
+                Are you sure you want to permanently delete
+                <span class="font-semibold">{{ selectedReferrals.size }}</span>
+                referral{{ selectedReferrals.size > 1 ? 's' : '' }}?
+              </p>
+              <p class="text-sm font-medium text-red-600 mt-2">⚠️ This action cannot be undone.</p>
+              <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Type <span class="font-semibold text-gray-900">Yes</span> to confirm
+                </label>
+                <input
+                  v-model="deleteConfirmText"
+                  type="text"
+                  placeholder="Yes"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+              <button
+                @click="closeBulkDeleteModal"
+                :disabled="isBulkActionProcessing"
+                class="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                @click="executeBulkDelete"
+                :disabled="isBulkActionProcessing || deleteConfirmText !== 'Yes'"
+                class="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ isBulkActionProcessing ? 'Deleting...' : 'Delete Referrals' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Results State -->
+          <div v-else>
+            <div class="flex items-center gap-3 mb-4">
+              <div
+                class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full"
+                :class="bulkDeleteResults.successCount > 0 ? 'bg-green-100' : 'bg-red-100'"
+              >
+                <svg
+                  v-if="bulkDeleteResults.successCount > 0"
+                  class="h-6 w-6 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                <svg
+                  v-else
+                  class="h-6 w-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-gray-900">
+                  {{
+                    bulkDeleteResults.successCount > 0
+                      ? 'Referrals Deleted'
+                      : 'Failed to Delete Referrals'
+                  }}
+                </h3>
+              </div>
+            </div>
+            <div class="mt-2 px-1">
+              <p v-if="bulkDeleteResults.successCount > 0" class="text-sm text-green-600 mb-2">
+                Successfully deleted {{ bulkDeleteResults.successCount }} referral{{
+                  bulkDeleteResults.successCount > 1 ? 's' : ''
+                }}
+              </p>
+              <div v-if="bulkDeleteResults.errors.length > 0" class="mt-3">
+                <p class="text-sm font-medium text-red-600 mb-2">
+                  Failed to delete {{ bulkDeleteResults.errors.length }} referral{{
+                    bulkDeleteResults.errors.length > 1 ? 's' : ''
+                  }}:
+                </p>
+                <div class="max-h-40 overflow-y-auto bg-red-50 rounded p-2">
+                  <ul class="text-xs text-red-700 space-y-1">
+                    <li v-for="(deleteError, idx) in bulkDeleteResults.errors" :key="idx">
+                      {{ deleteError }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="mt-6">
+              <button
+                @click="closeBulkDeleteModal"
+                class="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Bulk Close Confirmation Modal -->
     <div
       v-if="showBulkCloseModal"
@@ -631,7 +1001,7 @@ const {
 } = useReferralList();
 
 // Use the referral composable for bulk actions
-const { closeReferral } = useReferral();
+const { closeReferral, archiveReferral, deleteReferral } = useReferral();
 
 // Initialize state
 const sortBy = ref('updated_at');
@@ -639,7 +1009,43 @@ const sortOrder = ref<'asc' | 'desc'>('desc');
 const searchQuery = ref('');
 const debouncedSearch = ref('');
 const typeFilter = ref<'all' | 'professional' | 'self'>('all');
-const statusFilter = ref<'all' | 'new' | 'unassigned' | 'opened' | 'closed' | 'archived'>('all');
+
+// Status multi-select state — default: all statuses except Archived
+const statusFilter = ref<string[]>(['new', 'unassigned', 'opened', 'closed']);
+const showStatusDropdown = ref(false);
+
+const statusOptions = [
+  { value: 'new', label: 'New' },
+  { value: 'unassigned', label: 'Unassigned' },
+  { value: 'opened', label: 'Open' },
+  { value: 'closed', label: 'Closed' },
+  { value: 'archived', label: 'Archived' },
+];
+
+const statusFilterLabel = computed(() => {
+  if (statusFilter.value.length === 0) return 'All';
+  if (statusFilter.value.length === 1) {
+    return (
+      statusOptions.find((o) => o.value === statusFilter.value[0])?.label ?? statusFilter.value[0]
+    );
+  }
+  return `${statusFilter.value.length} selected`;
+});
+
+const toggleStatusOption = (value: string) => {
+  const idx = statusFilter.value.indexOf(value);
+  if (idx === -1) {
+    statusFilter.value = [...statusFilter.value, value];
+  } else {
+    statusFilter.value = statusFilter.value.filter((v) => v !== value);
+  }
+};
+
+// Derived query value for the status filter (comma-separated or 'all')
+const statusFilterQuery = computed(() =>
+  statusFilter.value.length === 0 ? 'all' : statusFilter.value.join(',')
+);
+
 const assignedToFilter = ref<string>('all');
 const localPage = ref(1);
 const itemsPerPage = ref(100);
@@ -652,6 +1058,11 @@ const selectedReferrals = ref<Set<string>>(new Set());
 const isBulkActionProcessing = ref(false);
 const showBulkCloseModal = ref(false);
 const bulkCloseResults = ref<{ successCount: number; errors: string[] } | null>(null);
+const showBulkArchiveModal = ref(false);
+const bulkArchiveResults = ref<{ successCount: number; errors: string[] } | null>(null);
+const showBulkDeleteModal = ref(false);
+const bulkDeleteResults = ref<{ successCount: number; errors: string[] } | null>(null);
+const deleteConfirmText = ref('');
 
 // Fetch users for assignment filter
 const { users: usersList, getUsers } = useUsers();
@@ -697,7 +1108,7 @@ const fetchData = async () => {
     sortOrder: sortOrder.value,
     search: debouncedSearch.value,
     type: typeFilter.value,
-    status: statusFilter.value,
+    status: statusFilterQuery.value,
     assignedTo: assignedToFilter.value,
   });
 };
@@ -713,8 +1124,8 @@ watch(searchQuery, (newValue) => {
   }, 300);
 });
 
-// Watch debounced search and filters
-watch([debouncedSearch, typeFilter, statusFilter, assignedToFilter, itemsPerPage], () => {
+// Watch debounced search and filters (use statusFilterQuery so array changes are tracked via computed)
+watch([debouncedSearch, typeFilter, statusFilterQuery, assignedToFilter, itemsPerPage], () => {
   localPage.value = 1;
   fetchData();
 });
@@ -847,8 +1258,8 @@ const toggleSelectAll = () => {
   }
 };
 
-// Clear selections when page changes
-watch([localPage, debouncedSearch, typeFilter, statusFilter, assignedToFilter], () => {
+// Clear selections when page or filters change
+watch([localPage, debouncedSearch, typeFilter, statusFilterQuery, assignedToFilter], () => {
   selectedReferrals.value.clear();
 });
 
@@ -901,6 +1312,93 @@ const executeBulkClose = async () => {
   bulkCloseResults.value = { successCount, errors };
 
   // Clear selections and refresh data
+  selectedReferrals.value.clear();
+  await fetchData();
+
+  isBulkActionProcessing.value = false;
+};
+
+// Bulk archive functions
+const handleBulkArchive = () => {
+  if (selectedReferrals.value.size === 0) return;
+  bulkArchiveResults.value = null;
+  showBulkArchiveModal.value = true;
+};
+
+const closeBulkArchiveModal = () => {
+  showBulkArchiveModal.value = false;
+  bulkArchiveResults.value = null;
+};
+
+const executeBulkArchive = async () => {
+  isBulkActionProcessing.value = true;
+  const errors: string[] = [];
+  let successCount = 0;
+  let skippedCount = 0;
+
+  for (const referralId of Array.from(selectedReferrals.value)) {
+    const referral = referrals.value.find((r) => r.id === referralId);
+
+    // Skip if already archived
+    if (referral?.status === 'archived') {
+      skippedCount++;
+      continue;
+    }
+
+    try {
+      await archiveReferral(referralId);
+      successCount++;
+    } catch (err: any) {
+      console.error(`Failed to archive referral ${referralId}:`, err);
+      errors.push(`${referralId}: ${err.data?.message || 'Failed to archive'}`);
+    }
+  }
+
+  if (skippedCount > 0) {
+    errors.unshift(
+      `${skippedCount} referral${skippedCount > 1 ? 's were' : ' was'} already archived (skipped)`
+    );
+  }
+
+  bulkArchiveResults.value = { successCount, errors };
+
+  selectedReferrals.value.clear();
+  await fetchData();
+
+  isBulkActionProcessing.value = false;
+};
+
+// Bulk delete functions
+const handleBulkDelete = () => {
+  if (selectedReferrals.value.size === 0) return;
+  bulkDeleteResults.value = null;
+  deleteConfirmText.value = '';
+  showBulkDeleteModal.value = true;
+};
+
+const closeBulkDeleteModal = () => {
+  showBulkDeleteModal.value = false;
+  bulkDeleteResults.value = null;
+  deleteConfirmText.value = '';
+};
+
+const executeBulkDelete = async () => {
+  isBulkActionProcessing.value = true;
+  const errors: string[] = [];
+  let successCount = 0;
+
+  for (const referralId of Array.from(selectedReferrals.value)) {
+    try {
+      await deleteReferral(referralId);
+      successCount++;
+    } catch (err: any) {
+      console.error(`Failed to delete referral ${referralId}:`, err);
+      errors.push(`${referralId}: ${err.data?.message || 'Failed to delete'}`);
+    }
+  }
+
+  bulkDeleteResults.value = { successCount, errors };
+
   selectedReferrals.value.clear();
   await fetchData();
 

@@ -73,6 +73,17 @@ export const useReferral = () => {
     }
   };
 
+  const deleteReferral = async (id: string) => {
+    try {
+      const response = await $fetch(`/api/referral/${id}/delete`, {
+        method: 'POST',
+      });
+      return response;
+    } catch (err: any) {
+      throw err;
+    }
+  };
+
   const updateReferral = async (id: string, data: any) => {
     try {
       const response = await $fetch<ReferralResponse>(`/api/referral/${id}/update`, {
@@ -97,6 +108,7 @@ export const useReferral = () => {
     openReferral,
     closeReferral,
     archiveReferral,
+    deleteReferral,
     updateReferral,
   };
 };
