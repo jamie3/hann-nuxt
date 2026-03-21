@@ -30,6 +30,7 @@ export default defineNuxtConfig({
       caCertificate: process.env.DATABASE_CA_CERTIFICATE || '',
     },
     public: {
+      baseUrl: process.env.NUXT_PUBLIC_BASE_URL || 'https://clients.hannwellness.com',
       googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
       turnstile: {
         enabled: process.env.NUXT_TURNSTILE_ENABLED !== 'false',

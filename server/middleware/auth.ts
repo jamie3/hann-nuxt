@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
     '/api/auth/logout',
     '/api/referral/self',
     '/api/referral/professional',
+    '/api/billing/',
     '/api/health',
     '/api/webhooks/postmark',
   ];

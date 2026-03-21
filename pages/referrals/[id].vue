@@ -467,6 +467,23 @@
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900">Payment Information</h2>
             <div class="flex gap-2">
+              <!-- Generate Payment Link -->
+              <button
+                @click="handleGeneratePaymentLink"
+                :disabled="isGeneratingPaymentLink"
+                class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-1 disabled:opacity-50"
+                title="Generate a one-time payment link for the client"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                  ></path>
+                </svg>
+                {{ isGeneratingPaymentLink ? 'Generating…' : 'Payment Link' }}
+              </button>
               <button
                 v-if="creditCard"
                 @click="toggleCardVisibility"
@@ -905,6 +922,77 @@
       loading-text="Archiving..."
       @confirm="confirmArchive"
     />
+
+    <!-- Payment Link Modal -->
+    <div
+      v-if="showPaymentLinkModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+      @click.self="showPaymentLinkModal = false"
+    >
+      <div
+        class="relative top-20 mx-auto p-5 border w-[480px] max-w-full shadow-lg rounded-md bg-white"
+      >
+        <div class="mt-3">
+          <div class="flex items-center gap-3 mb-4">
+            <div
+              class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100"
+            >
+              <svg
+                class="h-6 w-6 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-medium text-gray-900">Payment Link Generated</h3>
+              <p class="text-sm text-gray-500">
+                Valid for 7 days. Share this link with the client.
+              </p>
+            </div>
+          </div>
+
+          <p class="text-sm text-gray-600 mb-3">
+            Send this link to the client so they can securely enter their credit card information.
+            The link can only be used once — it will expire automatically after 7 days or
+            immediately after the client submits their card details.
+          </p>
+
+          <div class="mt-2">
+            <label class="block text-xs font-medium text-gray-500 mb-1">Payment Link</label>
+            <div class="flex gap-2 items-center">
+              <input
+                :value="generatedPaymentLink"
+                readonly
+                class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-700 font-mono truncate focus:outline-none"
+              />
+              <button
+                @click="copyPaymentLink"
+                class="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors whitespace-nowrap"
+              >
+                {{ paymentLinkCopied ? 'Copied!' : 'Copy' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <button
+              @click="showPaymentLinkModal = false"
+              class="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -1378,6 +1466,60 @@ const updateReferralDate = async () => {
     console.error('Failed to update referral date:', error);
     alert('Failed to update referral date. Please try again.');
     cancelEditingReferralDate();
+  }
+};
+
+// Payment link generation
+const isGeneratingPaymentLink = ref(false);
+const showPaymentLinkModal = ref(false);
+const generatedPaymentLink = ref('');
+const paymentLinkCopied = ref(false);
+
+const handleGeneratePaymentLink = async () => {
+  if (!id || isGeneratingPaymentLink.value) return;
+
+  isGeneratingPaymentLink.value = true;
+  try {
+    const response = await $fetch<{
+      success: boolean;
+      token: string;
+      expiresAt: string;
+      paymentUrl: string;
+    }>(`/api/referral/${id}/generate-payment-token`, {
+      method: 'POST',
+    });
+
+    // Build full absolute URL from relative paymentUrl or token
+    const origin = window.location.origin;
+    generatedPaymentLink.value = response.paymentUrl
+      ? response.paymentUrl.startsWith('http')
+        ? response.paymentUrl
+        : `${origin}${response.paymentUrl}`
+      : `${origin}/billing/${response.token}`;
+
+    paymentLinkCopied.value = false;
+    showPaymentLinkModal.value = true;
+  } catch (err: any) {
+    console.error('Failed to generate payment link:', err);
+    alert(err.data?.message || 'Failed to generate payment link. Please try again.');
+  } finally {
+    isGeneratingPaymentLink.value = false;
+  }
+};
+
+const copyPaymentLink = async () => {
+  try {
+    await navigator.clipboard.writeText(generatedPaymentLink.value);
+    paymentLinkCopied.value = true;
+    setTimeout(() => {
+      paymentLinkCopied.value = false;
+    }, 2000);
+  } catch {
+    // Fallback: select the input text manually
+    const input = document.querySelector<HTMLInputElement>('input[readonly]');
+    if (input) {
+      input.select();
+    }
   }
 };
 </script>

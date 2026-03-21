@@ -11,8 +11,12 @@ export default defineNuxtRouteMiddleware((to) => {
     '/health',
   ];
 
+  // Prefix-based public routes (dynamic segments)
+  const publicPrefixes = ['/billing/'];
+
   // Check if the current route is public
-  const isPublicRoute = publicRoutes.includes(to.path);
+  const isPublicRoute =
+    publicRoutes.includes(to.path) || publicPrefixes.some((prefix) => to.path.startsWith(prefix));
 
   // If user is not logged in and trying to access a protected route
   if (!loggedIn.value && !isPublicRoute) {

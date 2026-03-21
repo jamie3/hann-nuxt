@@ -16,8 +16,8 @@ Things to do during the migration
 - (Fixed) Referral No. Not showing the primary key
 - Drop down filters not working in prod but work in local (Status, Assigned To)
 - The Migate Mysql script when fetching new referrals sets the status to open not new.
-- Age at Referral is showing 0 years for https://clients.hannwellness.com/referrals/2538
-- Referral PDF is missing address
+- (Fixed) Age at Referral is showing 0 years for https://clients.hannwellness.com/referrals/2538
+- (Fixed) Referral PDF is missing address
 - Fix this error Dec 24 13:18:23 2025-12-24 13:18:23 [[33mwarn[39m]: Unauthorized API access attempt {"service":"hann-nuxt","url":"/api/\_auth/session","sourceIp":""}
 - Logout results in Logout Failed error
 
