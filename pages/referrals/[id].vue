@@ -561,8 +561,14 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <dt class="text-sm font-medium text-gray-500">Expiry</dt>
-                <dd class="mt-1 text-sm text-gray-900">
+                <dd class="mt-1 text-sm text-gray-900 flex items-center gap-2">
                   {{ showFullCard ? creditCard.expiry : '••/••' }}
+                  <span
+                    v-if="isCardExpired"
+                    class="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700"
+                  >
+                    Expired
+                  </span>
                 </dd>
               </div>
               <div>
@@ -1078,6 +1084,20 @@ const showDeleteCardModal = ref(false);
 const creditCard = ref<any>(null);
 const creditCardLoading = ref(false);
 const showFullCard = ref(false);
+
+// Returns true when the card's MM/YY expiry is in the past
+const isCardExpired = computed(() => {
+  const expiry: string | undefined = creditCard.value?.expiry;
+  if (!expiry) return false;
+  const [monthStr, yearStr] = expiry.split('/');
+  if (!monthStr || !yearStr) return false;
+  const month = parseInt(monthStr, 10);
+  const year = 2000 + parseInt(yearStr, 10);
+  const now = new Date();
+  // A card is valid through the end of its expiry month
+  const expiryDate = new Date(year, month, 1); // first day of the month AFTER expiry
+  return now >= expiryDate;
+});
 
 // Actions menu state
 const showActionsMenu = ref(false);

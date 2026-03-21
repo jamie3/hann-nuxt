@@ -2,9 +2,12 @@ import { UserRepository } from '../../repository/user-repository';
 import { UserService } from '../../service/user-service';
 import { withErrorHandler } from '../../utils/error-handler';
 import { env } from '../../utils/env';
+import { rateLimit } from '../../utils/rate-limiter';
 
 export default defineEventHandler(
   withErrorHandler(async (event) => {
+    rateLimit(event, { max: 10, windowMs: 60_000, keyPrefix: 'login' });
+
     const body = await readBody(event);
     const { username, password, turnstileToken } = body;
 
