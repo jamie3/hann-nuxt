@@ -171,6 +171,23 @@
           </select>
         </div>
 
+        <!-- Clear Filters -->
+        <button
+          v-if="isFiltered"
+          @click="clearFilters"
+          class="px-4 py-2 border-2 border-red-300 text-red-500 rounded-lg hover:bg-red-50 transition-colors font-medium"
+          title="Clear filters"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+
         <!-- Refresh -->
         <button
           @click="refresh()"
@@ -1003,15 +1020,22 @@ const {
 // Use the referral composable for bulk actions
 const { closeReferral, archiveReferral, deleteReferral } = useReferral();
 
-// Initialize state
-const sortBy = ref('updated_at');
-const sortOrder = ref<'asc' | 'desc'>('desc');
-const searchQuery = ref('');
-const debouncedSearch = ref('');
-const typeFilter = ref<'all' | 'professional' | 'self'>('all');
+// Filter state — persisted to URL query params and localStorage
+const {
+  searchQuery,
+  typeFilter,
+  statusFilter,
+  assignedToFilter,
+  itemsPerPage,
+  sortBy,
+  sortOrder,
+  currentPage: localPage,
+  isFiltered,
+  clearFilters,
+} = useReferralFilters();
 
-// Status multi-select state — default: all statuses except Archived
-const statusFilter = ref<string[]>(['new', 'unassigned', 'opened', 'closed']);
+// Debounced search for API calls (initialized from restored value so first fetch is correct)
+const debouncedSearch = ref(searchQuery.value);
 const showStatusDropdown = ref(false);
 
 const statusOptions = [
@@ -1046,9 +1070,6 @@ const statusFilterQuery = computed(() =>
   statusFilter.value.length === 0 ? 'all' : statusFilter.value.join(',')
 );
 
-const assignedToFilter = ref<string>('all');
-const localPage = ref(1);
-const itemsPerPage = ref(100);
 const editingReferralId = ref<string | null>(null);
 const selectedUserId = ref<number | null>(null);
 const assignmentSelect = ref<HTMLSelectElement | null>(null);
@@ -1107,7 +1128,7 @@ const fetchData = async () => {
     sortBy: sortBy.value,
     sortOrder: sortOrder.value,
     search: debouncedSearch.value,
-    type: typeFilter.value,
+    type: typeFilter.value as 'all' | 'professional' | 'self',
     status: statusFilterQuery.value,
     assignedTo: assignedToFilter.value,
   });
