@@ -57,6 +57,7 @@ export default defineEventHandler(
       user: {
         id: user.id,
         username: user.username,
+        name: user.name,
       },
     });
 
@@ -65,6 +66,7 @@ export default defineEventHandler(
       user: {
         id: user.id,
         username: user.username,
+        name: user.name,
       },
     };
   }, 'Login')
