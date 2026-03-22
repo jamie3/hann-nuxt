@@ -130,6 +130,72 @@ export class EmailService {
   }
 
   /**
+   * Send a payment link to a client via email
+   */
+  async sendPaymentLink(
+    referral: any,
+    recipientEmail: string,
+    paymentUrl: string,
+    expiresAt: Date
+  ): Promise<void> {
+    if (!this.client) {
+      throw new Error('Postmark client not initialized. Email sending is disabled.');
+    }
+
+    const fromEmail = env.EMAIL_FROM;
+    const db = useDB();
+    const emailRepository = new ReferralEmailRepository(db);
+
+    try {
+      const tag = 'payment-link';
+      const subject = 'Payment Information Required';
+
+      const expiresAtFormatted = expiresAt.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+
+      const emailContent = await renderEmailTemplate('payment-link', {
+        first_name: referral.first_name,
+        payment_url: paymentUrl,
+        expires_at: expiresAtFormatted,
+      });
+
+      const response = await this.client.sendEmail({
+        From: fromEmail,
+        To: recipientEmail,
+        Subject: subject,
+        MessageStream: 'outbound',
+        HtmlBody: emailContent,
+        Tag: tag,
+      });
+
+      logger.info('Payment link email sent via Postmark', {
+        messageId: response.MessageID,
+        recipient: recipientEmail,
+        referralId: referral.id,
+      });
+
+      // Log the email to database
+      await emailRepository.create({
+        referral_id: parseInt(referral.id),
+        from_email: fromEmail,
+        recipient_email: recipientEmail,
+        message_id: response.MessageID,
+        status: 'sent',
+        tag,
+        subject,
+        email_content: emailContent,
+        file_id: null,
+      });
+    } catch (error) {
+      logger.error('Error sending payment link email via Postmark', { error });
+      throw error;
+    }
+  }
+
+  /**
    * Resend referral PDF to a specific email address
    */
   async resendReferralPDF(

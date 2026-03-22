@@ -988,6 +988,66 @@
             </div>
           </div>
 
+          <!-- Send via Email -->
+          <div class="mt-4 pt-4 border-t border-gray-200">
+            <label class="block text-xs font-medium text-gray-500 mb-1">Send via Email</label>
+            <div class="flex gap-2 items-center">
+              <input
+                v-model="paymentLinkEmail"
+                type="email"
+                placeholder="Enter email address"
+                class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :disabled="isSendingPaymentLinkEmail"
+                @keyup.enter="sendPaymentLinkEmail"
+              />
+              <button
+                @click="sendPaymentLinkEmail"
+                :disabled="isSendingPaymentLinkEmail || !paymentLinkEmail"
+                class="px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors whitespace-nowrap disabled:opacity-50"
+              >
+                <svg
+                  v-if="isSendingPaymentLinkEmail"
+                  class="animate-spin h-4 w-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                {{ isSendingPaymentLinkEmail ? 'Sending…' : 'Send' }}
+              </button>
+            </div>
+            <p
+              v-if="paymentLinkEmailSuccess"
+              class="mt-2 text-sm text-green-600 flex items-center gap-1"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                ></path>
+              </svg>
+              Payment link sent successfully!
+            </p>
+            <p v-if="paymentLinkEmailError" class="mt-2 text-sm text-red-600">
+              {{ paymentLinkEmailError }}
+            </p>
+          </div>
+
           <div class="mt-6">
             <button
               @click="showPaymentLinkModal = false"
@@ -1518,6 +1578,12 @@ const handleGeneratePaymentLink = async () => {
       : `${origin}/billing/${response.token}`;
 
     paymentLinkCopied.value = false;
+
+    // Pre-populate email field with referral's email if available, and reset state
+    paymentLinkEmail.value = referral.value?.email || '';
+    paymentLinkEmailSuccess.value = false;
+    paymentLinkEmailError.value = '';
+
     showPaymentLinkModal.value = true;
   } catch (err: any) {
     console.error('Failed to generate payment link:', err);
@@ -1540,6 +1606,35 @@ const copyPaymentLink = async () => {
     if (input) {
       input.select();
     }
+  }
+};
+
+// Payment link email sending
+const paymentLinkEmail = ref('');
+const isSendingPaymentLinkEmail = ref(false);
+const paymentLinkEmailSuccess = ref(false);
+const paymentLinkEmailError = ref('');
+
+const sendPaymentLinkEmail = async () => {
+  if (!id || !paymentLinkEmail.value || isSendingPaymentLinkEmail.value) return;
+
+  isSendingPaymentLinkEmail.value = true;
+  paymentLinkEmailSuccess.value = false;
+  paymentLinkEmailError.value = '';
+
+  try {
+    await $fetch(`/api/referral/${id}/send-payment-link`, {
+      method: 'POST',
+      body: { email: paymentLinkEmail.value },
+    });
+
+    paymentLinkEmailSuccess.value = true;
+  } catch (err: any) {
+    console.error('Failed to send payment link email:', err);
+    paymentLinkEmailError.value =
+      err.data?.message || err.statusMessage || 'Failed to send payment link email';
+  } finally {
+    isSendingPaymentLinkEmail.value = false;
   }
 };
 </script>
