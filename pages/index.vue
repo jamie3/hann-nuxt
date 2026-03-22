@@ -6,32 +6,32 @@
     </div>
 
     <!-- Stats Cards Loading State -->
-    <div v-if="statsLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div v-if="statsLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
       <div
-        v-for="i in 6"
+        v-for="i in 7"
         :key="i"
-        class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-gray-300"
+        class="bg-white shadow-sm rounded-lg p-3 border-l-4 border-gray-300"
       >
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+            <div class="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
           </div>
-          <div class="ml-5 w-0 flex-1">
-            <div class="h-4 bg-gray-200 rounded w-3/4 mb-2 animate-pulse"></div>
-            <div class="h-8 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+          <div class="ml-3 w-0 flex-1">
+            <div class="h-3 bg-gray-200 rounded w-3/4 mb-1.5 animate-pulse"></div>
+            <div class="h-5 bg-gray-200 rounded w-1/2 animate-pulse"></div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Stats Cards -->
-    <div v-else-if="!statsError" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div v-else-if="!statsError" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
       <!-- Total Professional Referrals -->
-      <div class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-blue-500">
+      <div class="bg-white shadow-sm rounded-lg p-3 border-l-4 border-blue-500">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <svg
-              class="h-8 w-8 text-blue-500"
+              class="h-6 w-6 text-blue-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -44,10 +44,10 @@
               ></path>
             </svg>
           </div>
-          <div class="ml-5 w-0 flex-1">
+          <div class="ml-3 w-0 flex-1">
             <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Professional Referrals</dt>
-              <dd class="text-3xl font-semibold text-gray-900">
+              <dt class="text-xs font-medium text-gray-500 truncate">Professional Referrals</dt>
+              <dd class="text-xl font-semibold text-gray-900">
                 {{ stats?.totalProfessional || 0 }}
               </dd>
             </dl>
@@ -56,11 +56,11 @@
       </div>
 
       <!-- Total Self Referrals -->
-      <div class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-green-500">
+      <div class="bg-white shadow-sm rounded-lg p-3 border-l-4 border-green-500">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <svg
-              class="h-8 w-8 text-green-500"
+              class="h-6 w-6 text-green-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -73,21 +73,21 @@
               ></path>
             </svg>
           </div>
-          <div class="ml-5 w-0 flex-1">
+          <div class="ml-3 w-0 flex-1">
             <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Self Referrals</dt>
-              <dd class="text-3xl font-semibold text-gray-900">{{ stats?.totalSelf || 0 }}</dd>
+              <dt class="text-xs font-medium text-gray-500 truncate">Self Referrals</dt>
+              <dd class="text-xl font-semibold text-gray-900">{{ stats?.totalSelf || 0 }}</dd>
             </dl>
           </div>
         </div>
       </div>
 
       <!-- Total Unassigned -->
-      <div class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-orange-500">
+      <div class="bg-white shadow-sm rounded-lg p-3 border-l-4 border-orange-500">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <svg
-              class="h-8 w-8 text-orange-500"
+              class="h-6 w-6 text-orange-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -100,10 +100,10 @@
               ></path>
             </svg>
           </div>
-          <div class="ml-5 w-0 flex-1">
+          <div class="ml-3 w-0 flex-1">
             <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Unassigned</dt>
-              <dd class="text-3xl font-semibold text-gray-900">
+              <dt class="text-xs font-medium text-gray-500 truncate">Unassigned</dt>
+              <dd class="text-xl font-semibold text-gray-900">
                 {{ stats?.totalUnassigned || 0 }}
               </dd>
             </dl>
@@ -112,11 +112,11 @@
       </div>
 
       <!-- Total New -->
-      <div class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-yellow-500">
+      <div class="bg-white shadow-sm rounded-lg p-3 border-l-4 border-yellow-500">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <svg
-              class="h-8 w-8 text-yellow-500"
+              class="h-6 w-6 text-yellow-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -129,21 +129,21 @@
               ></path>
             </svg>
           </div>
-          <div class="ml-5 w-0 flex-1">
+          <div class="ml-3 w-0 flex-1">
             <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">New</dt>
-              <dd class="text-3xl font-semibold text-gray-900">{{ stats?.totalNew || 0 }}</dd>
+              <dt class="text-xs font-medium text-gray-500 truncate">New</dt>
+              <dd class="text-xl font-semibold text-gray-900">{{ stats?.totalNew || 0 }}</dd>
             </dl>
           </div>
         </div>
       </div>
 
       <!-- Total Opened -->
-      <div class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-indigo-500">
+      <div class="bg-white shadow-sm rounded-lg p-3 border-l-4 border-indigo-500">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <svg
-              class="h-8 w-8 text-indigo-500"
+              class="h-6 w-6 text-indigo-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -156,21 +156,21 @@
               ></path>
             </svg>
           </div>
-          <div class="ml-5 w-0 flex-1">
+          <div class="ml-3 w-0 flex-1">
             <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Opened</dt>
-              <dd class="text-3xl font-semibold text-gray-900">{{ stats?.totalOpened || 0 }}</dd>
+              <dt class="text-xs font-medium text-gray-500 truncate">Opened</dt>
+              <dd class="text-xl font-semibold text-gray-900">{{ stats?.totalOpened || 0 }}</dd>
             </dl>
           </div>
         </div>
       </div>
 
       <!-- Total Closed -->
-      <div class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-gray-500">
+      <div class="bg-white shadow-sm rounded-lg p-3 border-l-4 border-gray-500">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <svg
-              class="h-8 w-8 text-gray-500"
+              class="h-6 w-6 text-gray-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -183,21 +183,21 @@
               ></path>
             </svg>
           </div>
-          <div class="ml-5 w-0 flex-1">
+          <div class="ml-3 w-0 flex-1">
             <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Closed</dt>
-              <dd class="text-3xl font-semibold text-gray-900">{{ stats?.totalClosed || 0 }}</dd>
+              <dt class="text-xs font-medium text-gray-500 truncate">Closed</dt>
+              <dd class="text-xl font-semibold text-gray-900">{{ stats?.totalClosed || 0 }}</dd>
             </dl>
           </div>
         </div>
       </div>
 
       <!-- Total Archived -->
-      <div class="bg-white shadow-sm rounded-lg p-6 border-l-4 border-purple-500">
+      <div class="bg-white shadow-sm rounded-lg p-3 border-l-4 border-purple-500">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <svg
-              class="h-8 w-8 text-purple-500"
+              class="h-6 w-6 text-purple-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -210,13 +210,74 @@
               ></path>
             </svg>
           </div>
-          <div class="ml-5 w-0 flex-1">
+          <div class="ml-3 w-0 flex-1">
             <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Archived</dt>
-              <dd class="text-3xl font-semibold text-gray-900">{{ stats?.totalArchived || 0 }}</dd>
+              <dt class="text-xs font-medium text-gray-500 truncate">Archived</dt>
+              <dd class="text-xl font-semibold text-gray-900">{{ stats?.totalArchived || 0 }}</dd>
             </dl>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Case Load by Assignee -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden mb-6">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Case Load by Assignee</h2>
+      </div>
+
+      <!-- Loading State -->
+      <div v-if="openedByAssigneeLoading" class="px-6 py-4">
+        <div class="space-y-2">
+          <div v-for="i in 4" :key="i" class="flex items-center justify-between">
+            <div class="h-4 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+            <div class="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="openedByAssignee.length === 0" class="px-6 py-6 text-center">
+        <p class="text-sm text-gray-500">No active referrals assigned to anyone.</p>
+      </div>
+
+      <!-- Table -->
+      <div v-else class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Assigned To
+              </th>
+              <th
+                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Active Referrals
+              </th>
+              <th class="px-6 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="row in openedByAssignee" :key="row.userId" class="hover:bg-gray-50">
+              <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ row.name }}
+              </td>
+              <td class="px-6 py-3 whitespace-nowrap text-right">
+                <span class="text-sm font-semibold text-indigo-600">{{ row.count }}</span>
+              </td>
+              <td class="px-6 py-3 whitespace-nowrap w-48">
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                  <div
+                    class="bg-indigo-500 h-2 rounded-full"
+                    :style="`width: ${Math.round((row.count / maxOpenedCount) * 100)}%`"
+                  ></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -401,6 +462,33 @@ const { statsData, statsLoading, statsError, getStats } = useReferralStats();
 const stats = computed(() => statsData.value);
 const newReferrals = computed(() => referrals.value);
 
+// Opened referrals by assignee
+interface OpenedByAssigneeRow {
+  userId: number;
+  name: string;
+  count: number;
+}
+const openedByAssignee = ref<OpenedByAssigneeRow[]>([]);
+const openedByAssigneeLoading = ref(false);
+
+const maxOpenedCount = computed(() =>
+  openedByAssignee.value.length > 0 ? openedByAssignee.value[0].count : 1
+);
+
+const getOpenedByAssignee = async () => {
+  openedByAssigneeLoading.value = true;
+  try {
+    const response = await $fetch<{ success: boolean; data: OpenedByAssigneeRow[] }>(
+      '/api/referrals/opened-by-assignee'
+    );
+    openedByAssignee.value = response?.data ?? [];
+  } catch (err) {
+    console.error('Failed to fetch opened by assignee:', err);
+  } finally {
+    openedByAssigneeLoading.value = false;
+  }
+};
+
 // Fetch users for assignment
 const { users: usersList, getUsers } = useUsers();
 
@@ -421,6 +509,7 @@ onMounted(async () => {
   // Fetch all data in parallel
   await Promise.all([
     getStats(),
+    getOpenedByAssignee(),
     getReferrals({
       page: 1,
       limit: 10,

@@ -297,6 +297,32 @@ export class ReferralRepository extends BaseRepository<
   }
 
   /**
+   * Get caseload (new + opened referrals) grouped by assigned user
+   */
+  async getCaseloadByAssignee(): Promise<{ userId: number; name: string; count: number }[]> {
+    const rows = await this.db
+      .selectFrom('referral')
+      .innerJoin('user', 'user.id', 'referral.assigned_to')
+      .select([
+        'referral.assigned_to as userId',
+        (eb) => eb.fn.coalesce(eb.ref('user.name'), eb.ref('user.username')).as('name'),
+        (eb) => eb.fn.count<number>('referral.id').as('count'),
+      ])
+      .where('referral.is_deleted', '=', false)
+      .where('referral.status', 'in', ['new', 'opened'])
+      .where('referral.assigned_to', 'is not', null)
+      .groupBy(['referral.assigned_to', 'user.name', 'user.username'])
+      .orderBy('count', 'desc')
+      .execute();
+
+    return rows.map((row) => ({
+      userId: Number(row.userId),
+      name: String(row.name),
+      count: Number(row.count),
+    }));
+  }
+
+  /**
    * Merge data from secondary referral into primary referral
    * Moves all related data (clinical notes, files, emails, credit card) to primary
    */
