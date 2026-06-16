@@ -224,6 +224,22 @@
                   Email Referral PDF
                 </button>
 
+                <!-- Generate Email -->
+                <button
+                  @click="handleMenuAction(openGenerateEmailModal)"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    ></path>
+                  </svg>
+                  Generate Email
+                </button>
+
                 <div class="border-t border-gray-100"></div>
 
                 <!-- Merge -->
@@ -357,271 +373,32 @@
       </div>
 
       <!-- Main Content -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Personal Information -->
-        <div class="bg-white shadow-sm rounded-lg p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h2>
-          <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Date of Birth</dt>
-              <dd class="mt-1 text-sm text-gray-900">
-                {{ referral.date_of_birth ? formatDate(referral.date_of_birth) : '-' }}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Gender</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.gender || '-' }}</dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Age</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.age }}</dd>
-            </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Age at Referral</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.age_at_referral }}</dd>
-            </div>
-            <div v-if="referral.parents_guardians">
-              <dt class="text-sm font-medium text-gray-500">Parents / Guardians</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.parents_guardians }}</dd>
-            </div>
-          </dl>
-        </div>
-
-        <!-- Contact Information -->
-        <div class="bg-white shadow-sm rounded-lg p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h2>
-          <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Primary Telephone</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.primary_telephone }}</dd>
-            </div>
-            <div v-if="referral.secondary_telephone">
-              <dt class="text-sm font-medium text-gray-500">Secondary Telephone</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.secondary_telephone }}</dd>
-            </div>
-            <div v-if="referral.email">
-              <dt class="text-sm font-medium text-gray-500">Email</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.email }}</dd>
-            </div>
-            <div v-if="referral.address_1" class="md:col-span-2">
-              <dt class="text-sm font-medium text-gray-500">Address</dt>
-              <dd class="mt-1 text-sm text-gray-900">
-                <div>{{ referral.address_1 }}</div>
-                <div v-if="referral.address_2">{{ referral.address_2 }}</div>
-                <div>
-                  {{ referral.city
-                  }}<span v-if="referral.province_state">, {{ referral.province_state }}</span>
-                </div>
-                <div v-if="referral.postal_zip">{{ referral.postal_zip }}</div>
-                <div v-if="referral.country">{{ referral.country }}</div>
-              </dd>
-            </div>
-          </dl>
-        </div>
-
-        <!-- Referrer Information (Professional Only) -->
+      <div>
+        <!-- Tab bar -->
         <div
-          v-if="referral.referral_type === 'professional'"
-          class="bg-white shadow-sm rounded-lg p-6 lg:col-span-2"
+          class="bg-white shadow-sm rounded-lg mb-6 px-6 flex flex-wrap items-center justify-between gap-3"
         >
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Referrer Information</h2>
-          <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div v-if="referral.referrer_name">
-              <dt class="text-sm font-medium text-gray-500">Referrer Name</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_name }}</dd>
-            </div>
-            <div v-if="referral.referrer_relationship">
-              <dt class="text-sm font-medium text-gray-500">Relationship</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_relationship }}</dd>
-            </div>
-            <div v-if="referral.referrer_email">
-              <dt class="text-sm font-medium text-gray-500">Referrer Email</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_email }}</dd>
-            </div>
-            <div v-if="referral.referrer_prefers_contact !== null">
-              <dt class="text-sm font-medium text-gray-500">Prefers Pre-Contact</dt>
-              <dd class="mt-1 text-sm text-gray-900">
-                {{ referral.referrer_prefers_contact ? 'Yes' : 'No' }}
-              </dd>
-            </div>
-          </dl>
-        </div>
-
-        <!-- Service Information -->
-        <div class="bg-white shadow-sm rounded-lg p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Service Information</h2>
-          <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Requested Service</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.requested_service }}</dd>
-            </div>
-            <div v-if="referral.method_of_payment">
-              <dt class="text-sm font-medium text-gray-500">Method of Payment</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ referral.method_of_payment }}</dd>
-            </div>
-          </dl>
-        </div>
-
-        <!-- Payment Information -->
-        <div class="bg-white shadow-sm rounded-lg p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">Payment Information</h2>
-            <div class="flex gap-2">
-              <!-- Generate Payment Link -->
-              <button
-                @click="handleGeneratePaymentLink"
-                :disabled="isGeneratingPaymentLink"
-                class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-1 disabled:opacity-50"
-                title="Generate a one-time payment link for the client"
-              >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                  ></path>
-                </svg>
-                {{ isGeneratingPaymentLink ? 'Generating…' : 'Payment Link' }}
-              </button>
-              <button
-                v-if="creditCard"
-                @click="toggleCardVisibility"
-                class="p-2 text-gray-600 hover:text-gray-800"
-                title="Toggle card visibility"
-              >
-                <svg
-                  v-if="showFullCard"
-                  class="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                  ></path>
-                </svg>
-                <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  ></path>
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  ></path>
-                </svg>
-              </button>
-              <button
-                v-if="creditCard"
-                @click="openEditCardModal"
-                class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800"
-              >
-                Edit
-              </button>
-              <button
-                v-if="creditCard"
-                @click="handleDeleteCreditCard"
-                class="px-3 py-1 text-sm text-red-600 hover:text-red-800"
-              >
-                Delete
-              </button>
-              <button
-                v-if="!creditCard"
-                @click="openEditCardModal"
-                class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800"
-              >
-                + Add Card
-              </button>
-            </div>
-          </div>
-
-          <!-- Credit Card Display -->
-          <div v-if="creditCardLoading" class="text-center py-4">
-            <div
-              class="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
-            ></div>
-            <p class="mt-2 text-sm text-gray-600">Loading payment info...</p>
-          </div>
-
-          <div v-else-if="creditCard" class="space-y-3">
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Card Number</dt>
-              <dd class="mt-1 text-sm text-gray-900 font-mono">
-                {{ showFullCard ? creditCard.card_number : creditCard.card_number_masked }}
-              </dd>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <dt class="text-sm font-medium text-gray-500">Expiry</dt>
-                <dd class="mt-1 text-sm text-gray-900 flex items-center gap-2">
-                  {{ showFullCard ? creditCard.expiry : '••/••' }}
-                  <span
-                    v-if="isCardExpired"
-                    class="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700"
-                  >
-                    Expired
-                  </span>
-                </dd>
-              </div>
-              <div>
-                <dt class="text-sm font-medium text-gray-500">CVV</dt>
-                <dd class="mt-1 text-sm text-gray-900">
-                  {{ showFullCard ? creditCard.cvv : '•••' }}
-                </dd>
-              </div>
-            </div>
-          </div>
-
-          <div v-else class="text-center py-4 text-gray-500">
-            <svg
-              class="mx-auto h-10 w-10 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-              ></path>
-            </svg>
-            <p class="mt-2 text-sm">No credit card on file</p>
-          </div>
-        </div>
-
-        <!-- Presenting Issues -->
-        <div
-          v-if="referral.presenting_issues"
-          class="bg-white shadow-sm rounded-lg p-6 lg:col-span-2"
-        >
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">Presenting Issues or Concerns</h2>
-            <button
-              @click="openPresentingIssuesModal"
-              class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Edit
+          <nav class="flex gap-6 -mb-px overflow-x-auto">
+            <button type="button" @click="activeTab = 'details'" :class="tabClass('details')">
+              Details
             </button>
-          </div>
-          <p class="text-sm text-gray-900 whitespace-pre-line">
-            {{ referral.presenting_issues }}
-          </p>
-        </div>
+            <button type="button" @click="activeTab = 'payment'" :class="tabClass('payment')">
+              Payment
+            </button>
+            <button type="button" @click="activeTab = 'notes'" :class="tabClass('notes')">
+              Clinical Notes
+            </button>
+            <button type="button" @click="activeTab = 'files'" :class="tabClass('files')">
+              Files
+            </button>
+            <button type="button" @click="activeTab = 'emails'" :class="tabClass('emails')">
+              Email Activity
+            </button>
+          </nav>
 
-        <!-- Clinical Notes -->
-        <div class="bg-white shadow-sm rounded-lg p-6 lg:col-span-2">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">Clinical Notes</h2>
-            <div class="flex gap-2">
+          <!-- Contextual actions for the active tab -->
+          <div class="py-2 flex gap-2">
+            <template v-if="activeTab === 'notes'">
               <button
                 v-if="clinicalNotes.length > 0"
                 @click="toggleAllNotes"
@@ -635,9 +412,301 @@
               >
                 New Clinical Note
               </button>
-            </div>
+            </template>
+            <template v-else-if="activeTab === 'files'">
+              <label
+                class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 cursor-pointer"
+              >
+                <input
+                  type="file"
+                  @change="handleFileSelect"
+                  class="hidden"
+                  :disabled="uploading"
+                />
+                {{ uploading ? 'Uploading...' : 'Upload File' }}
+              </label>
+            </template>
+            <template v-else-if="activeTab === 'emails'">
+              <button
+                @click="openGenerateEmailModal"
+                class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
+              >
+                Generate Email
+              </button>
+            </template>
+          </div>
+        </div>
+
+        <!-- Details panel -->
+        <div v-show="activeTab === 'details'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Personal Information -->
+          <div class="bg-white shadow-sm rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h2>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Date of Birth</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  {{ referral.date_of_birth ? formatDate(referral.date_of_birth) : '-' }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Gender</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.gender || '-' }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Age</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.age }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Age at Referral</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.age_at_referral }}</dd>
+              </div>
+              <div v-if="referral.parents_guardians">
+                <dt class="text-sm font-medium text-gray-500">Parents / Guardians</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.parents_guardians }}</dd>
+              </div>
+            </dl>
           </div>
 
+          <!-- Contact Information -->
+          <div class="bg-white shadow-sm rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h2>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Primary Telephone</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.primary_telephone }}</dd>
+              </div>
+              <div v-if="referral.secondary_telephone">
+                <dt class="text-sm font-medium text-gray-500">Secondary Telephone</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.secondary_telephone }}</dd>
+              </div>
+              <div v-if="referral.email">
+                <dt class="text-sm font-medium text-gray-500">Email</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.email }}</dd>
+              </div>
+              <div v-if="referral.address_1" class="md:col-span-2">
+                <dt class="text-sm font-medium text-gray-500">Address</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <div>{{ referral.address_1 }}</div>
+                  <div v-if="referral.address_2">{{ referral.address_2 }}</div>
+                  <div>
+                    {{ referral.city
+                    }}<span v-if="referral.province_state">, {{ referral.province_state }}</span>
+                  </div>
+                  <div v-if="referral.postal_zip">{{ referral.postal_zip }}</div>
+                  <div v-if="referral.country">{{ referral.country }}</div>
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Referrer Information (Professional Only) -->
+          <div
+            v-if="referral.referral_type === 'professional'"
+            class="bg-white shadow-sm rounded-lg p-6 lg:col-span-2"
+          >
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Referrer Information</h2>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div v-if="referral.referrer_name">
+                <dt class="text-sm font-medium text-gray-500">Referrer Name</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_name }}</dd>
+              </div>
+              <div v-if="referral.referrer_relationship">
+                <dt class="text-sm font-medium text-gray-500">Relationship</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_relationship }}</dd>
+              </div>
+              <div v-if="referral.referrer_email">
+                <dt class="text-sm font-medium text-gray-500">Referrer Email</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.referrer_email }}</dd>
+              </div>
+              <div v-if="referral.referrer_prefers_contact !== null">
+                <dt class="text-sm font-medium text-gray-500">Prefers Pre-Contact</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  {{ referral.referrer_prefers_contact ? 'Yes' : 'No' }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Service Information -->
+          <div class="bg-white shadow-sm rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Service Information</h2>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Requested Service</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.requested_service }}</dd>
+              </div>
+              <div v-if="referral.method_of_payment">
+                <dt class="text-sm font-medium text-gray-500">Method of Payment</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ referral.method_of_payment }}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Payment panel -->
+        <div v-show="activeTab === 'payment'" class="grid grid-cols-1 gap-6">
+          <!-- Payment Information -->
+          <div class="bg-white shadow-sm rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-semibold text-gray-900">Payment Information</h2>
+              <div class="flex gap-2">
+                <!-- Generate Payment Link -->
+                <button
+                  @click="handleGeneratePaymentLink"
+                  :disabled="isGeneratingPaymentLink"
+                  class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-1 disabled:opacity-50"
+                  title="Generate a one-time payment link for the client"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                    ></path>
+                  </svg>
+                  {{ isGeneratingPaymentLink ? 'Generating…' : 'Payment Link' }}
+                </button>
+                <button
+                  v-if="creditCard"
+                  @click="toggleCardVisibility"
+                  class="p-2 text-gray-600 hover:text-gray-800"
+                  title="Toggle card visibility"
+                >
+                  <svg
+                    v-if="showFullCard"
+                    class="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    ></path>
+                  </svg>
+                  <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    ></path>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  v-if="creditCard"
+                  @click="openEditCardModal"
+                  class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  Edit
+                </button>
+                <button
+                  v-if="creditCard"
+                  @click="handleDeleteCreditCard"
+                  class="px-3 py-1 text-sm text-red-600 hover:text-red-800"
+                >
+                  Delete
+                </button>
+                <button
+                  v-if="!creditCard"
+                  @click="openEditCardModal"
+                  class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  + Add Card
+                </button>
+              </div>
+            </div>
+
+            <!-- Credit Card Display -->
+            <div v-if="creditCardLoading" class="text-center py-4">
+              <div
+                class="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
+              ></div>
+              <p class="mt-2 text-sm text-gray-600">Loading payment info...</p>
+            </div>
+
+            <div v-else-if="creditCard" class="space-y-3">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Card Number</dt>
+                <dd class="mt-1 text-sm text-gray-900 font-mono">
+                  {{ showFullCard ? creditCard.card_number : creditCard.card_number_masked }}
+                </dd>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">Expiry</dt>
+                  <dd class="mt-1 text-sm text-gray-900 flex items-center gap-2">
+                    {{ showFullCard ? creditCard.expiry : '••/••' }}
+                    <span
+                      v-if="isCardExpired"
+                      class="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700"
+                    >
+                      Expired
+                    </span>
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">CVV</dt>
+                  <dd class="mt-1 text-sm text-gray-900">
+                    {{ showFullCard ? creditCard.cvv : '•••' }}
+                  </dd>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="text-center py-4 text-gray-500">
+              <svg
+                class="mx-auto h-10 w-10 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                ></path>
+              </svg>
+              <p class="mt-2 text-sm">No credit card on file</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Details panel (continued) -->
+        <div v-show="activeTab === 'details'" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <!-- Presenting Issues -->
+          <div
+            v-if="referral.presenting_issues"
+            class="bg-white shadow-sm rounded-lg p-6 lg:col-span-2"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-semibold text-gray-900">Presenting Issues or Concerns</h2>
+              <button
+                @click="openPresentingIssuesModal"
+                class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Edit
+              </button>
+            </div>
+            <p class="text-sm text-gray-900 whitespace-pre-line">
+              {{ referral.presenting_issues }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Clinical Notes panel -->
+        <div v-show="activeTab === 'notes'" class="bg-white shadow-sm rounded-lg p-6">
           <!-- Notes Loading -->
           <div v-if="notesLoading" class="text-center py-4">
             <div
@@ -706,18 +775,8 @@
           </div>
         </div>
 
-        <!-- Files -->
-        <div class="bg-white shadow-sm rounded-lg p-6 lg:col-span-2">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">Files</h2>
-            <label
-              class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 cursor-pointer"
-            >
-              <input type="file" @change="handleFileSelect" class="hidden" :disabled="uploading" />
-              {{ uploading ? 'Uploading...' : 'Upload File' }}
-            </label>
-          </div>
-
+        <!-- Files panel -->
+        <div v-show="activeTab === 'files'" class="bg-white shadow-sm rounded-lg p-6">
           <!-- File Upload Error -->
           <div v-if="fileError" class="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded">
             <p class="text-red-700 text-sm">{{ fileError }}</p>
@@ -809,6 +868,101 @@
             </div>
           </div>
         </div>
+
+        <!-- Email Activity panel -->
+        <div v-show="activeTab === 'emails'" class="bg-white shadow-sm rounded-lg p-6">
+          <!-- Activity Loading -->
+          <div v-if="referralEmailsLoading" class="text-center py-4">
+            <div
+              class="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
+            ></div>
+            <p class="mt-2 text-sm text-gray-600">Loading email activity...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div
+            v-else-if="referralEmails.length === 0"
+            class="text-center py-8 text-gray-500 text-sm"
+          >
+            No emails for this referral yet
+          </div>
+
+          <!-- Activity List -->
+          <div v-else class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th
+                    class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Subject
+                  </th>
+                  <th
+                    class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Template
+                  </th>
+                  <th
+                    class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Recipient
+                  </th>
+                  <th
+                    class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    When
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr v-for="email in referralEmails" :key="email.id">
+                  <td class="px-4 py-3 text-sm text-gray-900">{{ email.subject || '—' }}</td>
+                  <td class="px-4 py-3 text-sm whitespace-nowrap">
+                    <span v-if="email.template_name" class="text-gray-900">
+                      {{ email.template_name }}
+                    </span>
+                    <span v-else class="text-gray-400 italic">Manual</span>
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-700">{{ email.recipient_email }}</td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span
+                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                      :class="{
+                        'bg-gray-100 text-gray-800': email.status === 'draft',
+                        'bg-indigo-100 text-indigo-800': email.status === 'scheduled',
+                        'bg-blue-100 text-blue-800': email.status === 'sent',
+                        'bg-green-100 text-green-800': email.status === 'delivered',
+                        'bg-purple-100 text-purple-800': email.status === 'opened',
+                        'bg-cyan-100 text-cyan-800': email.status === 'clicked',
+                        'bg-red-100 text-red-800':
+                          email.status === 'bounced' || email.status === 'failed',
+                        'bg-yellow-100 text-yellow-800': email.status === 'spam_complaint',
+                      }"
+                    >
+                      {{ email.status }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                    <template v-if="email.status === 'scheduled' && email.scheduled_at">
+                      Scheduled {{ new Date(email.scheduled_at).toLocaleString() }}
+                    </template>
+                    <template v-else-if="email.sent_at">
+                      Sent {{ new Date(email.sent_at).toLocaleString() }}
+                    </template>
+                    <template v-else>
+                      {{ new Date(email.created_at).toLocaleString() }}
+                    </template>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -835,6 +989,14 @@
 
     <!-- Email PDF Modal -->
     <EmailReferralPDFModal v-model="showEmailPDFModal" @sent="handleEmailPDFSent" />
+
+    <!-- Generate Email Modal -->
+    <GenerateEmailModal
+      v-model="showGenerateEmailModal"
+      :referral-id="id"
+      :default-email="referral?.email || ''"
+      @generated="handleEmailGenerated"
+    />
 
     <!-- Edit Credit Card Modal -->
     <EditCreditCardModal
@@ -1130,6 +1292,27 @@ const showNewNoteModal = ref(false);
 // Email PDF modal state
 const showEmailPDFModal = ref(false);
 
+// Generate Email modal state
+const showGenerateEmailModal = ref(false);
+
+// Referral email activity
+const {
+  emails: referralEmails,
+  loading: referralEmailsLoading,
+  getEmails: getReferralEmails,
+} = useReferralEmails(id);
+
+// Tabbed sections
+type ReferralTab = 'details' | 'payment' | 'notes' | 'files' | 'emails';
+const activeTab = ref<ReferralTab>('details');
+
+const tabClass = (tab: ReferralTab) => {
+  const base = 'py-3 border-b-2 text-sm font-medium transition-colors';
+  return activeTab.value === tab
+    ? `${base} border-blue-600 text-blue-600`
+    : `${base} border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300`;
+};
+
 // Presenting issues modal state
 const showPresentingIssuesModal = ref(false);
 
@@ -1188,6 +1371,16 @@ const openEmailPDFModal = () => {
   showEmailPDFModal.value = true;
 };
 
+// Open generate email modal
+const openGenerateEmailModal = () => {
+  showGenerateEmailModal.value = true;
+};
+
+// Refresh the activity list after an email is generated
+const handleEmailGenerated = () => {
+  getReferralEmails();
+};
+
 // Open presenting issues modal
 const openPresentingIssuesModal = () => {
   showPresentingIssuesModal.value = true;
@@ -1239,6 +1432,11 @@ if (id) {
 // Fetch clinical notes for this referral
 if (id) {
   await getClinicalNotesByReferralId(id);
+}
+
+// Fetch email activity for this referral
+if (id) {
+  await getReferralEmails();
 }
 
 // Set page meta

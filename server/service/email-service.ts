@@ -196,6 +196,65 @@ export class EmailService {
   }
 
   /**
+   * Send a custom (template-generated) email to a recipient and log it.
+   * Used by the manual "generate email" flow on the referral page.
+   */
+  async sendCustomEmail(params: {
+    referral: any;
+    recipientEmail: string;
+    subject: string;
+    htmlBody: string;
+    templateId?: number | null;
+    createdBy?: number | null;
+  }): Promise<{ messageId: string }> {
+    if (!this.client) {
+      throw new Error('Postmark client not initialized. Email sending is disabled.');
+    }
+
+    const fromEmail = env.EMAIL_FROM;
+    const db = useDB();
+    const emailRepository = new ReferralEmailRepository(db);
+    const tag = 'custom-email';
+
+    try {
+      const response = await this.client.sendEmail({
+        From: fromEmail,
+        To: params.recipientEmail,
+        Subject: params.subject,
+        MessageStream: 'outbound',
+        HtmlBody: params.htmlBody,
+        Tag: tag,
+      });
+
+      logger.info('Custom email sent via Postmark', {
+        messageId: response.MessageID,
+        recipient: params.recipientEmail,
+        referralId: params.referral.id,
+      });
+
+      await emailRepository.create({
+        referral_id: parseInt(params.referral.id),
+        from_email: fromEmail,
+        recipient_email: params.recipientEmail,
+        message_id: response.MessageID,
+        status: 'sent',
+        tag,
+        subject: params.subject,
+        email_content: params.htmlBody,
+        template_id: params.templateId ?? null,
+        created_by: params.createdBy ?? null,
+        sent_at: new Date(),
+        file_id: null,
+      });
+
+      return { messageId: response.MessageID };
+    } catch (error) {
+      logger.error('Error sending custom email via Postmark', { error });
+      throw error;
+    }
+  }
+
+  /**
    * Resend referral PDF to a specific email address
    */
   async resendReferralPDF(

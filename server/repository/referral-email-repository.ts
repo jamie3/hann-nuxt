@@ -47,6 +47,22 @@ export class ReferralEmailRepository extends BaseRepository<
   }
 
   /**
+   * Find all emails for a referral, including the name of the template used
+   * (null when the email was composed manually). Soft-deleted templates still
+   * resolve their name so historical activity stays meaningful.
+   */
+  async findByReferralIdWithTemplate(referralId: string): Promise<any[]> {
+    return await this.db
+      .selectFrom(this.tableName)
+      .leftJoin('email_template', 'email_template.id', 'referral_email.template_id')
+      .selectAll('referral_email')
+      .select('email_template.name as template_name')
+      .where('referral_email.referral_id', '=', parseInt(referralId))
+      .orderBy('referral_email.created_at', 'desc')
+      .execute();
+  }
+
+  /**
    * Find all emails ordered by created_at
    */
   async findAllEmails(): Promise<ReferralEmailRow[]> {
@@ -81,6 +97,26 @@ export class ReferralEmailRepository extends BaseRepository<
       .executeTakeFirst();
 
     return result || null;
+  }
+
+  /**
+   * Find scheduled emails that are due to be sent (scheduled_at <= now).
+   *
+   * Locks the returned rows with FOR UPDATE SKIP LOCKED so that concurrent
+   * workers/cron invocations don't pick up the same email twice. Run this
+   * inside a transaction and flip the status to 'sending' before releasing.
+   */
+  async findDueScheduled(now: Date, limit = 50): Promise<ReferralEmailRow[]> {
+    return await this.db
+      .selectFrom(this.tableName)
+      .selectAll()
+      .where('status', '=', 'scheduled')
+      .where('scheduled_at', '<=', now)
+      .orderBy('scheduled_at', 'asc')
+      .limit(limit)
+      .forUpdate()
+      .skipLocked()
+      .execute();
   }
 
   /**

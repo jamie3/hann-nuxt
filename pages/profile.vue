@@ -42,6 +42,26 @@
               <p class="mt-1 text-xs text-gray-500">Email cannot be changed</p>
             </div>
 
+            <!-- Roles (Read-only) -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Roles</label>
+              <div
+                class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 min-h-[2.5rem] flex flex-wrap items-center gap-2"
+              >
+                <span
+                  v-for="role in roles"
+                  :key="role"
+                  class="px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 capitalize"
+                >
+                  {{ role }}
+                </span>
+                <span v-if="roles.length === 0" class="text-sm text-gray-500"
+                  >No roles assigned</span
+                >
+              </div>
+              <p class="mt-1 text-xs text-gray-500">Roles are managed by an administrator</p>
+            </div>
+
             <!-- Name (Editable) -->
             <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
@@ -168,6 +188,9 @@ definePageMeta({
 // Get current user from session
 const { user } = useUserSession();
 const sessionUser = computed(() => user.value as any);
+
+// Roles the user belongs to (attached to the session at login)
+const roles = computed<string[]>(() => sessionUser.value?.roles ?? []);
 
 // Full user data
 const currentUser = ref<any>(null);

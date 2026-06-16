@@ -19,3 +19,17 @@ export async function renderEmailTemplate(
   const template = readFileSync(templatePath, 'utf-8');
   return await liquid.parseAndRender(template, data);
 }
+
+/**
+ * Render a raw Liquid template string (e.g. a database-stored email template).
+ * Supports nested variables such as {{ referral.first_name }}.
+ * @param templateString - The raw template source
+ * @param data - Data to inject into the template
+ * @returns Rendered string
+ */
+export async function renderTemplateString(
+  templateString: string,
+  data: Record<string, any>
+): Promise<string> {
+  return await liquid.parseAndRender(templateString, data);
+}

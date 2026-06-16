@@ -3,6 +3,7 @@ import { UserService } from '../../service/user-service';
 import { withErrorHandler } from '../../utils/error-handler';
 import { env } from '../../utils/env';
 import { rateLimit } from '../../utils/rate-limiter';
+import { logger } from '../../lib/logger';
 
 export default defineEventHandler(
   withErrorHandler(async (event) => {
@@ -52,12 +53,25 @@ export default defineEventHandler(
       });
     }
 
+    // Load the user's roles for client-side gating of admin features.
+    // user.id is a string (mapped from the DB), but user_role.user_id is an
+    // integer column, so coerce it explicitly.
+    const roleRows = await db
+      .selectFrom('user_role')
+      .select('role')
+      .where('user_id', '=', parseInt(user.id, 10))
+      .execute();
+    const roles = roleRows.map((r) => r.role);
+
+    logger.info('User logged in', { userId: user.id, roles });
+
     // Create session
     await setUserSession(event, {
       user: {
         id: user.id,
         username: user.username,
         name: user.name,
+        roles,
       },
     });
 

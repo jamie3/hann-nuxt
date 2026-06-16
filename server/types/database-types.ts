@@ -49,6 +49,19 @@ export interface CreditCard {
   updated_at: Generated<Timestamp>;
 }
 
+export interface EmailTemplate {
+  body: string;
+  created_at: Generated<Timestamp>;
+  created_by: number | null;
+  description: string | null;
+  id: Generated<number>;
+  is_deleted: Generated<boolean>;
+  name: string;
+  public_id: Generated<string>;
+  subject: string;
+  updated_at: Generated<Timestamp>;
+}
+
 export interface File {
   created_at: Generated<Timestamp>;
   file_data: Buffer;
@@ -146,6 +159,7 @@ export interface ReferralEmail {
   click_location: string | null;
   clicked_at: Timestamp | null;
   created_at: Generated<Timestamp>;
+  created_by: number | null;
   delivered_at: Timestamp | null;
   details: string | null;
   email_content: string | null;
@@ -161,10 +175,13 @@ export interface ReferralEmail {
   recipient_email: string;
   record_type: string | null;
   referral_id: number;
+  scheduled_at: Timestamp | null;
+  sent_at: Timestamp | null;
   spam_complaint_at: Timestamp | null;
   status: Generated<string>;
   subject: string | null;
   tag: string | null;
+  template_id: number | null;
   updated_at: Generated<Timestamp>;
   user_agent: string | null;
   webhook_data: Json | null;
@@ -197,6 +214,7 @@ export interface UserRole {
 export interface DB {
   clinical_note: ClinicalNote;
   credit_card: CreditCard;
+  email_template: EmailTemplate;
   file: File;
   original_clients: OriginalClients;
   original_clinical_note: OriginalClinicalNote;
