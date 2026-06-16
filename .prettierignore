@@ -10,5 +10,5 @@ dist
 .idea
 .DS_Store
 coverage
-yarn.lock
+pnpm-lock.yaml
 package-lock.json

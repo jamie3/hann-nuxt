@@ -57,7 +57,7 @@ This creates:
 Use the provided script to create users with hashed passwords:
 
 ```bash
-yarn create-user
+pnpm create-user
 ```
 
 The script will prompt you for:
@@ -66,7 +66,7 @@ The script will prompt you for:
 
 Example:
 ```
-$ yarn create-user
+$ pnpm create-user
 Enter username: admin
 Enter password: mypassword123
 
@@ -244,7 +244,7 @@ If you get database connection errors:
 
 If you see TypeScript errors about missing types:
 ```bash
-yarn nuxt prepare
+pnpm exec nuxt prepare
 ```
 
 Then reload VSCode window (Cmd/Ctrl + Shift + P → "Reload Window")

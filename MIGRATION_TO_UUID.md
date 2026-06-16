@@ -79,7 +79,7 @@ This document describes the migration from integer `serial` primary keys to UUID
    ```bash
    npm run migrate
    # or
-   yarn migrate
+   pnpm migrate
    ```
 
 3. **Verify migration**:

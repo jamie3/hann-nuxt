@@ -31,7 +31,7 @@ Your PostgreSQL database must be running with all migrations applied:
 
 ```bash
 # Run migrations
-yarn db:migrate
+pnpm db:migrate
 
 # Verify database is ready
 psql -h localhost -p 5432 -U postgres -d hann -c "SELECT COUNT(*) FROM referral;"
@@ -79,7 +79,7 @@ psql -h localhost -p 5432 -U postgres -d hann -c "SELECT COUNT(*) FROM referral;
 Execute the migration script:
 
 ```bash
-yarn db:import-mysql
+pnpm db:import-mysql
 ```
 
 Or directly with tsx:

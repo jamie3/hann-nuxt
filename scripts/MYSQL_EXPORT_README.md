@@ -86,7 +86,7 @@ Run the export script:
 ```bash
 npm run export-mysql-schema
 # or
-yarn export-mysql-schema
+pnpm export-mysql-schema
 ```
 
 ## Output

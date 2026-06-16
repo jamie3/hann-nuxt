@@ -11,7 +11,7 @@ Creates a new user account in the database.
 **Usage:**
 
 ```bash
-yarn create-user
+pnpm create-user
 ```
 
 **Features:**
@@ -24,7 +24,7 @@ yarn create-user
 **Example:**
 
 ```bash
-yarn create-user
+pnpm create-user
 # Enter username: john.doe
 # Enter password: ********
 
@@ -37,8 +37,8 @@ yarn create-user
 **For different environments:**
 
 ```bash
-yarn create-user --env production
-yarn create-user --env test
+pnpm create-user --env production
+pnpm create-user --env test
 ```
 
 ### `change-password.ts`
@@ -48,7 +48,7 @@ Changes the password for an existing user account.
 **Usage:**
 
 ```bash
-yarn change-password
+pnpm change-password
 ```
 
 **Features:**
@@ -66,7 +66,7 @@ yarn change-password
 **Example:**
 
 ```bash
-yarn change-password
+pnpm change-password
 # Enter username: john.doe
 # Found user: john.doe (ID: 1)
 # Enter new password: ********
@@ -81,8 +81,8 @@ yarn change-password
 **For different environments:**
 
 ```bash
-yarn change-password --env production
-yarn change-password --env test
+pnpm change-password --env production
+pnpm change-password --env test
 ```
 
 ---
