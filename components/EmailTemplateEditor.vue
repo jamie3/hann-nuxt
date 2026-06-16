@@ -151,6 +151,8 @@ const availableVariables = [
   '{{ referral.primary_telephone }}',
   '{{ referral.requested_service }}',
   '{{ referral.status }}',
+  '{{ user.name }}',
+  '{{ user.email }}',
 ];
 
 watch(

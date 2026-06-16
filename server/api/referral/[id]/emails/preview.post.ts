@@ -1,6 +1,7 @@
 import { useDB } from '~/server/utils/db';
 import { EmailTemplateRepository } from '~/server/repository/email-template-repository';
 import { renderTemplateString } from '~/server/utils/email-templates';
+import { buildTemplateContext } from '~/server/utils/template-context';
 import { withErrorHandler } from '~/server/utils/error-handler';
 
 /**
@@ -40,7 +41,7 @@ export default defineEventHandler(
       throw createError({ statusCode: 404, message: 'Template not found' });
     }
 
-    const context = { referral };
+    const context = await buildTemplateContext(event, referral);
     const subject = await renderTemplateString(template.subject, context);
     const renderedBody = await renderTemplateString(template.body, context);
 

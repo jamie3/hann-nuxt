@@ -3,6 +3,7 @@ import { env } from '~/server/utils/env';
 import { ReferralEmailRepository } from '~/server/repository/referral-email-repository';
 import { EmailTemplateRepository } from '~/server/repository/email-template-repository';
 import { renderTemplateString } from '~/server/utils/email-templates';
+import { buildTemplateContext } from '~/server/utils/template-context';
 import { emailService } from '~/server/service/email-service';
 import { withErrorHandler } from '~/server/utils/error-handler';
 
@@ -70,7 +71,7 @@ export default defineEventHandler(
       if (!template) {
         throw createError({ statusCode: 404, message: 'Template not found' });
       }
-      const context = { referral };
+      const context = await buildTemplateContext(event, referral);
       if (subject == null) subject = await renderTemplateString(template.subject, context);
       if (emailBody == null) emailBody = await renderTemplateString(template.body, context);
     }
