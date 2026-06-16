@@ -25,6 +25,7 @@ export class UserService {
       is_deleted: row.is_deleted,
       created_at: row.created_at.toISOString(),
       updated_at: row.updated_at.toISOString(),
+      roles: [],
     };
   }
 
@@ -105,7 +106,21 @@ export class UserService {
 
   async getAllUsers(): Promise<User[]> {
     const userRows = await this.userRepository.findAll();
-    return userRows.map((row) => this.mapToUser(row));
+    const users = userRows.map((row) => this.mapToUser(row));
+
+    // Attach each user's roles in a single query
+    const roleRows = await this.userRepository.findRolesForUsers(userRows.map((r) => r.id));
+    const rolesByUserId = new Map<number, string[]>();
+    for (const { user_id, role } of roleRows) {
+      const list = rolesByUserId.get(user_id) ?? [];
+      list.push(role);
+      rolesByUserId.set(user_id, list);
+    }
+    users.forEach((user, i) => {
+      user.roles = rolesByUserId.get(userRows[i].id) ?? [];
+    });
+
+    return users;
   }
 
   async updateUser(id: string, data: Partial<UserRow>): Promise<void> {

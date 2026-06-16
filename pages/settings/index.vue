@@ -76,6 +76,12 @@
                 scope="col"
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
+                Roles
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Created At
               </th>
               <th
@@ -131,6 +137,18 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">{{ user.email || '-' }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div v-if="user.roles && user.roles.length" class="flex flex-wrap gap-1">
+                  <span
+                    v-for="role in user.roles"
+                    :key="role"
+                    class="px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 capitalize"
+                  >
+                    {{ role }}
+                  </span>
+                </div>
+                <span v-else class="text-sm text-gray-400">-</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">

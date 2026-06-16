@@ -36,4 +36,13 @@ export class UserRepository extends BaseRepository<DB, 'user', UserRow, UserInse
       .orderBy('created_at', 'desc')
       .execute();
   }
+
+  async findRolesForUsers(userIds: number[]): Promise<{ user_id: number; role: string }[]> {
+    if (userIds.length === 0) return [];
+    return await this.db
+      .selectFrom('user_role')
+      .select(['user_id', 'role'])
+      .where('user_id', 'in', userIds)
+      .execute();
+  }
 }

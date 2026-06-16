@@ -233,8 +233,9 @@ const fetchUserData = async () => {
   }
 };
 
-// Fetch user data on mount
-await fetchUserData();
+// Fetch user data on mount (client-side, so the session cookie is sent —
+// a server-side fetch during SSR/hard refresh isn't authenticated).
+onMounted(fetchUserData);
 
 // Check if passwords match
 const passwordMismatch = computed(() => {

@@ -103,7 +103,10 @@ See [SERVER_ARCHITECTURE.md](SERVER_ARCHITECTURE.md) for the backend layering, a
 
 ## Production
 
-Build and preview:
+The application is hosted on [DigitalOcean](https://www.digitalocean.com). Access the
+DigitalOcean account by signing in with Google using `jamie@hannpsychologicalservices.com`.
+
+Build and preview locally:
 
 ```bash
 pnpm build

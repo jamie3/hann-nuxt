@@ -920,7 +920,12 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
-                <tr v-for="email in referralEmails" :key="email.id">
+                <tr
+                  v-for="email in referralEmails"
+                  :key="email.id"
+                  @click="navigateTo(`/emails/${email.id}`)"
+                  class="hover:bg-gray-50 cursor-pointer"
+                >
                   <td class="px-4 py-3 text-sm text-gray-900">{{ email.subject || '—' }}</td>
                   <td class="px-4 py-3 text-sm whitespace-nowrap">
                     <span v-if="email.template_name" class="text-gray-900">
