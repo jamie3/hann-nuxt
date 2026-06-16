@@ -58,12 +58,8 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Body (HTML)</label>
-            <textarea
-              v-model="body"
-              rows="10"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Body</label>
+            <RichTextEditor v-model="body" />
           </div>
 
           <div>

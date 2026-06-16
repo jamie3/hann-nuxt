@@ -80,8 +80,9 @@ export class ReferralEmailRepository extends BaseRepository<
     return await this.db
       .selectFrom(this.tableName)
       .leftJoin('referral', 'referral.id', 'referral_email.referral_id')
+      .leftJoin('email_template', 'email_template.id', 'referral_email.template_id')
       .selectAll('referral_email')
-      .select(['referral.first_name', 'referral.last_name'])
+      .select(['referral.first_name', 'referral.last_name', 'email_template.name as template_name'])
       .orderBy('referral_email.created_at', 'desc')
       .execute();
   }

@@ -93,6 +93,11 @@
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
+                Template
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 To
               </th>
               <th
@@ -135,6 +140,12 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{ email.subject || '-' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <span v-if="email.template_name" class="text-gray-900">
+                  {{ email.template_name }}
+                </span>
+                <span v-else class="text-gray-400 italic">Manual</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{ email.recipient_email }}

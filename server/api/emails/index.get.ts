@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
         referral_id: email.referral_id.toString(),
         first_name: email.first_name || null,
         last_name: email.last_name || null,
+        template_name: email.template_name ?? null,
         from_email: email.from_email,
         recipient_email: email.recipient_email,
         message_id: email.message_id,
