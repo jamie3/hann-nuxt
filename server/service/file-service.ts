@@ -72,8 +72,12 @@ export class FileService {
   }
 
   async getAllFiles(): Promise<FileMetadata[]> {
-    const rows = await this.fileRepository.findAllRows();
-    return rows.map((row) => this.mapToFileMetadata(row));
+    const rows = await this.fileRepository.findAllRowsWithReferralInfo();
+    return rows.map((row) => ({
+      ...this.mapToFileMetadata(row),
+      referral_first_name: row.first_name ?? null,
+      referral_last_name: row.last_name ?? null,
+    }));
   }
 
   async deleteFile(id: string): Promise<void> {

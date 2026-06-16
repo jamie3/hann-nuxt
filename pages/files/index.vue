@@ -105,7 +105,10 @@
                 :to="`/referrals/${file.referral_id}`"
                 class="text-blue-600 hover:text-blue-800"
               >
-                #{{ file.referral_id.substring(0, 8) }}
+                #{{ file.referral_id }}
+                <span v-if="file.referral_first_name || file.referral_last_name">
+                  — {{ file.referral_first_name }} {{ file.referral_last_name }}
+                </span>
               </NuxtLink>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

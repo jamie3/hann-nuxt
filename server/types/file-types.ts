@@ -30,4 +30,6 @@ export interface FileMetadata {
   uploaded_by: string | null;
   created_at: string;
   updated_at: string;
+  referral_first_name?: string | null;
+  referral_last_name?: string | null;
 }

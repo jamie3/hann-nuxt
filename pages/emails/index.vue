@@ -124,7 +124,7 @@
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr
-              v-for="email in filteredEmails"
+              v-for="email in paginatedEmails"
               :key="email.id"
               @click="navigateTo(`/emails/${email.id}`)"
               class="hover:bg-gray-50 cursor-pointer"
@@ -196,6 +196,87 @@
         </table>
       </div>
 
+      <!-- Pagination -->
+      <div
+        v-if="filteredEmails.length > 0"
+        class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200"
+      >
+        <div class="flex-1 flex justify-between sm:hidden">
+          <button
+            @click="previousPage"
+            :disabled="currentPage === 1"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Showing
+              <span class="font-medium">{{ startIndex + 1 }}</span>
+              to
+              <span class="font-medium">{{ Math.min(endIndex, filteredEmails.length) }}</span>
+              of
+              <span class="font-medium">{{ filteredEmails.length }}</span>
+              results
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+              <button
+                @click="previousPage"
+                :disabled="currentPage === 1"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span class="sr-only">Previous</span>
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <button
+                v-for="page in displayedPages"
+                :key="page"
+                @click="goToPage(page)"
+                :class="[
+                  page === currentPage
+                    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
+                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                ]"
+              >
+                {{ page }}
+              </button>
+              <button
+                @click="nextPage"
+                :disabled="currentPage === totalPages"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span class="sr-only">Next</span>
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+
       <!-- Empty State -->
       <div v-if="data.emails.length === 0" class="text-center py-12">
         <svg
@@ -236,6 +317,7 @@ const pending = computed(() => loading.value);
 
 // Refresh function
 const refresh = () => {
+  currentPage.value = 1;
   getEmails();
 };
 
@@ -251,6 +333,47 @@ const filteredEmails = computed(() => {
 
   const query = searchQuery.value.toLowerCase().trim();
   return data.value.emails.filter((email) => email.recipient_email.toLowerCase().includes(query));
+});
+
+// Pagination
+const currentPage = ref(1);
+const itemsPerPage = 25;
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredEmails.value.length / itemsPerPage))
+);
+const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage);
+const endIndex = computed(() => startIndex.value + itemsPerPage);
+const paginatedEmails = computed(() =>
+  filteredEmails.value.slice(startIndex.value, endIndex.value)
+);
+
+// Up to 5 page numbers, centred on the current page
+const displayedPages = computed(() => {
+  const pages: number[] = [];
+  const maxPagesToShow = 5;
+  let startPage = Math.max(1, currentPage.value - Math.floor(maxPagesToShow / 2));
+  const lastPage = Math.min(totalPages.value, startPage + maxPagesToShow - 1);
+  if (lastPage - startPage < maxPagesToShow - 1) {
+    startPage = Math.max(1, lastPage - maxPagesToShow + 1);
+  }
+  for (let i = startPage; i <= lastPage; i++) pages.push(i);
+  return pages;
+});
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
+const previousPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
+const goToPage = (page: number) => {
+  currentPage.value = page;
+};
+
+// Reset to the first page whenever the filter changes
+watch(searchQuery, () => {
+  currentPage.value = 1;
 });
 
 // Fetch data after component is mounted

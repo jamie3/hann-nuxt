@@ -66,6 +66,30 @@ export class FileRepository extends BaseRepository<DB, 'file', FileRow, FileInse
       .execute();
   }
 
+  /**
+   * All file metadata joined with the owning referral's name.
+   */
+  async findAllRowsWithReferralInfo(): Promise<any[]> {
+    return await this.db
+      .selectFrom('file')
+      .leftJoin('referral', 'referral.id', 'file.referral_id')
+      .select([
+        'file.id',
+        'file.referral_id',
+        'file.file_name',
+        'file.file_size',
+        'file.mime_type',
+        'file.uploaded_by',
+        'file.created_at',
+        'file.updated_at',
+        'referral.first_name',
+        'referral.last_name',
+      ])
+      .where('file.is_deleted', '=', false)
+      .orderBy('file.created_at', 'desc')
+      .execute();
+  }
+
   async deleteFile(id: string): Promise<void> {
     return await this.delete(id);
   }
