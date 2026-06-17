@@ -1307,9 +1307,31 @@ const {
   getEmails: getReferralEmails,
 } = useReferralEmails(id);
 
-// Tabbed sections
+// Tabbed sections — kept in sync with the ?tab= query param
 type ReferralTab = 'details' | 'payment' | 'notes' | 'files' | 'emails';
-const activeTab = ref<ReferralTab>('details');
+const TABS: ReferralTab[] = ['details', 'payment', 'notes', 'files', 'emails'];
+const router = useRouter();
+
+const isTab = (value: unknown): value is ReferralTab => TABS.includes(value as ReferralTab);
+
+const activeTab = ref<ReferralTab>(isTab(route.query.tab) ? route.query.tab : 'details');
+
+// Reflect tab changes in the URL (replace, so we don't spam browser history)
+watch(activeTab, (tab) => {
+  if (route.query.tab !== tab) {
+    router.replace({ query: { ...route.query, tab } });
+  }
+});
+
+// React to external URL changes (back/forward, shared links)
+watch(
+  () => route.query.tab,
+  (tab) => {
+    if (isTab(tab) && tab !== activeTab.value) {
+      activeTab.value = tab;
+    }
+  }
+);
 
 const tabClass = (tab: ReferralTab) => {
   const base = 'py-3 border-b-2 text-sm font-medium transition-colors';

@@ -45,6 +45,19 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+        <div class="w-56">
+          <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select
+            id="status"
+            v-model="statusFilter"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 capitalize"
+          >
+            <option value="">All statuses</option>
+            <option v-for="status in statusOptions" :key="status" :value="status">
+              {{ status.replace('_', ' ') }}
+            </option>
+          </select>
+        </div>
       </div>
       <div class="mt-3 text-sm text-gray-600">
         Showing {{ filteredEmails.length }} of {{ data?.emails.length || 0 }} emails
@@ -165,11 +178,14 @@
                 <span
                   class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                   :class="{
-                    'bg-green-100 text-green-800': email.status === 'delivered',
+                    'bg-gray-100 text-gray-800': email.status === 'draft',
+                    'bg-indigo-100 text-indigo-800': email.status === 'scheduled',
                     'bg-blue-100 text-blue-800': email.status === 'sent',
+                    'bg-green-100 text-green-800': email.status === 'delivered',
                     'bg-purple-100 text-purple-800': email.status === 'opened',
-                    'bg-indigo-100 text-indigo-800': email.status === 'clicked',
-                    'bg-red-100 text-red-800': email.status === 'bounced',
+                    'bg-cyan-100 text-cyan-800': email.status === 'clicked',
+                    'bg-red-100 text-red-800':
+                      email.status === 'bounced' || email.status === 'failed',
                     'bg-yellow-100 text-yellow-800': email.status === 'spam_complaint',
                   }"
                 >
@@ -321,18 +337,37 @@ const refresh = () => {
   getEmails();
 };
 
-// Search functionality
+// Search + status filtering
 const searchQuery = ref('');
+const statusFilter = ref('');
+
+const statusOptions = [
+  'draft',
+  'scheduled',
+  'sent',
+  'delivered',
+  'opened',
+  'clicked',
+  'bounced',
+  'spam_complaint',
+  'failed',
+];
 
 const filteredEmails = computed(() => {
   if (!data.value?.emails) return [];
 
-  if (!searchQuery.value.trim()) {
-    return data.value.emails;
+  let result = data.value.emails;
+
+  if (statusFilter.value) {
+    result = result.filter((email) => email.status === statusFilter.value);
   }
 
   const query = searchQuery.value.toLowerCase().trim();
-  return data.value.emails.filter((email) => email.recipient_email.toLowerCase().includes(query));
+  if (query) {
+    result = result.filter((email) => email.recipient_email.toLowerCase().includes(query));
+  }
+
+  return result;
 });
 
 // Pagination
@@ -371,8 +406,8 @@ const goToPage = (page: number) => {
   currentPage.value = page;
 };
 
-// Reset to the first page whenever the filter changes
-watch(searchQuery, () => {
+// Reset to the first page whenever a filter changes
+watch([searchQuery, statusFilter], () => {
   currentPage.value = 1;
 });
 
